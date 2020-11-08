@@ -1,0 +1,11 @@
+#!/opt/pond/bin/pond
+GetPONDCpuKernelThreadsNumber[]
+SetPONDCpuKernelThreadsNumber[8]
+GetPONDCpuKernelThreadsNumber[]
+Exit
+b=Matrix['b']
+b.Set[{1,2,3,4}]
+b
+a=Matrix[{1,2,3,4}]
+a
+a.ToList[]

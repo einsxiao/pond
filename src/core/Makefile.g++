@@ -1,0 +1,69 @@
+#compile setting
+CC       = g++
+DIRS     = 
+# LIBS = -ldl 
+##################################################################################
+# FLAGS := -O3 -std=c++11  -s WASM=1 -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1
+# EXCEPTION_FLAGS :=-s DISABLE_EXCEPTION_CATCHING=0
+DEBUG_FLAGS      := -g --profiling
+LEVEL_FLAG       := -O3 -DDEBUG
+# MEM_FLAGS        := -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_MEMORY=666MB 
+# WORKER_FLAGS     := -s EXPORTED_FUNCTIONS="['_evaluate','_message']" -s BUILD_AS_WORKER=0 -s MAIN_MODULE=1 -shared --bind
+WORKER_FLAGS     := -shared --bind
+FPIC             := -fPIC
+# ASYNCIFY         :=-s ASYNCIFY=1
+# EXPORTALL        :=-s EXPORT_ALL=1
+#LINKABLE:=-s LINKABLE=1
+FLAGS            :=-std=c++11 -s WASM=1 $(EXPORTALL) $(ASYNCIFY) $(MEM_FLAGS) $(LEVEL_FLAG) $(LINKABLE) -Wno-unused-value $(EXCEPTION_FLAGS) --emit-symbol-map
+
+##################################################################################
+MAKE              = make
+OUT               = worker.js
+
+###################################################
+HEADERS          := $(wildcard *.h)
+SRCS             := $(wildcard *.cpp) 
+ROBJECTS         := $(patsubst %.cpp, build-g++/release/%.o, $(SRCS))
+DOBJECTS         := $(patsubst %.cpp, build-g++/debug/%.o, $(SRCS))
+BUILDDIRS         = $(DIRS:%=build-g++-%)
+###################################################
+MODE             := release
+
+release          : release-prepare prepare-work release-build-g++ post-work
+debug            : debug-prepare prepare-work debug-build-g++ post-work
+################
+debug-prepare:
+	$(eval FLAGS = $(DEBUG_FLAGS) $(FLAGS) )
+	$(eval MODE  = debug )
+prepare-work: $(BUILDDIRS)
+	$(eval timestamp=$(shell date +"%s"))
+	@echo "Make $(MODE) version"
+	$(shell if [ -f build-g++ ]; then rm build-g++; mkdir build-g++; elif ! [ -d build-g++ ]; then mkdir build-g++; fi; )
+	$(shell if [ -f build-g++/debug ]; then rm build-g++/debug; mkdir build-g++/debug; elif ! [ -d build-g++/debug ]; then mkdir build-g++/debug; fi; )
+	$(shell if [ -f build-g++/release ]; then rm build-g++/release; mkdir build-g++/release; elif ! [ -d build-g++/release ]; then mkdir build-g++/release; fi; )
+post-work:
+	cp *.js *.wasm ~/assets/
+	cp *.h   ~/assets/headers/
+	sed  -ri "s/worker.wasm/worker.wasm?v=${timestamp}/" ~/assets/worker.js 
+#	cp *.h   ~/pond/include/
+################################
+debug-build-g++: $(DOBJECTS)
+	$(CC) $(FLAGS) $(WORKER_FLAGS) -o $(OUT) $(DOBJECTS) $(INCLUDE)  $(LIBS)
+build-g++/debug/%.o: %.cpp $(HEADERS)
+	$(CC) $(FLAGS) -c $(FPIC) $< -o $@ -I. $(INCLUDE)
+################################
+release-prepare:
+	$(eval MODE = release )
+release-build-g++: $(ROBJECTS)
+	$(CC) $(FLAGS) $(WORKER_FLAGS) -o $(OUT) $(ROBJECTS) $(INCLUDE)  $(LIBS)
+build-g++/release/%.o: %.cpp $(HEADERS)
+	$(CC) $(FLAGS) -c $(FPIC) $< -o $@ -I. $(INCLUDE)
+#################################
+clean:
+	@-rm *.wasm  2>/dev/null
+	@-rm -r build-g++ 2>/dev/null
+
+$(BUILDDIRS):
+	@echo "Dealing dir $(@:build-g++-%=%)"
+	$(MAKE) -C $(@:build-g++-%=%) $(MODE)
+

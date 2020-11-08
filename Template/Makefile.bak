@@ -1,0 +1,83 @@
+#compile setting
+CC = emcc
+DIRS = 
+LIBS = 
+INCLUDE = -I/opt/ovoweb/pond/src/core/  -I/opt/ovoweb/assets/headers/ 
+##################################################################################
+DEBUG_FLAG:=-g --profiling
+LEVEL_FLAG:=-O3 -DDEBUG 
+FPIC :=-fPIC
+ASYNCIFY:=-s ASYNCIFY=1
+#LINKABLE:=-s LINKABLE=1 # this will raise the memory grouth error
+
+##################################################################################
+MODULE_FLAGS := -s SIDE_MODULE=1 -bind -shared
+FLAGS :=-std=c++11 -s WASM=1 -s EXPORT_ALL=1 $(LEVEL_FLAG) $(LINKABLE) -Wno-unused-value --emit-symbol-map
+##################################################################################
+MAKE = make
+
+###################################################
+HEADERS := $(wildcard *.h) $(wildcard /opt/ovoweb/pond/src/core/*.h)
+ORISRCS := $(wildcard *.cpp) 
+SRCS := $(patsubst %.cpp, build/%.cpp, $(ORISRCS))
+ROBJECTS := $(patsubst %.cpp, build/release/%.o, $(ORISRCS))
+DOBJECTS := $(patsubst %.cpp, build/debug/%.o, $(ORISRCS))
+BUILDDIRS = $(DIRS:%=build-%)
+MODULE_NAME := $(notdir $(CURDIR))
+###################################################
+MODE := debug
+OUT := lib$(MODULE_NAME)Module.wasm
+
+
+release: release-prepare prepare-work release-build post-work
+release-in: release-prepare prepare-work release-build post-work-in
+debug: debug-prepare prepare-work debug-build post-work
+debug-in: debug-prepare prepare-work debug-build post-work-in
+################
+prepare-work: $(BUILDDIRS)
+# @echo $(HEADERS)
+	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
+	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )
+	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
+	@/opt/ovoweb/bin/pond-module-src-processor $(MODULE_NAME)
+	@echo "代码准备完成."
+# exit 1
+post-work:
+	cp -f build/$(MODULE_NAME)Module.h ~/assets/headers/
+	cp -f $(OUT) ~/assets/modules/$(MODULE_NAME)@@$(OUT)
+post-work-in:
+	@echo "模块编译成功."
+##################################
+debug-prepare:
+	@echo "调试模式"
+	$(eval FLAGS := $(DEBUG_FLAG) $(FLAGS) )
+	$(eval MODE = debug )
+debug-build: $(DOBJECTS)
+	@echo "开始组装 $< ."
+	$(CC) $(FLAGS) $(ASYNCIFY) $(MODULE_FLAGS) -o $(OUT) $(DOBJECTS) $(INCLUDE) $(LIBS)
+	@echo "组装 lib$(MODULE_NAME)Module.so 完成."
+build/debug/%.o: %.cpp $(HEADERS)
+	@echo "开始编译 $< ."
+	$(CC) $(FLAGS) $(ASYNCIFY) $(FPIC) -c build/$< -o $@ -I. $(INCLUDE) 2>&1 >&- | /opt/ovoweb/bin/line-process
+	@echo "完成编译 $< ."
+##################################
+release-prepare:
+	@echo "上线模式"
+	$(eval MODE = release )
+release-build: $(ROBJECTS)
+	@echo "开始组装 lib$(MODULE_NAME)Module.so ."
+	@$(CC) $(FLAGS) $(ASYNCIFY) $(MODULE_FLAGS) -o $(OUT) $(ROBJECTS) $(INCLUDE)  $(LIBS)
+	@echo "完成组装 lib$(MODULE_NAME)Module.so ."
+build/release/%.o: %.cpp $(HEADERS)
+	@echo "开始编译 $< ."
+	@$(CC) $(FLAGS) $(ASYNCIFY) $(FPIC) -c build/$< -o $@ -I. $(INCLUDE) 2>&1 >&- | /opt/ovoweb/bin/line-process
+	@echo "完成编译 $< ."
+#################################
+clean:
+	-@if [ -d build ]; then rm -r build; fi
+	-@rm *.wasm
+
+$(BUILDDIRS):
+	@echo "Dealing dir $(@:build-%=%)"
+	$(MAKE) -C $(@:build-%=%) $(MODE)
+

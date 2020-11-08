@@ -1,0 +1,8 @@
+exe
+*.so
+*.o
+*.pyc
+*.wasm
+*.map
+*.swp
+*/__pycache__/

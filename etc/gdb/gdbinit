@@ -1,0 +1,17 @@
+#gdbinit file
+
+add-auto-load-safe-path $POND_ROOT/etc/gdb/pond
+source $POND_ROOT/etc/gdb/pond/pond.py
+
+set auto-load local-gdbinit
+set overload-resolution on
+set print object on
+set print pretty on
+
+python
+import sys,os
+sys.path.insert(0, os.path.join(os.environ.get('POND_ROOT'), 'etc/gdb/stlprettyprinter') )
+from libstdcxx.v6.printers import register_libstdcxx_printers
+register_libstdcxx_printers (None)
+end
+

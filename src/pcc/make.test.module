@@ -1,0 +1,3 @@
+all:
+	pcc -G --compiler-options -g3 -c -std=c++11 --compiler-options -fopenmp testModule.cu `pond-path pcc` 
+	pcc -o out testModule.cu.o --compiler-options -fopenmp -lpd `pond-path pcc` 

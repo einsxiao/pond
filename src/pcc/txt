@@ -1,0 +1,161 @@
+pcc -G --compiler-options -g3 -c -std=c++11 --compiler-options -fopenmp testModule.cu `pond-path pcc` 
+[:
+  [pragma:
+    include
+    [@ <]
+    pond
+    [@ >]
+  ]
+  [pragma:
+    include
+    [string: "testModule.h"]
+  ]
+  [newline]
+  using
+  namespace
+  std
+  [semicolon: ;]
+  [newline]
+  using
+  namespace
+  pond
+  [semicolon: ;]
+  [newline]
+  __DEBUG_MAIN__
+  [bracket:
+    [string: "input.pd"]
+  ]
+  [semicolon: ;]
+  [newline]
+  testModule
+  [colon: :]
+  [colon: :]
+  testModule
+  [bracket: ()]
+  [colon: :]
+  Module
+  [bracket:
+    ModuleNameStr
+  ]
+  [block: {
+
+}]
+  [newline]
+  testModule
+  [colon: :]
+  [colon: :]
+  [@ ~]
+  testModule
+  [bracket: ()]
+  [block: {
+
+}]
+  [newline]
+  int
+  testModule
+  [colon: :]
+  [colon: :]
+  PD_hello
+  [bracket:
+    Object
+    [@ &]
+    Argv
+  ]
+  [newline]
+  [block:
+    dout
+    [@ <]
+    [@ <]
+    [string: "Welcome to the land of creativity!!!"]
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    ReturnNull
+    [semicolon: ;]
+    [newline]
+  ]
+  [newline]
+  int
+  testModule
+  [colon: :]
+  [colon: :]
+  PD_hello2
+  [bracket:
+    Object
+    [@ &]
+    Argv
+  ]
+  [newline]
+  [block:
+    dout
+    [@ <]
+    [@ <]
+    [string: "Welcome to the land of creativity!!!"]
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    ReturnNull
+    [semicolon: ;]
+    [newline]
+  ]
+  [newline]
+]
+try rewrite
+0
+0x1c6d9d0
+2
+func: bracket
+func: bracket
+put content to tmp file:/tmp/pcc_tmp00025417468_testModule.cu
+output:
+#1 "testModule.cu" 1
+#define ModuleName test
+#line 1
+                                   
+                        
+                                
+                       
+                                   
+#include <pond>
+#include "testModule.h" 
+                              
+using namespace std;
+using namespace pond;
+
+                              
+__DEBUG_MAIN__("input.pd");
+                              
+testModule::testModule():Module(ModuleNameStr ){
+
+}
+
+testModule :: ~testModule(){
+
+}
+
+                              
+int testModule::PD_hello(Object&Argv)
+{
+  dout << "Welcome to the land of creativity!!!"  << endl;
+                                
+  ReturnNull;
+}
+
+int testModule :: PD_hello2(Object&Argv)
+{
+  dout << "Welcome to the land of creativity!!!"  << endl;
+                                
+  ReturnNull;
+}
+
+
+
+
+
+testModule.cu(15): error: identifier "ModuleNameStr" is undefined
+1 error detected in the compilation of "/tmp/tmpxft_0001841e_00000000-6_pcc_tmp00025417468_testModule.cpp1.ii".
+make.test.module:2: recipe for target 'all' failed

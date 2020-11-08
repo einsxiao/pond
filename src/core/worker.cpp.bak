@@ -1,0 +1,64 @@
+#include<iostream>
+// #include<emscripten.h>
+#include<pond>
+using namespace std;
+using namespace pond;
+
+class Route{ 
+ public:
+  pond::Evaluation *Eva = NULL;
+public:
+  Route(){}
+  // EMSCRIPTEN_KEEPALIVE
+  void Init(){
+    cout<<"Pond Kernel constructing..."<<endl;
+    EM_ASM({
+        FS.mkdir("/pond");
+        FS.mkdir("/pond/assets");
+        FS.mkdir("/pond/assets/modules");
+        // console.log("filesystem of worker is ready...");
+      });
+    Eva = new pond::Evaluation(false);
+    //cerr<<"Kernel Inited to " <<Eva<<endl; 
+  }
+  // EMSCRIPTEN_KEEPALIVE
+  ~Route(){
+    cout<<"Pond Kernel destructing..."<<endl;
+    if ( Eva ) delete Eva;
+    Eva = NULL;
+  }
+};
+static Route __route; 
+
+extern "C" {
+  // void evaluateContinue(char*exinput){
+  //   if ( not __route.Eva ){
+  //     __route.Init();
+  //   }
+  //   __route.Eva->EvaluateContinue(exinput);
+  //   string output = pond::ToString( __route.Eva->statusCode == KernelStatusErrorThrow )+"final";
+  //   emscripten_worker_respond( (char*)output.c_str(), (output.size() )*sizeof(string::value_type) );
+  //   return;
+  // }
+  void evaluate(char*input){
+    //cout<<"try evaluate with kernel:"<< __route.Eva<<endl;
+    if ( not __route.Eva ){
+      __route.Init();
+    }
+    __route.Eva->EvaluateString(input);
+    string output = pond::ToString( __route.Eva->statusCode == KernelStatusErrorThrow )+"final";
+    emscripten_worker_respond( (char*)output.c_str(), (output.size() )*sizeof(string::value_type) );
+    return;
+  }
+  void message(char*c_mes){ // for recieve messages
+    string mes(c_mes);
+    int pos = 0;
+    for (pos =0; pos < mes.size(); pos++){
+      if ( mes[pos] == '_' ) break;
+    }
+    EvaKernel->messages[mes.substr(0,pos)] = mes.substr(pos+1, mes.size() -pos - 1 );
+  }
+}
+
+
+// important note: to prevent dead code emi...  add a print within the function 

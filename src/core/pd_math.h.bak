@@ -1,0 +1,63 @@
+#ifndef evamath_pond_h
+#define evamath_pond_h
+
+namespace pond{
+
+  ///////////////////////////////////////////
+/* #define pow3(x) ((x)*(x)*(x)) */
+/* #define pow4(x) ((x)*(x)*(x)*(x)) */
+/* #define pow5(x) ((x)*(x)*(x)*(x)*(x)) */
+/* #define pow6(x) ((x)*(x)*(x)*(x)*(x)*(x)) */
+/* #define pow7(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)) */
+/* #define pow8(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)) */
+  struct Index{
+    u_int i,j;
+    ////////////////////////////////////
+    Index() = default;
+    ~Index() = default;
+    explicit Index(const double value){
+      *(reinterpret_cast<double*>(this)) = value;
+    }
+    Index(const u_int f,const u_int s){
+      i = f;  j = s;
+    };
+    Index&operator=(const Index&ind)=default;
+    inline bool zeroQ()const{  return *(reinterpret_cast<const double*>(this)) == 0; }
+    inline bool nonzeroQ()const{  return *(reinterpret_cast<const double*>(this)) != 0; }
+    inline void zero(){  *(reinterpret_cast<double*>(this))=0; }
+    /* inline void set(double val){ *(reinterpret_cast<double*>(this)) = val; }; */
+    inline void set(u_int f,u_int s){ i=f; j=s;};
+#define _deal(oper)                                                     \
+    inline friend bool operator oper(const Index ind1,const Index ind2){ \
+      return *reinterpret_cast<const double*>(&ind1) oper *reinterpret_cast<const double*>(&ind2); \
+    };
+    _deal(  == );
+    _deal(  != );
+#undef _deal
+    inline friend bool operator<(const Index ind1,const Index ind2){ 
+      return  ind1.i < ind2.i  or ind1.i == ind2.j and ind1.j < ind2.j ;
+    };
+    inline friend std::ostream& operator<<(std::ostream &os,const Index c){
+      os<<pond::ToString(c);
+      return os;
+    }
+  };
+
+  class Math{
+  public:
+    static bool          NumberQ(double);
+    static bool          IntegerQ(double);
+    static bool          FiniteQ(double);
+    static bool          InfQ(double);
+    static bool          NanQ(double);
+    static bool          NumberQ(std::string);
+    static std::string   OrderForm(int id);
+    static std::string   OrderForm(int id, const char*lang);
+  };
+
+};
+
+
+#endif
+
+

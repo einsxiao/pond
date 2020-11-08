@@ -1,0 +1,73 @@
+#compile setting
+CC = emcc
+DIRS = 
+LIBS = 
+INCLUDE = -I/opt/ovoweb/pond/src/core/
+##################################################################################
+FLAGS := -std=c++11 -s WASM=1 -s EXPORT_ALL=1 -s ASYNCIFY=1
+MODULE_FLAGS := -s SIDE_MODULE=1 -shared
+FPIC :=-fPIC
+ASYNCIFY:=-s ASYNCIFY=1
+DEBUG_FLAG:=-g
+RELEASE_FLAG:=-O2
+
+##################################################################################
+MAKE = make
+
+###################################################
+HEADERS := $(wildcard *.h)
+SRCS := $(wildcard *.cpp) 
+ROBJECTS := $(patsubst %.cpp, build/release/%.o, $(SRCS))
+DOBJECTS := $(patsubst %.cpp, build/debug/%.o, $(SRCS))
+BUILDDIRS = $(DIRS:%=build-%)
+ModuleName := $(notdir $(CURDIR))
+###################################################
+OUT := lib$(ModuleName)Module.wasm
+
+
+release: release-prepare prepare-work release-build post-work
+debug: debug-prepare prepare-work debug-build post-work
+################
+prepare-work: $(BUILDDIRS)
+	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
+	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )
+	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
+post-work:
+	@echo "  preparing $(ModuleName) in assets dir"
+	@$(shell if ! [ -d ~/assets/modules/$(ModuleName) ]; then mkdir ~/assets/modules/$(ModuleName); fi )
+	@cp -f $(OUT) ~/assets/modules/$(ModuleName)_$(OUT)
+#	@if [ -f $(ModuleName).zip ]; then rm $(ModuleName).zip; fi
+#	@zip -q -o -u -r $(ModuleName) $(OUT) assets
+#	@cp $(ModuleName).zip ~/assets/modules/
+##################################
+debug-prepare:
+	@echo "Debug Make"
+	$(eval FLAGS :=$(DEBUG_FLAG) $(FLAGS) )
+	$(eval MODE =debug )
+debug-build: $(DOBJECTS)
+#	@echo "  building $(OUT)"
+	$(CC) $(FLAGS) $(MODULE_FLAGS) --bind -o $(OUT) $(DOBJECTS) $(INCLUDE)  $(LIBS)
+build/debug/%.o: %.cpp $(HEADERS)
+#	@echo "  compiling $< to $@"
+	$(CC) $(FLAGS) -c $(FPIC) $< -o $@ -I. $(INCLUDE)
+##################################
+release-prepare:
+	@echo "Release Make"
+	$(eval FLAGS :=$(RELEASE_FLAG) $(FLAGS) )
+	$(eval MODE =release )
+release-build: $(ROBJECTS)
+#	@echo "  building $(OUT)"
+	$(CC) $(FLAGS) $(MODULE_FLAGS) --bind -o $(OUT) $(ROBJECTS) $(INCLUDE)  $(LIBS)
+build/release/%.o: %.cpp $(HEADERS)
+#	@echo "  compiling $< to $@"
+	$(CC) $(FLAGS) -c $(FPIC) $< -o $@ -I. $(INCLUDE)
+#################################
+clean:
+	@-if [ -d build ]; then rm -r build; fi
+	-@rm *.js *.wasm *.o
+	@echo "clean up *.o, build dir"
+
+$(BUILDDIRS):
+	@echo "Dealing dir $(@:build-%=%)"
+	$(MAKE) -C $(@:build-%=%) $(MODE)
+

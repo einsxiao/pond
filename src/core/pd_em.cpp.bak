@@ -1,0 +1,117 @@
+#include<pd_headers.h>
+#include<emscripten/fetch.h>
+#include<emscripten.h>
+using namespace pond;
+using namespace std;
+
+EMSCRIPTEN_KEEPALIVE
+void pond::PostMessage(const string mes){
+  //cerr<<"worker do post message: "<<mes<<endl;
+  emscripten_worker_respond_provisionally( (char*)mes.c_str(),
+                                           (mes.size() )*sizeof(string::value_type) );
+}
+
+EMSCRIPTEN_KEEPALIVE
+void pond::PostMessageError(const string mes){
+  EvaKernel->statusCode = 119;
+  emscripten_worker_respond_provisionally( (char*)mes.c_str(),
+                                           (mes.size() )*sizeof(string::value_type) );
+}
+
+EMSCRIPTEN_KEEPALIVE
+void pond::CleanMessage(string type){
+  //dout<<"try clean signlal"<<endl;
+  auto iter = EvaKernel->messages.find(type);
+  if ( iter != EvaKernel->messages.end() ){
+    EvaKernel->messages.erase( iter );
+  }
+}
+
+static map<string,string>::iterator iter;
+static clock_t start;
+EMSCRIPTEN_KEEPALIVE
+string pond::WaitForMessage(string type, double max_wait, int sleep_dur){
+  //cout<<"try wait for message :"<<type<<endl;
+  start = clock();
+  for(;;){
+    iter = EvaKernel->messages.find(type);
+    if (  ((clock() - start)/CLOCKS_PER_SEC) > max_wait ) break;
+    if ( iter != EvaKernel->messages.end() ){
+      return (*iter).second;
+    }else{
+      //cout<<"wait for message"<<type<<endl;
+      pond::sleep_ms(sleep_dur);
+    }
+  }
+  Warning("WaitForSignal","waiting for "+type+" timeout.");
+  return "";
+}
+
+EMSCRIPTEN_KEEPALIVE
+string pond::idb_load(const char* filename,const char*database){
+  void *data; int size,error;
+  emscripten_idb_load(database, filename, &data, &size, &error);
+  if ( error ) Erroring("FS_IDB","idb_load failed to load file "+string(filename)+" code:");
+  string res((char*)data,size);
+  free(data); data = NULL;
+  return res;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int pond::idb_load_to_file(const char* filename,const char* database){
+  //cout<<"try load "<<filename<<" to FS"<<endl;
+  void *data; int size,error;
+  emscripten_idb_load(database,filename,&data,&size,&error);
+  FILE *f = fopen( filename, "wb" ); 
+  if (f){
+    fwrite( data, 1, size, f );
+    fclose(f);
+    free(data); data = NULL;
+    error = 0;
+  }else{
+    free(data); data = NULL;
+    Warning("FS_IDB","idb_load_to_file failed to open file "+string(filename)+" to write");
+    error = -1;
+  }
+
+  return error;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int pond::idb_store(const char* filename, const string& content,const char*database){
+  int error;
+  emscripten_idb_store(database, filename, (void*)content.c_str(), content.size()*sizeof(string::value_type), &error);
+  if ( error ) Warning("FS_IDB","idb store with errorcode:"+pond::ToString(error) );
+  return error;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int pond::idb_store(const char* filename, const char*content,u_int size, const char*database){
+  int error;
+  emscripten_idb_store(database, filename, (void*)content, size, &error);
+  if ( error ) Warning("FS_IDB","idb store with errorcode:"+pond::ToString(error) );
+  return error;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int pond::idb_delete(const char* filename,const char*database){
+  int error;
+  emscripten_idb_delete(database, filename, &error);
+  if ( error ) Warning("FS_IDB","idb delete with errorcode:"+pond::ToString(error ) );
+  return error;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int pond::idb_existsQ(const char* filename,const char*database){
+  //dout<<"idb_existsQ test if "<<filename<<" in "<<database<<endl;
+  int exist,error;
+  emscripten_idb_exists(database, filename, &exist, &error);
+  if ( error ) Warning("FS_IDB","idb exsits test with errorcode:"+pond::ToString(error ) );
+  return exist;
+}
+
+EMSCRIPTEN_KEEPALIVE
+void pond::sleep_ms(double sec){
+  emscripten_sleep(int(sec) );
+}
+

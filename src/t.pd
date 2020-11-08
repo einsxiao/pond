@@ -1,0 +1,9 @@
+#!/usr/bin/env pond
+HoldPattern( Plus(a~~~,Times(x~~),Times(i~Number,x~~),b~~~))
+#HoldPattern( Plus(a~~~,Times(x~~),Times(i~Number,x~~),b~~~))
+3+4+5
+#a+b+a
+a+b+a
+
+3+33
+

@@ -1,0 +1,67 @@
+#INCLUDE = -Icore/
+DIRS:=core Arithmatics Class List String System ../Template
+MDIRS:=Arithmatics Class List String System ../Template
+###################################################
+# -s EXPORT_ALL=1
+#FLAGS := -std=c++11  -s WASM=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s EMTERPRETIFY=1 -s EMTERPRETIFY_ASYNC=1
+#FLAGS := -std=c++11  -s WASM=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s ASYNCIFY=1 -s ASSERTIONS=0
+#FLAGS :=-std=c++11  -s WASM=1 -s ASYNCIFY=1
+#FLAGS :=-std=c++11  -s WASM=1 
+#MODULE_FLAGS := -s FETCH=1 -s FORCE_FILESYSTEM=1 -s FETCH=1 -s USE_ZLIB=1
+DEBUG          :=-DDEBUG
+#EXCEPTION := -s DISABLE_EXCEPTION_CATCHING=0
+FLAGS          :=-std=c++11  -s WASM=1 #-s ALLOW_MEMORY_GROWTH=1 -s TOTAL_MEMORY=512MB
+MODULE_FLAGS   :=-s FETCH=1 --bind --emit-symbol-map -lidbfs.js
+ASYNCIFY       :=-s ASYNCIFY=1
+DEBUG_FLAG     :=-g -DDEBUG
+RELEASE_FLAG   :=-O3
+#JSFLAG         :=--pre-js pre_pond.js
+#FPIC           := -fPIC
+OUT            :=pond.js
+###################################################
+CC = emcc
+HEADERS      := $(wildcard *.h)
+SRCS         := $(wildcard *.cpp) 
+ROBJECTS     := $(patsubst %.cpp, build/release/%.o, $(SRCS))
+DOBJECTS     := $(patsubst %.cpp, build/debug/%.o, $(SRCS))
+BUILDDIRS     = $(DIRS:%=build-%)
+MBUILDDIRS    = $(MDIRS:%=build-%)
+FLAGS        :=$(FLAGS) $(ASYNCIFY) $(DEBUG) $(EXCEPTION) $(JSFLAG)
+
+debug         : release-prepare  prepare-work release-build post-work
+release       : release-prepare prepare-work release-build post-work
+dirclean      : clean-prepare $(BUILDDIRS)
+dir           : release-prepare $(BUILDDIRS)
+debugrelease  : release-prepare $(BUILDDIRS)
+mdir          : release-prepare $(MBUILDDIRS)
+################
+prepare-work: #$(BUILDDIRS)
+	$(eval timestamp=$(shell date +"%s"))
+	@echo "Make $(MODE) Version"
+	sed  -ri "s/pond.js\?v\=[0-9]*/pond.js?v=${timestamp}/" ~/pondnote/public/index.html 
+	sed  -ri "s/worker.js\?v\=[0-9]*/worker.js?v=${timestamp}/" pond.cpp
+	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
+	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )
+	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
+post-work:
+	cp -rf *.js *.wasm ~/assets/
+##################################
+debug-prepare:
+	$(eval MODE =debug )
+##################################
+release-prepare:
+	$(eval FLAGS :=$(RELEASE_FLAG) $(FLAGS) )
+	$(eval MODE =release )
+release-build: $(ROBJECTS)
+	$(CC) $(FLAGS) $(MODULE_FLAGS) $(FPIC) -o $(OUT) $(ROBJECTS)
+build/release/%.o: %.cpp $(HEADERS)
+	$(CC) $(FLAGS) -c $(FPIC) $< -o $@ -I. $(INCLUDE)
+#################################
+clean: clean-prepare $(BUILDDIRS)
+	@-rm *.wasm
+	@-rm -r build
+clean-prepare:
+	$(eval MODE = clean )
+
+$(BUILDDIRS):
+	$(MAKE) -C $(@:build-%=%) $(MODE)

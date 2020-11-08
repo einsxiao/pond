@@ -1,0 +1,103 @@
+#ifndef Modules_POND_H
+#define Modules_POND_H
+
+////////////////////////////////////////////////////////////////////////////////////////
+namespace pond{
+  
+  class Module{
+  public:
+    std::string		  moduleName, moduleDescreption;
+  public: //
+                    Module(std::string name); 
+    virtual        ~Module();
+    //////////////////////////////
+    static int      RegisterFunction(const char*funcName,MemberFunction func,const Module*mod,const char*des="");
+    static int      RegisterFunction(const char*funcName,StaticFunction func,const Module*mod=NULL,const char*des="");
+    static int      AddAttribute(const char*key, const char*attribute);
+    static int      AddAttribute(const char*key, const AttributeType type);
+    //////////////////////////////
+    std::string     GetModuleName();
+    std::string     ModuleDescription();
+    int             SetModuleDescription(std::string des);
+    //////////////////////////////
+  };
+  typedef Module   *type_create(std::string name);
+  typedef void      type_destroy(Module*);
+  typedef double    type_return_functions();
+  typedef int       type_regsterfunction(Module*);
+
+
+  /////////new way
+  // #define ModuleName System
+////////////////////////////////////////////////////////////////////////////////////////
+#define _ModuleNameStr(moduleName) #moduleName
+#define __ModuleNameStr(moduleName) _ModuleNameStr(moduleName)
+#define ModuleNameStr __ModuleNameStr(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _ModuleType(moduleName) moduleName##Module
+#define __ModuleType(moduleName) _ModuleType(moduleName)
+#define ModuleType __ModuleType(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _create_ModuleType(moduleName) __create_##moduleName##Module
+#define __create_ModuleType(moduleName) _create_ModuleType(moduleName)
+#define CreateModuleType __create_ModuleType(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _destroy_ModuleType(moduleName) __destroy_##moduleName##Module
+#define __destroy_ModuleType(moduleName) _destroy_ModuleType(moduleName)
+#define DestroyModuleType __destroy_ModuleType(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _destroy_ModuleType(moduleName) __destroy_##moduleName##Module
+#define __destroy_ModuleType(moduleName) _destroy_ModuleType(moduleName)
+#define DestroyModuleType __destroy_ModuleType(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _ReturnFunctionsType(module) __return_functions_##module
+#define __ReturnFunctionsType(module) _ReturnFunctionsType(module)
+#define ReturnFunctionsType __ReturnFunctionsType(ModuleName)
+////////////////////////////////////////////////////////////////////////////////////////
+#define _RegisterFunctionsType(module,func) func##_Eva_Register_##module
+#define RegisterFunctionsType(module,func) _RegisterFunctionsType(module,func)
+////////////////////////////////////////////////////////////////////////////////////////
+
+#define DeclareModule(module) class module##Module:public Module
+#define Constructors(module) public: module##Module(std::string); ~module##Module(); private: unsigned int __MODULE_DECLARE_MARK
+#define DeclareFunction(func) int PD_##func(Object&Argv)
+////////////////////////////////////////////////////////////////////////////////////////
+#define DefinePDFunction(func,Argv,description...)                      \
+  int func##_Eva_init_int(__register_function(#func));                  \
+  extern "C" int RegisterFunctionsType(ModuleName,func)(Module*module){ \
+    return Module::RegisterFunction(#func,(MemberFunction)(&ModuleType::PD_##func),module,##description); \
+  };                                                                    \
+  int ModuleType::PD_##func(Object&Argv)
+#define DefineFunction(func,description...) DefinePDFunction(func,Argv,##description)
+  ////////////////////////////////////////////////////////////////////////////////////////
+
+#define ModuleConstruction                                              \
+  static pond::Object __module_function_list;                           \
+  static int __register_function(std::string func){                     \
+    if ( __module_function_list.NullQ() )                               \
+      __module_function_list.SetList();                                 \
+    __module_function_list.PushBackSymbol( func.c_str() );              \
+    return 0;                                                           \
+  }                                                                     \
+  extern "C" double ReturnFunctionsType(){                              \
+    return *reinterpret_cast<double*>(&__module_function_list.objid);   \
+  };                                                                    \
+  extern "C" pond::Module *CreateModuleType(std::string name){          \
+    return new ModuleType(name);                                        \
+  }                                                                     \
+  extern "C" void DestroyModuleType(pond::Module*p){ delete (ModuleType*)p; } \
+  ModuleType::ModuleType(std::string name):Module(ModuleNameStr)
+////////////////////////////////////////////////////////////////////////////////////////
+#define ModuleDestruction ModuleType::~ModuleType()
+////////////////////////////////////////////////////////////////////////////////////////
+///////////////
+
+
+
+};
+
+#endif
+
+
+
+

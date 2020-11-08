@@ -1,0 +1,27 @@
+#include<pd_headers.h>
+// #include<emscripten.h>
+using namespace std;
+using namespace pond;
+
+// static map<string,string>::iterator iter;
+
+// EMSCRIPTEN_KEEPALIVE
+// void DocIn::RequestInput(){
+//   if ( in_ss.tellg() < 0 || in_ss.str() == "" ){
+//     // no content there anymore request frontent to get input
+//     //cout<<"request frontend for input"<<endl;
+//     pond::CleanMessage( "input" );
+//     pond::PostMessage( "input" );
+//     in_ss.clear();
+//     in_ss.str( pond::WaitForMessage( "input",600 ) );
+//     //cout<<"wait for input"<<endl;
+//   }
+// }
+
+// EMSCRIPTEN_KEEPALIVE
+// int DocIn::Initialize(string s){
+//   in_ss.clear();
+//   in_ss.str( s );
+//   return 0;
+// }
+
