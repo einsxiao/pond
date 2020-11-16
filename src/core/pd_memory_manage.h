@@ -114,6 +114,7 @@ namespace pond{
       if ( freeObjs.size() > 0 ){
         Index res = freeObjs.back() ;
         freeObjs.pop_back();
+        //dout<<tableName<<"Table ele newed from freeObjs:"<<res<<std::endl;
         return res;
       }else{
         if ( idx.j == RowSize ){
@@ -121,9 +122,11 @@ namespace pond{
           objs.push_back(row);
           idx.i ++; 
           idx.j = 0;
+          //dout<<tableName<<"Table ele newed from new row:"<<idx<<std::endl;
           return idx;
         }else{
           idx.j ++;
+          //dout<<tableName<<"EvaTable ele newed from exists row:"<<idx<<std::endl;
           return idx;
         }
       };
@@ -131,6 +134,7 @@ namespace pond{
     };
     inline void Free(Index id){
       /* std::lock_guard<std::mutex> lock(mt); */
+      //dout<<tableName<<"Table ele "<<id<<" is freed"<<std::endl;
       if ( id.nonzeroQ() ){
         freeObjs.push_back(id);
       }
@@ -251,7 +255,12 @@ namespace pond{
     };
   };
 
-  class __EvaOptimizeRecord:public __EvaTable< std::pair<double,std::string> >{};
+  class __EvaOptimizeRecord:public __EvaTable< std::pair<double,std::string> >{
+  public:
+    __EvaOptimizeRecord(){
+      tableName = "OptimizeRecord";
+    };
+  };
 
   class EvaMemoryPool{
   public:
@@ -423,6 +432,7 @@ namespace pond{
   _DS(Query,                 106);
   _DS(LineBreak,             107);       // a special one
   _DS(ArrowFunction,         108);
+  _DS(as,                    109);
 #undef _DS
 
 

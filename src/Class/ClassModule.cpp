@@ -50,20 +50,23 @@ int ClassModule::PD_class(Object&argv){
   CheckShouldEqual( 2 );
   CheckShouldBeSymbol( 1 );
   CheckShouldBeListWithHead(2, SYMID_OF_ExpressionList );
-  Object &name = argv[1];
-  Object &body = argv[2];
-  //dout<<"class def with "<<argv<<endl;
-  Object pairTable(__List__, SYMID_OF_Dict );
-  Object patternTable(__List__,SYMID_OF_List );
-  Object varList(__List__,SYMID_OF_List );
+  #define name argv[1]
+  #define body argv[2]
+  // Object name = argv[1];
+  // Object body = argv[2];
+  Object pairTable(     __List__,SYMID_OF_Dict );
+  Object patternTable(  __List__,SYMID_OF_List );
+  Object varList(       __List__,SYMID_OF_List );
   //dout<<"create new context"<<endl;
   EvaKernel->newContext( pairTable, patternTable);
   //dout<<"try analyze defination body"<<endl;
   for (int i=1; i <= body.Size(); i++ ){
-    //dout<<"deal arg "<<i<<endl;
+    //dout<<"deal arg "<<i<<","<<body[i].ToFullFormString()<<endl;
     while ( body[i].ListQ( SYMID_OF_CompoundExpression ) ){
+      //dout<<i<<" is a compound"<<endl;
       body.InsertRef( body.Begin()+i, body[i].Begin(), body[i].End() );
       body.Delete( i );
+      //dout<<"after processing, body is "<<body.ToFullFormString()<<endl;
     }
     Object pair; 
     if ( body[i].SymbolQ() ){
@@ -104,12 +107,18 @@ int ClassModule::PD_class(Object&argv){
   }
   EvaKernel->deleteContext();
   //dout<<"class table = "<< pairTable<<" \npattern table = "<< patternTable <<endl;
+  //dout<<"before push argv = "<< argv <<endl;
   argv[2] = pairTable;
+  //dout<<"argv 2 set, argv ="<< argv <<endl;
   argv.PushBackRef( patternTable );
+  //dout<<"pattern append, argv ="<< argv <<endl;
   argv.PushBackRef( varList );
+  //dout<<"varList append, argv ="<< argv <<endl;
   argv[0].SetSymbol( SYMID_OF_CLASS$DEFINED$CONTENT$ );
+  //dout<<"argv 0 set, argv ="<< argv <<endl;
   // define content pair
-  Object defname = Object(__Symbol__, string(name)+"$DEFINATION$");
+  Object defname = Object(__Symbol__, string(name.Key())+"$DEFINATION$");
+  //dout<<"insert declare defpair: "<<defname<<"|"<<argv<<endl;
   Object defpair = EvaKernel->RefInstantInsertOrUpdatePairValue(defname, argv);
   //dout<< " pair stored in table is "<< defpair<<endl;
 
@@ -119,7 +128,9 @@ int ClassModule::PD_class(Object&argv){
   cladef[1].set_idx( defpair.objid );
   //dout<<defpair<<" objid ="<< defpair.objid<<endl;
   // define for defination
+  //dout<<"insert defination content pair:"<<name<<"|"<<cladef<<endl;
   Object pair = EvaKernel->RefInstantInsertOrUpdatePairValue( name, cladef );
+  //dout<<" set for "<<name<<" with content "<< pair << endl;
   Module::AddAttribute( name.Key(), AttributeType::Protected );
   argv.SetVoid();
   // after well formated defination:
@@ -127,6 +138,8 @@ int ClassModule::PD_class(Object&argv){
   //        CLASS$DEFINATION$( name,    pairTable,      patternTable )
   // A ->
   //        CLASS$DEFINED$($_x_y, A)
+#undef name
+#undef body
   return 1;
 }
 
@@ -134,11 +147,11 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
  
   Set_Context( Conjunct ){ // A.a = 3, where A is 
     //dout<<"into Conjunct Set Context with Argv = "<<Argv<<endl;
-    Object&cla  =  Argv[1][1];
-    Object clapair( cla[1].idx() );
+    Object &cla  =  Argv[1][1];
+    Object  clapair( cla[1].idx() );
     Object &def = clapair[2];
+    Object &var  =  Argv[1][2];
 
-    Object&var  =  Argv[1][2];
     if ( not var.SymbolQ() ){
       zhErroring("类","只有类成员才能被赋值 "+var.ToString()+" 不是一个符号")||
         Erroring("class", "Only class member can be assigned a value" +var.ToString()+" is not a Symbol.");
@@ -201,7 +214,6 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
     //dout<<"get into delay function of defined class to do instance production"<<endl;
     //dout<<"current argv = "<<Argv<<endl;
     Object &cla = Argv[0];
-    //dout<<" cla = "<<cla<<endl;
     Object clapair( cla[1].idx() );
     Object &def = clapair[2];
     Object &pairTable = def[2];
@@ -215,7 +227,7 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
     static INIT_SYMID_OF( constructor );
     static Object constructor(__Symbol__, SYMID_OF_constructor );
     Object funcpair = pairTable.DictGetPair( constructor );
-    if ( funcpair[2].ListQ( SYMID_OF_FUNCTION$DEFINED$ ) ){
+    if ( funcpair && funcpair[2].ListQ( SYMID_OF_FUNCTION$DEFINED$ ) ){
       //dout<<"before constructor vt = "<<ins[2]<<endl;
       EvaKernel->newContext( ins[2] );
       Argv[0].SetVoid();

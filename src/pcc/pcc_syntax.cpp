@@ -198,6 +198,7 @@ int Syntax::processing(Node&parent,int level,bool endReturn = false,bool colonRe
         rollForward(1);
       if ( endReturn ){ //such as #include #pragma
         //dout<<"end return met, quit current level"<<endl;
+        rollBack(1);
         return 0;
       }
       if (  ( nodes.size() == 0 ) or (nodes.size() > 0  and nodes.back()->type == "newline") ){

@@ -141,18 +141,18 @@ try:
   #   user.mod_request('delete_module',module_name)
   #   exit(0)
     
- #upload module
-  if operation == 'upload' or operation == 'push':
-    if len(sysargv) < 3:
-      module_name = ''
-    else:
-      module_name = sysargv[2]
-      pass
-    ####
-    options_transform(options,{'b':'branch','t':'type','v':'version'})
-    #user.request_upload_module(module_name,options)
-    user.mod_request("upload_module",module_name,options)
-    exit(0)
+  #upload module
+  # if operation == 'upload' or operation == 'push':
+  #   if len(sysargv) < 3:
+  #     module_name = ''
+  #   else:
+  #     module_name = sysargv[2]
+  #     pass
+  #   ####
+  #   options_transform(options,{'b':'branch','t':'type','v':'version'})
+  #   #user.request_upload_module(module_name,options)
+  #   user.mod_request("upload_module",module_name,options)
+  #   exit(0)
 
   #download module
   # if operation == 'download' or operation == 'pull' or operation == 'get':
@@ -280,15 +280,21 @@ try:
 
   if operation == 'clear': operation = 'logout'
 
-  if operation in ['say_hello','login','check','logout','push','pull']:
+  if operation in ['say_hello','login','check','logout','pull']:
     # print("processing ",operation )
     mod = importlib.import_module("operations."+operation)
     mod.request(sysargv[1:], options )
     exit(0)
     pass
 
+  cmd = "GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git".format(pond_home)
+  for item in sys.argv[1:]:
+    cmd += " "+item
+    pass
+  #print("run as system cmd>",cmd)
+  os.system(cmd)
   #treated as edit, operation as script file
-  os.system(script_path+'/../bin/pond <'+sysargv[1])
+  #os.system(script_path+'/../bin/pond <'+sysargv[1])
   # files = ''
   # for i in range(1,len(sysargv)):
   #   files+=""" \""""+sysargv[i]+"""\""""

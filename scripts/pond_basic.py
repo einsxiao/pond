@@ -24,8 +24,13 @@ import json
 import requests
 DEBUG = True
 
-POND_API_URL       = 'https://doc.run/pond/modules/'
-POND_API_URL       = 'http://127.0.0.1:88/pond/modules/'
+POND_SERVER        = "doc.run"
+POND_SERVER        = "127.0.0.1"
+if POND_SERVER == "doc.run":
+    POND_API_URL       = 'https://doc.run/pond/modules/'
+else:
+    POND_API_URL       = 'http://127.0.0.1:88/pond/modules/'
+    pass
 POND_PASS_HINT     = """
   If you are not signed up or forget the account info, 
   please visit https://doc.run to signin/signup.
@@ -44,7 +49,9 @@ if ( not pond_home ):
 BLK_SIZE      = 1020
 
 operation_auth_free =  {'register_user','check_user_info','connect_user','find_back', 'mod_register_user','mod_check_user_info','mod_connect_user','mod_find_back','mod_ping',}
-if DEBUG: print("Debug Mode")
+
+# if DEBUG: print("Debug Mode")
+
 class CONSTANTS:
     RUNNING_SIDE = "server"
     pass

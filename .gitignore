@@ -5,4 +5,5 @@ exe
 *.wasm
 *.map
 *.swp
+*/build/
 */__pycache__/

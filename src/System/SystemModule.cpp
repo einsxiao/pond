@@ -192,9 +192,11 @@ SystemModule::SystemModule():Module(MODULE_NAME){
 
     // AddAttribute("ArrowFunction",AttributeType::DelayFunction);
     AddAttribute("ArrowFunction",AttributeType::HoldAll); // working similar to def and function
-    AddAttribute("def",AttributeType::HoldAll);
+
     RegisterFunction( "function",MemberFunction(&SystemModule::PD_def), this);
+    AddAttribute("def",AttributeType::HoldAll);
     AddAttribute("function",AttributeType::HoldAll);
+    
     RegisterFunction( "函数",MemberFunction(&SystemModule::PD_def), this);
     AddAttribute("函数",AttributeType::HoldAll);
     AddAttribute("FUNCTION$DEFINED$",AttributeType::DelayFunction);
@@ -2020,7 +2022,8 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
 }
 
 #define _err_return ({ ARGV[0] = ARGV[0][1][0]; ReturnError;})
-int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){ //"函数调用 DelayFunction"
+int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
+  // 函数调用 DelayFunction
   //dout<<"FUNCTION$DEFINED$ called with ARGV="<<ARGV<<endl;
   //EvaKernel->GetMemInfo();
   // check function form

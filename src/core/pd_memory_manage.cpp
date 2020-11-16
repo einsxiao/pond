@@ -140,9 +140,10 @@ EvaMemoryPool::EvaMemoryPool(){
   _DS(ExpressionList           );
   _DS2(Unpack,                 0,55 );
   _DS2(UnpackDict,             0,55 );
-  _DS4(Query,                  47,195,0,0);
+  _DS4(Query,                  47,195,  0,0);
   _DS(LineBreak                );       // a special one
-  _DS4(ArrowFunction,          48,210,3,1);
+  _DS4(ArrowFunction,          48,210,  3,1);
+  _DS4(as,                     170,170, 3,1);
   /////////////////////////////////////////////////////////
 
 

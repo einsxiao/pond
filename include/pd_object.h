@@ -59,8 +59,14 @@ namespace pond{
     void Malloc();
     void Clear();
     void Free();
-    inline void cnt_incr(){  _obj_at_objid.cnt++;};
-    inline void cnt_decr(){  _obj_at_objid.cnt--;};
+    inline void cnt_incr(){
+      //dout<<objid<<" ref incr"<<std::endl;
+      _obj_at_objid.cnt++;
+    };
+    inline void cnt_decr(){
+      //dout<<objid<<" ref decr"<<std::endl;
+      _obj_at_objid.cnt--;
+    };
   public:
     Object &operator=(const Object&obj);
     Object  Copy()const; // copy self as a new object and return

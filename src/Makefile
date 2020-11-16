@@ -44,6 +44,7 @@ pond: $(OBJECTS)
 	$(NVCC) $(NVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
 
 DALL: $(BUILDDIRS) pond-dev
+	cp -f $(OUT) ../bin/
 
 pond-dev: $(DOBJECTS)
 	$(NVCC) $(DNVFLAGS)  -o $(DOUT) $(DOBJECTS) $(INCLUDE) -lpd -lmpi

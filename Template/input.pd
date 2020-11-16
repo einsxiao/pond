@@ -1,0 +1,16 @@
+#!/usr/bin/env pond
+#import Template
+#hello()
+#incr(4)
+print("test class def")
+3+3
+class BB{
+  x;
+  a = 2;
+  def f(x){
+    return x+1;
+  }
+}
+BB
+aa = BB()
+aa

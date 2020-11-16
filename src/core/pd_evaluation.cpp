@@ -445,15 +445,21 @@ int Evaluation::ImportLoad(Object&ARGV){
 int Evaluation::PD_Import(Object&ARGV){
   //deout<<" depth addr "<< &(EvaKernel->EvaluationDepth) <<endl;
 
-  if ( EvaKernel->EvaluationDepth != 0 ){
-    //cerr<<"try import "<<ARGV<<" in depth "<< EvaKernel->EvaluationDepth <<endl;
-    zhErroring("导入","导入操作只能在代码最上层级进行") ||
-      Erroring("import","Import operation can only be done on the top level of source code.") ;
-    ReturnError;
-  }
+  //dout<<"Import operation in depth:"<<EvaKernel->EvaluationDepth<<endl;
+  // if ( EvaKernel->EvaluationDepth != 0 ){
+  //   //cerr<<"try import "<<ARGV<<" in depth "<< EvaKernel->EvaluationDepth <<endl;
+  //   zhErroring("导入","导入操作只能在代码最上层级进行") ||
+  //     Erroring("import","Import operation can only be done on the top level of source code.") ;
+  //   ReturnError;
+  // }
   for (int i=1; i<= ARGV.Size(); i++ ){
     if ( ARGV[i].StringQ() or ARGV[i].SymbolQ() ){
       EvaKernel->GetModule( ARGV[i].Key() );
+    }else if ( ARGV[i].ListQ(SYMID_OF_as) ){
+      // import with as, collectting in a namespace(a variable)
+      //dout<<"try import "<<ARGV[i][1]<<" as "<<ARGV[i][2]<<endl;
+      Object module_context_pair;
+      // EvaKernel->newContext( vartable, patternTable );
     }else if ( ARGV[i].ListQ() ){
       EvaKernel->PD_Import( ARGV[i] );
     }
@@ -928,10 +934,11 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
     }
     if ( ARGV[0].ValuedSymbolQ() ){// is a unChanged Symbol or something with EvaRecordTable id
       //dout<<"eval valued symboled head "<< ARGV<<endl;
-      //dprintf("head has something when eval %s",ARGV.ToString().c_str());
+      //dout<<"head has something when eval "<<ARGV.ToString().c_str()<<endl;
       Object valuepair( ARGV[0].idx() );
       int recId = valuepair.ids();
       EvaRecord *rec = NULL;
+      //dout<<"the rec is"<<rec<<endl;
       if ( recId > 0 and recId < evaRecordTable.size() )
         rec = evaRecordTable[ recId ];
       if ( rec != NULL ){
@@ -950,14 +957,22 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
         //dout<<"eval valued symboled delay head "<< ARGV<<endl;
         Object valuepair( ARGV[0][0].idx() );
         int recId = valuepair.ids();
+        //dout<<"get recId "<<recId<<" for "<<ARGV[0][0]<<endl;
         EvaRecord *rec = NULL;
-        if ( recId > 0 and recId < evaRecordTable.size() )
+        if ( recId > 0 and recId < evaRecordTable.size() ){
           rec = evaRecordTable[ recId ];
+        }
+        //dout<<"get rec "<<rec<<endl;
+
         if ( rec != NULL ){
           if ( pond::AttributeQ(rec->attributes, AttributeType::DelayFunction) ){
             AttributeProcessing( ARGV, rec->attributes,false,true);
-            if ( rec->staticFunction ) EvaReturn((*rec->staticFunction)(ARGV) );
-            if ( rec->module and rec->memberFunction ) EvaReturn(((rec->module)->*(rec->memberFunction))(ARGV));
+            if ( rec->staticFunction ){
+              EvaReturn((*rec->staticFunction)(ARGV) );
+            }
+            if ( rec->module and rec->memberFunction ){
+              EvaReturn(((rec->module)->*(rec->memberFunction))(ARGV));
+            }
           }
         }
       }else{

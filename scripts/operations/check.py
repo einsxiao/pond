@@ -23,7 +23,7 @@ def request(argv,options):
         module_name = argv[1]
         # try check module information
         res = module_request('check-module',{
-            'module_name'   :  module_name,
+            'module_name'    : module_name,
         })
         if res['status'] == 'not_exist':
             print("\n  Module {0} does not created yet.\n".format(module_name) )
@@ -47,11 +47,11 @@ def request(argv,options):
 
         return
 
-    jres = module_request('check-login',{
-        'username'    : username,
-        'token'       : token,
-    })
 
+    jres = module_request('check-login',{
+        'username'       : username,
+        'token'          : token,
+    })
 
     if jres['status'] != 'success':
         print("\n  Your login information is expired. please use command \`pd login\` to login.")
