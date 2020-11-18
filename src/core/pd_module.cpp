@@ -21,6 +21,7 @@ string Module::GetModuleName(){return moduleName;}
 #include<string.h>
 int Module::RegisterFunction(const char* funcName, MemberFunction func,const Module*mod,const char*descri){
   Object temp; temp.SetSymbol( funcName );
+  //dout<<"register member function "<< temp << " : "<<descri<< endl;
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord(temp);
   SetAttribute(rec->attributes,AttributeType::Protected);
   rec->staticFunction = NULL;
@@ -31,6 +32,7 @@ int Module::RegisterFunction(const char* funcName, MemberFunction func,const Mod
 }
 
 int Module::RegisterFunction(const char*funcName, StaticFunction func,const Module*mod,const char*descri){
+  //dout<<"register static function "<< func<< " : "<<descri<< endl;
   Object temp; temp.SetSymbol( funcName );
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord(temp);
   SetAttribute(rec->attributes,AttributeType::Protected);

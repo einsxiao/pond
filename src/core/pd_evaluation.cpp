@@ -193,21 +193,24 @@ Evaluation::Evaluation(bool debug){
   //   GetModule("Mathematica");
   // }
   
-  //init symidToPairIndex
-  //dout<<"init the global sym to pair table"<<endl;
-  Object pairTable = (*valueTables.begin())->pairTable;
-  //dout<<"init pair Table =" << pairTable <<endl;
-  int maxID = 0;
-  for (int i=1; i<= pairTable.Size(); i++ ){
-    //dout<<"add "<< pairTable[i]<< " to map Table for evaluation"<<endl;
-    int id = pairTable[i][1].SymbolId();
-    //dout<<"current sym id = "<< id << endl;
-    if ( id > maxID ) maxID = id;
-    if ( id >= symidToPairIndex.size() )
-      symidToPairIndex.resize( id+1 );
-    symidToPairIndex[id] = pairTable[i].objid;
+  //only enable symidToPairIndex in relase mode
+  if ( ! this->DebugMode ) {
+    //init symidToPairIndex
+    //dout<<"init the global sym to pair table"<<endl;
+    Object pairTable = (*valueTables.begin())->pairTable;
+    //dout<<"init pair Table =" << pairTable <<endl;
+    int maxID = 0;
+    for (int i=1; i<= pairTable.Size(); i++ ){
+      //dout<<"add "<< pairTable[i]<< " to map Table for evaluation"<<endl;
+      int id = pairTable[i][1].SymbolId();
+      //dout<<"current sym id = "<< id << endl;
+      if ( id > maxID ) maxID = id;
+      if ( id >= symidToPairIndex.size() )
+        symidToPairIndex.resize( id+1 );
+      symidToPairIndex[id] = pairTable[i].objid;
+    }
+    //dout<<"symidToPairIndex final size = "<< symidToPairIndex.size() <<" maxID ="<<maxID<<endl;
   }
-  //dout<<"final size = "<<symidToPairIndex.size() <<" maxID ="<<maxID<<endl;
   // currentValueTable = (*valueTables.begin()).first;
 
   //dout<<"new a context to evaluate in a level 1 context"<<endl;
@@ -260,6 +263,7 @@ Module *Evaluation::ModulePtr(string moduleName){
 
 int Evaluation::GetModuleLib(string moduleName){
   //dout<< "try get lib of "<<moduleName<<" in "<<endl;
+  //dout<<"start import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   //checking moduleName spell
   if ( moduleTable.find( moduleName ) != moduleTable.end() ){ // already initialized
     //cerr<<"GetModule::Module: "<<moduleName<<" has already been got."<<endl;
@@ -392,23 +396,33 @@ int Evaluation::GetModuleLib(string moduleName){
   type_return_functions *__return_functions = (type_return_functions*)dlsym(lib_Handler,("__return_functions_"+moduleName).c_str() );
   dlsym_error=dlerror();
 
+  //dout<<"before import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   if ( __return_functions != NULL ){ // write in template style,handle registered functions
     type_regsterfunction*regfunc;
     Index objid(__return_functions() );
     //dout<<"return function objid = "<<objid<<endl;
     Object  funclist( objid )  ;
-    //dout<<"return functions = "<<funclist<<endl;
-    string func;
+    //dout<<"return functions for "<<moduleName<<"= "<<funclist<<endl;
     if ( funclist.ListQ() ){
+      //dout<<" dealing functions for module "<<moduleName <<endl;
       for (u_int i=1;i<=funclist.Size();i++){
-        func = funclist[i].Key();
-        regfunc = (type_regsterfunction*)dlsym(lib_Handler,(func+"_Eva_Register_"+moduleName).c_str() );
+        string func = funclist[i].Key();
+        //dout<<"dealing func "<<func<<endl;
+        regfunc = (type_regsterfunction*)dlsym(lib_Handler, (func+"_Eva_Register_"+moduleName).c_str() );
+        //dout<<(void*)regfunc << " - "<<new_module  << " : "<<  func << endl;
         dlsym_error=dlerror();
-        if ( regfunc == NULL || dlsym_error ) Warning("GetModule","Failed to register function "+func+". Please check your code style for proper usage of DefineFunction(func).");
-        else regfunc(new_module);
+        if ( regfunc == NULL || dlsym_error ){
+          Warning("GetModule","Failed to register function "+ func+ ". Please check your code style for proper usage of DefineFunction(func).");
+        } else {
+          // register function by handler defined by mactor in pd_module.h
+          // it should be noted that sysIdToPairIndex should be updated properly
+          regfunc(new_module);
+        }
       }
     }
     //dout<<"function processing done"<<endl;
+
+    //dout<<"after import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   }
   dlsym_error=dlerror();
   if ( dlsym_error )
@@ -460,6 +474,7 @@ int Evaluation::PD_Import(Object&ARGV){
       //dout<<"try import "<<ARGV[i][1]<<" as "<<ARGV[i][2]<<endl;
       Object module_context_pair;
       // EvaKernel->newContext( vartable, patternTable );
+      //dout<<"load module in a context with keyword 'as'"<<endl;
     }else if ( ARGV[i].ListQ() ){
       EvaKernel->PD_Import( ARGV[i] );
     }
@@ -926,7 +941,7 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
         Evaluate( ARGV[0] );
       }else{
         Index tind = symidToPairIndex[ id ] ;
-        //dout<<"meet symid To Pair table for "<< ARGV[0] << endl;
+        //dout<<"meet symid To Pair table for "<< ARGV[0] << " tind = "<< tind << " id = "<<id<< endl;
         ARGV[0].set_idx( tind );
       }
     }else{
@@ -938,9 +953,9 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
       Object valuepair( ARGV[0].idx() );
       int recId = valuepair.ids();
       EvaRecord *rec = NULL;
-      //dout<<"the rec is"<<rec<<endl;
       if ( recId > 0 and recId < evaRecordTable.size() )
         rec = evaRecordTable[ recId ];
+      //dout<<"the rec for "<<ARGV<<" is "<<(void*)rec<<endl;
       if ( rec != NULL ){
         //cerr<<"Attribute processing for "<< ARGV <<endl;
         if ( AttributeProcessing(ARGV,rec->attributes) > 0 ) EvaReturn(1);

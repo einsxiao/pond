@@ -1,7 +1,8 @@
+#!/usr/bin/env pond
 ####################################
 # Author          : AUTHOR
 # Version         : Template.VERSION  
 # R-Copyleft(r-ɔ) : DATE
 ####################################
-hey(p_) := print('Hey! ', p )
+hey(p~) := print('Hey! ', p )
 hey('X')

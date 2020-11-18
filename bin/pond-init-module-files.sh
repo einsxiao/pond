@@ -28,7 +28,7 @@ change_from_to ./ DATE "`date`" 2>&1>/dev/null
 chmod +r ~/.pond.user.auth
 change_from_to ./ AUTHOR "`cat ~/.pond.user.auth |json nickname`" 2>&1>/dev/null
 chmod -r ~/.pond.user.auth
-change_from_to ./ VERSION "1.1.1" 2>&1>/dev/null
+change_from_to ./ VERSION "0.1.0" 2>&1>/dev/null
 
 exit 0
 
