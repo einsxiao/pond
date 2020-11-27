@@ -12,7 +12,7 @@ def request(argv,options):
     token     = info.get('token')
 
     if not token:
-        print("\n  You haven't login yet.\n")
+        print("\nYou haven't login yet.\n")
         return
 
     try:
@@ -21,10 +21,10 @@ def request(argv,options):
             os.system("chmod 600 "+auth_file)
             os.system("rm "+auth_file)
             pass
-        print("\n  Succeed to delete login information.\n")
+        print("\nSucceed to delete login information.\n")
     except Exception as e:
-        print("  Failed to delete login information. Check your permission of file ~/.pond.user.auth")
-        print("  failed for:",e)
+        print("Failed to delete login information. Check your permission of file ~/.pond.user.auth")
+        print("failed for:",e)
         pass
 
     return 

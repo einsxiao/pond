@@ -58,7 +58,6 @@ There are two things you can do about this warning:
 (setq linum-format "%3d  ")  ;set format  
 (global-linum-mode 1) ; always show line number
 ;;(menu-bar-mode 1) ; hide menu bar
-;;(tool-bar-mode 0) ; hide tool bar
 (setq scroll-margin 3 scroll-conservatively 10000 )
 ;;(set-scroll-bar-mode nil)
 (fset 'yes-or-no-p 'y-or-n-p) 
@@ -94,58 +93,36 @@ There are two things you can do about this warning:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'load-path (concat etc-dir "modes") ) 
 (require 'keybinding)
+
+
 (require 'sql)
 (require 'web-mode)
-(require 'rjsx-mode)
 (require 'cuda)
 (require 'pond)
 
 
-(add-to-list 'ac-modes 'web-mode)
-(add-to-list 'ac-modes 'rjsx-mode)
-;; (add-to-list 'ac-modes 'pond-kernel-mode)
-;; (add-to-list 'ac-modes 'pond-ev-mode)
-;; (add-to-list 'ac-modes 'pond-multi-mode)
-
-(defun my-web-mode-hook ()
-  "Hooks for Web mode."
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-attr-indent-offset 2)
-  (setq web-mode-sql-indent-offset 0)
-  (setq web-mode-attr-indent-offset 0)
-  (setq web-mode-script-padding 0)
-)
-(add-hook 'web-mode-hook  'my-web-mode-hook)
-
+(require 'rjsx-mode)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 
 
+;;(add-to-list 'ac-modes 'web-mode)
+;;(add-to-list 'ac-modes 'rjsx-mode)
+;; (add-to-list 'ac-modes 'pond-kernel-mode)
+;;(add-to-list 'ac-modes 'pond-ev-mode)
+;; (add-to-list 'ac-modes 'pond-multi-mode)
+
+(defun my-web-mode-hook ()
+   "Hooks for Web mode."
+   (setq web-mode-markup-indent-offset 2)
+   (setq web-mode-css-indent-offset 2)
+   (setq web-mode-code-indent-offset 2)
+   (setq web-mode-attr-indent-offset 2)
+   (setq web-mode-sql-indent-offset 0)
+   (setq web-mode-attr-indent-offset 0)
+   (setq web-mode-script-padding 0)
+ )
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
 
 (global-set-key (kbd "RET") 'newline-and-indent)
-
-;; (global-set-key (kbd "C-\\") 'toggle-input-method)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; pyim
-;; (add-to-list 'load-path (concat etc-dir "pyim") ) 
-;; (require 'pyim)
-;; (require 'pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
-;; (pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
-;; (setq default-input-method "pyim")
-;; (setq pyim-default-scheme 'pyim-shuangpin)
-
-;; (setq-default pyim-english-input-switch-functions
-;;               '(pyim-probe-dynamic-english
-;;                 pyim-probe-isearch-mode
-;;                 pyim-probe-program-mode
-;;                 pyim-probe-org-structure-template))
-
-;; (setq-default pyim-punctuation-half-width-functions
-;;               '(pyim-probe-punctuation-line-beginning
-;;                 pyim-probe-punctuation-after-punctuation))
-
-;; (setq pyim-page-tooltip 'posframe)
-;; (setq pyim-page-length 5)
-
 

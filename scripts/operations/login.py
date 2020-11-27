@@ -4,8 +4,8 @@ import json
 
 # login
 def request(argv,options):
-    # print('args =', args )
-    # print('argw =', argw )
+    #print('args =', args )
+    #print('argw =', argw )
 
     s = requests.Session()
     # s.headers.update({
@@ -26,7 +26,7 @@ def request(argv,options):
     password.strip()
     sys.stdout.flush()
 
-    res = s.post( POND_API_URL+"login/",{
+    res = s.post( POND_URL+"/pond/modules/login/",{
         'username'    : username,
         'password'    : password,
     },{
@@ -37,7 +37,7 @@ def request(argv,options):
 
     #print( 'jres = ', type(jres), jres )
 
-    if jres['status'] != 'success':
+    if jres.get('status') != 'success':
         print("\n  User name or password is invalid.")
         print(POND_PASS_HINT)
     else:
@@ -51,8 +51,8 @@ def request(argv,options):
             file = open(auth_file,'w')
             file.write( res.text )
             file.close()
-            os.system("chmod 000 "+auth_file)
-            print("  You have been login successfully with DocRun user:",jres['username'])
+            os.system("chmod 600 "+auth_file)
+            print("  You have been login successfully with DocRun user:",jres.get('username'))
         except Exception as e:
             print("  Failed to write login information. Check your permission of file ~/.pond.user.auth")
             print("  failed for:",e)

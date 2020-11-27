@@ -117,7 +117,6 @@ dexe: $(DALLOBJECTS)
 
 all-prepare: 
 	@echo "dealing with " $(MODULE_NAME)
-	@echo $(DALLOBJECTS)
 	@if [ "x`pond-path pcc $(DEPENDED_MODULES)`" == "x" ]; \
 		then echo "Error: Dependency failed.";\
 		exit 2;\

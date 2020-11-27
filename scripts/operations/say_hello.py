@@ -8,7 +8,7 @@ def request(*args,**argw):
 
     s = requests.Session()
 
-    res = s.post( POND_API_URL+"hello/",{
+    res = s.post( POND_URL+"/pond/modules/hello/",{
         'info'   : 'test from pond client',
     })
 

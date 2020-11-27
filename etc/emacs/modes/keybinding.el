@@ -220,9 +220,6 @@
 
 (define-key pond-keys-minor-mode-map  (kbd "M-0") 'my-fullscreen) 
 
-;;(define-key pond-keys-minor-mode-map [(f10)] 'tool-bar-mode) 
-;;(define-key pond-keys-minor-mode-map [(S-f10)] 'menu-bar-mode) 
-
 (define-key pond-keys-minor-mode-map (kbd "M-RET") 'semantic-ia-fast-jump)
 (define-key pond-keys-minor-mode-map (kbd "C-RET") 
 			 (lambda () (interactive)

@@ -1,33 +1,31 @@
 from pond_basic import *
 import requests
 import datetime 
-import dateutil
 import json
 
-# login
+# login requried
 def request(argv,options):
 
-    options_transform(options,{'b':'branch','v':'version'})
-    branck   = options.get('branch')
-    version  = options.get('version')
+    # options_transform(options,{'v':'version'})
+    # version  = options.get('version')
 
-    # print( 'argv = ',argv)
-    # print( 'options = ',options)
+    #print( 'argv = ',argv)
+    #print( 'options = ',options)
     if len(argv) >= 2:
         module_name = argv[1]
     else:
         cwd = os.getcwd()
-        print( pond_home)
-        print( cwd )
+        #print( pond_home)
+        #print( cwd )
         if not cwd.startswith( pond_home ):
-            print("  Name of a module should be specified if outside a module working directory.")
+            print("Name of a module should be specified if outside a module working directory.")
             return
         module_name = os.path.basename( cwd[ len(pond_home): ] )
         pass
-    print( '\n  Try pull module ',module_name )
+    #print( '\nTry pull module ',module_name )
 
     if not POND_AUTH_TOKEN:
-        print("\n  You haven't login yet.\n")
+        print("\nYou haven't login yet.\n")
         return
 
     module_dir = os.path.join( pond_home, module_name )
@@ -36,12 +34,13 @@ def request(argv,options):
     key_file    = os.path.join(pond_home, ".git_private_key")
     res = module_request( 'check-module',{
         'module_name'      : module_name,
-        'fetch_git_key'    : not os.path.exists( key_file ),
+        'fetch_git_key'    : ('' if os.path.exists( key_file ) else 'yes'),
         'repo_prepare'     : '1',
     })
 
-    # print("check-module res:",res)
+    #print("check-module res:",res)
     if res.get('git_private_key' ):
+        #print("get git_private_key:", res.get('git_private_key') )
         file_content_set( key_file, res.get('git_private_key') )
         os.system("chmod 600 "+key_file)
         pass
@@ -51,13 +50,13 @@ def request(argv,options):
         file_content_set( os.path.join(pond_home, ".git_private_key"), res.get('git_private_key') )
         pass
 
-    if res['status'] == 'not_exist':
-        print('\n  Module {0} does not exist.'.format(module_name) )
+    if res.get('status') == 'not_exist':
+        print('\nModule {0} does not exist.'.format(module_name) )
         return
 
-    if res['status'] == 'someone':
-        if not res['is_shared']:
-            print('\n  Module {0} is not shared by its author.'.format(module_name) )
+    if res.get('status') == 'someone':
+        if not res.get('is_shared'):
+            print('\nModule {0} is not shared by its author.'.format(module_name) )
             return
         pass
 
@@ -65,20 +64,16 @@ def request(argv,options):
     os.chdir( pond_home )
     if not os.path.exists( module_dir ):
         # clone the repo
-        print("  try clone")
-        cmd = "GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git clone git@{1}:{2}.git".format(
-            pond_home,POND_SERVER,module_name
-        )
-        print("run with cmd", cmd)
+        #print("try clone")
+        cmd = pond_git_cmd + " clone git@{0}:{1}.git".format(POND_SERVER, module_name)
+        #print("do clone with cmd>", cmd)
         os.system( cmd )
         pass
     else:
-        print("  try pull")
+        #print("try pull")
         os.chdir( module_dir )
-        cmd = "GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git pull".format(
-            pond_home,POND_SERVER
-        )
-        print("run with cmd", cmd)
+        cmd = pond_git_cmd+" pull"
+        #print("do pull with cmd>", cmd)
         os.system( cmd )
         pass
 
@@ -89,11 +84,9 @@ def request(argv,options):
         #empty repo, prepare files by templates from pond_root
         print("repo is empty, initializing the repo.")
         os.system( os.path.join( pond_root, 'bin', 'pond-init-module-files.sh')+" "+module_name )
-        os.system("git add .")
-        os.system("git commit -m '{0} initializing'")
-        cmd = "GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git push origin master".format(
-            pond_home,POND_SERVER,module_name
-        )
+        os.system(pond_git_cmd+" add .")
+        os.system(pond_git_cmd+" commit -m '{0} initializing'".format(module_name) )
+        cmd = pond_git_cmd+ " push origin master"
         os.system( cmd )
         pass
     

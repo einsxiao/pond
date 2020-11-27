@@ -28,7 +28,7 @@ def help_info():
     run|-r [script]
           run script in pond kernel
 
-    push|upload [module_name]
+    push [module_name]
           upload module, push new code to server side
 
     pull [module_name] [options]
@@ -39,7 +39,7 @@ def help_info():
     login
           setup account bonded with https://doc.run 
 
-    logout|clear
+    logout
           clear pond login info
 
     check 
@@ -58,7 +58,7 @@ try:
 
   #no argv run something
   script_path = os.path.split(os.path.realpath(__file__))[0]
-  sysargv,options=argv2argsoptions(sys.argv,['version','help','run','nowindow','local'],{'?':'help','h':'help','v':'version','r':'run','u':'user','g':'group','p':'perm','t':'type','b':'branch','nw':'nowindow'})
+  sysargv,options=argv2argsoptions(sys.argv,['version','help','run',],{'?':'help','h':'help','v':'version','r':'run',})
   #print('sysargv =',sysargv)
   #print('options =',options)
   #no argument
@@ -73,10 +73,6 @@ try:
     operation = 'NOT_DEFINED'
     pass
 
-  # no_window_opt_str = '  '
-  # if options.get('nowindow'):
-  #   no_window_opt_str = ' -nw ';
-
   #help
   if operation == 'help' or options.get('help'):
     help_info()
@@ -89,148 +85,6 @@ try:
     # user.mod_request('ping')
     exit(0)
     pass
-
-  # if operation == 'check':
-  #   if len(sysargv)<3:
-  #     if ( get_option(options,'user') ):
-  #       #user.request_list_module(options);
-  #       user.mod_request("list_module",options)
-  #       exit(0)
-  #       pass
-  #     print("check pond settings")
-  #     #if user.request_check_user_info():
-  #     if user.mod_request("check_user_info"):
-  #       user.mod_request("list_module",options)
-  #       #user.request_list_module();
-  #       exit(0)
-  #       pass
-  #     exit(1)
-  #     pass
-  #   module_name = sysargv[2]
-  #   print("check module '%s'... "%module_name)
-  #   if get_option(options,'version'):
-  #     #user.request_check_module(module_name,True);
-  #     user.mod_request('check_module',module_name,True)
-  #   else:
-  #     #user.request_check_module(module_name);
-  #     user.mod_request('check_module',module_name )
-  #     pass
-  #   exit(0)
-
-  #new module
-  # if operation == 'new' or operation == 'create':
-  #   if len(sysargv)<3:
-  #     print('Arguement error: a module name is required.')
-  #     exit(1)
-  #     pass
-  #   module_name = sysargv[2]
-  #   options_transform(options,{'t':'type','n':'name','l':'lang','f':'from'})
-  #   print('try to register module %s'%module_name)
-  #   #user.request_new_module(module_name,options)
-  #   user.mod_request('new_module',module_name,options)
-  #   exit(0)
-    
-  #delete module
-  # if operation == 'delete':
-  #   if len(sysargv) < 3:
-  #     print('Argument error. A module name is required.')
-  #     exit(1)
-  #     pass
-  #   module_name = sysargv[2]
-  #   #user.request_delete_module(module_name)
-  #   user.mod_request('delete_module',module_name)
-  #   exit(0)
-    
-  #upload module
-  # if operation == 'upload' or operation == 'push':
-  #   if len(sysargv) < 3:
-  #     module_name = ''
-  #   else:
-  #     module_name = sysargv[2]
-  #     pass
-  #   ####
-  #   options_transform(options,{'b':'branch','t':'type','v':'version'})
-  #   #user.request_upload_module(module_name,options)
-  #   user.mod_request("upload_module",module_name,options)
-  #   exit(0)
-
-  #download module
-  # if operation == 'download' or operation == 'pull' or operation == 'get':
-  #   sysargv,options=argv2argsoptions(sys.argv,[],{'v':'version','b':'branch'})
-  #   if len(sysargv) < 3:
-  #     module_name = get_modulename_from_path()
-  #     if not module_name:
-  #       print('Argument Error:A module name is required. Otherwize, operation need to be done at the root of the module.')
-  #   else:
-  #     module_name = sysargv[2]
-  #     pass
-  #   #########
-  #   dprint('module_name = %s'%module_name)
-  #   options_transform(options,{'b':'branch','v':'version'})
-  #   #user.request_download_module_to_user(module_name,options)
-  #   user.mod_request("download_module",module_name,options)
-  #   exit(0)
-
-  # #load program
-  # if operation == 'load' :
-  #   if len(sysargv) < 3:
-  #     print('Argument Error:A program name is required.')
-  #     pass
-  #   program_name = sysargv[2]
-  #   #user.request_load_program(program_name,'normal');
-  #   user.mod_request("load_program",program_name,'normal');
-  #   exit(0);
-
-  # #perm_module
-  # if operation == "perm":
-  #   if len(sysargv) < 3:
-  #     module_name = get_modulename_from_path()
-  #     if not module_name:
-  #       print('Argument Error:A module name is required. Otherwize, operation need to be done at the root of the module.')
-  #   else:
-  #     module_name = sysargv[2]
-  #     ############
-  #   dprint('module_name = %s'%module_name)
-  #   options_transform(options,{'g':'group','u':'user','p':'perm'})
-  #   #user.request_perm_module(module_name,options)
-  #   user.mod_request("perm_module",module_name,options)
-  #   exit(0)
-
-  # #say_hello test
-  # if operation == 'say_hello':
-  #   print('say hello test')
-  #   user.contact_host('say_hello','noncrypt')
-  #   user.request_say_hello()
-  #   exit(0)
-
-  # if operation == 'register':
-  #   print('checking your account infomation')
-  #   #local connection info
-  #   #check_result = user.request_check_user_info_only()
-  #   check_result = user.mod_request("check_user_info_only")
-  #   if check_result == 'connected to server':
-  #     print('You are already connected to server. No need to register a new pond account.')
-  #     exit(0)
-  #     pass
-  #   print("checking finished. Permitted to register.")
-  #   if check_result == "connection info outdated": # delete connection info
-  #     pond_dir= os.getenv('POND_HOME')
-  #     auth_file = pond_dir + '/.user.auth'
-  #     os.system('rm -f '+auth_file)
-  #     ###
-  #     #user.request_register_user()
-  #   user.mod_request('register_user')
-  #   exit(0)
-
-  # if operation == 'connect':
-  #   #user.request_connect_user()
-  #   user.mod_request("connect_user")
-  #   exit(0)
-
-  # if operation == 'disconnect':
-  #   #user.request_connect_user()
-  #   user.mod_request("disconnect_user")
-  #   exit(0)
 
   if operation == 'run': 
     if len(sysargv)<3:
@@ -250,19 +104,6 @@ try:
     exit(0)
     pass
 
-  # if operation == 'clear':
-  #   pond_dir = os.getenv('POND_HOME')
-  #   if not os.path.exists(pond_dir): os.system("mkdir "+pond_dir)
-  #   auth_file = pond_dir+'/.user.auth'
-  #   dprint("auth_file = ",auth_file);
-  #   if os.path.exists(auth_file):
-  #     os.system('chmod 600 '+auth_file)
-  #     os.system('rm '+auth_file)
-  #     print("clear local auth information.")
-  #     pass
-  #   exit(0);
-  #   pass
-
   #show local version
   if operation == 'version' or get_option(options,'version'):
     print("""
@@ -280,33 +121,27 @@ try:
 
   if operation == 'clear': operation = 'logout'
 
-  if operation in ['say_hello','login','check','logout','pull']:
+  if operation in ['say_hello','login','check','logout','pull', 'push']:
     # print("processing ",operation )
     mod = importlib.import_module("operations."+operation)
     mod.request(sysargv[1:], options )
     exit(0)
     pass
 
-  cmd = "GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git".format(pond_home)
+  cmd = pond_git_cmd 
   for item in sys.argv[1:]:
     cmd += " "+item
     pass
-  #print("run as system cmd>",cmd)
+  # print("run as system cmd>",cmd)
   os.system(cmd)
-  #treated as edit, operation as script file
-  #os.system(script_path+'/../bin/pond <'+sysargv[1])
-  # files = ''
-  # for i in range(1,len(sysargv)):
-  #   files+=""" \""""+sysargv[i]+"""\""""
-  #   pass
-  # os.system(pond_root+"/bin/pond "+files)
+
 except KeyboardInterrupt as e:
   print("\nprogram killed by keyboard interrupt")
-  dtraceback()
+  rtraceback()
 except EOFError as e:
   print("\nprogram killed for EOF Error")
-  dtraceback()
+  rtraceback()
 except Exception as e:
   print("program exist with error:",e)
-  dtraceback()
+  rtraceback()
 
