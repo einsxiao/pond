@@ -3,7 +3,7 @@
 ################################################################
 DEPENDED_MODULES  := 
 INCLUDE           :=
-LIBS              := 
+LIBS              := -lMatrixModule
 SUBDIRS           :=
 #MPI_ENABLE        := True
 ################################################################
@@ -72,7 +72,7 @@ DALL: dexe debugsharelib
 
 debugsharelib: $(DALLOBJECTS)
 	$(CC) $(DFLAGS) -shared -o lib$(MODULE_NAME)-dev.so $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
-	@chmod -x lib$(MODULE_NAME)-dev.so
+#	@chmod -x lib$(MODULE_NAME).so
 build/debug/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tcpp.o: %.cpp $(HEADERS)
@@ -87,7 +87,7 @@ ALL: sharelib
 
 sharelib: $(ALLOBJECTS)
 	$(CC) $(FLAGS) -shared -o lib$(MODULE_NAME).so $(ALLOBJECTS) $(INCLUDE)  $(LIBS) 
-	@chmod -x lib$(MODULE_NAME).so
+#	@chmod -x lib$(MODULE_NAME).so
 build/release/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/release/%.tcpp.o: %.cpp $(HEADERS)
@@ -98,22 +98,22 @@ build/release/%.tf90.o: %.f90 $(HEADERS)
 	$(FORCC) $(FORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
 
 #############################################################################
-clean:
-	@make -i cleandebug
-	@make -i cleanrelease
+clean: cleandebug cleanrelease
 
 cleandebug:
-	@rm -rf build/debug
-	@rm exe;
-	rm lib$(MODULE_NAME)-dev.so;
+	@-rm -rf build/debug
+	$(shell if [ -f core ]; then rm core; fi; )
+	$(shell if [ -f exe ]; then rm exe; fi; )
+	$(shell if [ -f lib$(MODULE_NAME)-dev.so ]; then rm lib$(MODULE_NAME)-dev.so; fi; )
+	$(shell if [ -f lib$(MODULE_NAME).so ]; then rm lib$(MODULE_NAME).so; fi; )
 
 cleanrelease:
-	rm -rf build/release;
-	rm lib$(MODULE_NAME).so;
+	@-rm -rf build/release;
+	$(shell if [ -f lib$(MODULE_NAME).so ]; then rm lib$(MODULE_NAME).so; fi; )
 
 #############################################################################
 dexe: $(DALLOBJECTS)
-	$(CC) $(DFLAGS) -o $(EXCU) $(DALLOBJECTS) $(INCLUDE) $(DLIBS) $(LIBS) -lpd
+	$(CC) $(DFLAGS) -o $(EXCU) $(DALLOBJECTS) $(INCLUDE) $(DLIBS) $(LIBS) -lpd-dev
 
 all-prepare: 
 	@echo "dealing with " $(MODULE_NAME)
@@ -127,8 +127,5 @@ all-prepare:
 	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
 	$(shell cp $(MODULE_NAME).h $(POND_ROOT)/include/ )
 post-work:
-	$(shell cp *.so $(POND_ROOT)/lib/)
+	$(shell if [ -w $(POND_ROOT) ]; then cp *.so $(POND_ROOT)/lib/; fi)
 
-upload:
-	@echo "Upload to Pond server"
-	$(shell pond upload)

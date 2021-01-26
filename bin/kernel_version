@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+import subprocess
+s = subprocess.check_output(['uname','-r']).decode()
+print( '.'.join(s.split('.')[:2] ),end='' )

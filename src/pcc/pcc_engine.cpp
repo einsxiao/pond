@@ -64,7 +64,9 @@ int Engine::processing()
     cout<<buffer;
   }
   if ( FileExistQ( cmdLine->tmpFilePath ) ){
-    System("rm "+cmdLine->tmpFilePath);
+    //System("rm "+cmdLine->tmpFilePath);
+  } else {
+    dout<<"tmp file "<< cmdLine->tmpFilePath <<" not exist"<<endl;
   }
   return pclose(fp)/256;
 }

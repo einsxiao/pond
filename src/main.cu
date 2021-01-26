@@ -9,44 +9,144 @@
 using namespace std;
 using namespace pond;
 
+int parseArgv(int argc, char* argv[], vector<pair<string,string> > &options, vector<string>&args){
+  for (int i=0; i< argc; i++){
+    string cont = argv[i];
+    if ( cont.size()>=2 && cont[0] == '-' ){ // is an option
+      if ( cont[1] == '-' ) cont.erase(0,2);
+      else cont.erase(0,1);
+      int p = cont.find("=");
+      if ( p ){
+        options.push_back( pair<string,string>(
+                             cont.substr(0,p),
+                             cont.substr(p+1,cont.size()-p-1)
+                           )
+        );
+      } else{
+        options.push_back( pair<string,string>(cont,"" ) );
+      }
+    } else { // is a normal arg
+      args.push_back( cont );
+    }
+  }
+
+  return 0;
+}
+
 int main(int argc,char* argv[])
 { 
-  int res = 0;
+  string lang        = GetEnv("POND_LANG","zh");
+  int    res         = 0;
+  bool   noprint     = false;
+  bool   pmark       = false;
   try{
-    if ( argc == 1 ){
+    vector<pair<string,string> > options;
+    vector<string> args;
+    parseArgv( argc, argv, options, args );
+    ////////////////////////////////////////////
+    string rcfile = GetEnv("POND_RC");
+    if ( rcfile.size() == 0 ) rcfile = GetEnv("HOME")+"/.pondrc";
+    for(size_t i=0; i<options.size(); i++){
+      if ( options[i].first == "version" || options[i].first == "v" ){
+        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        cout<<"Version "<< POND_VERSION <<endl;
+        return 0;
+      }
+      if ( options[i].first == "help" || options[i].first == "h" ){
+        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        if ( lang == "zh"){
+          cout<<"用法:  pond [选项] ..."<<endl;
+          cout<<"    pond [选项] 脚本文件 ..."<<endl;
+          cout<<"可选项: "<<endl;
+          cout<<"    --exec='CODE'        : 解释并执行CODE"<<endl;
+          cout<<"    --version    / -v    : 显示当前版本"<<endl;
+          cout<<"    --noprint            : 不打印求值得到结果的行(脚本模式)"<<endl;
+          cout<<"    --rcfile=rcfile      : 指定启动脚本"<<endl;
+          cout<<"    --pmark              : 在交互模式中，打印模式标记"<<endl;
+          cout<<"    --help       / -h    : 显示帮助信息"<<endl;
+          cout<<""<<endl;
+        } else {
+          cout<<"Usage:  pond [option] ..."<<endl;
+          cout<<"    pond [option] script-file ..."<<endl;
+          cout<<"options: "<<endl;
+          cout<<"    --exec='code'        : prase and evaluate CODE"<<endl;
+          cout<<"    --version    / -v    : show current version"<<endl;
+          cout<<"    --noprint            : do not print lines with result(script mode)"<<endl;
+          cout<<"    --rcfile=rcfile      : set rc file for initializing"<<endl;
+          cout<<"    --pmark              : print mode mark information in interactive mode"<<endl;
+          cout<<"    --help       / -h    : show help info"<<endl;
+          cout<<""<<endl;
+        }
+        return 0;
+      }
+      if ( options[i].first == "rcfile" ){
+        rcfile = options[i].second;
+        continue;
+      }
+      if ( options[i].first == "noprint" ){
+        noprint = true;
+        continue;
+      }
+      if ( options[i].first == "pmark" ){
+        pmark = true;
+        continue;
+      }
+
+    }
+    if ( args.size() == 1 ){
       if ( isatty( 0 ) ){
-        cout<<"Pond for Linux."<<endl;
-        cout<<"All rights reserved."<<endl;
-        Kernel kernel(&cin, true, argc, argv);
+        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        Kernel kernel(&cin, true, argc, argv, rcfile);
+        kernel.pmark = pmark;
         res = kernel.Phrasing();
       }else{
-        Kernel kernel(&cin, false, argc, argv);
+        Kernel kernel(&cin, false, argc, argv, rcfile);
+        kernel.noprint = noprint ;
         res = kernel.Phrasing();
       }
-    }else if ( argc >= 2 ){
-      string filename = argv[1];
-      ifstream fcin(filename.c_str());
-      if ( fcin ){
-        Kernel kernel(&fcin, false, argc, argv);		
-        res = kernel.Phrasing();
-      }else{
-        zhWarning("pond","脚本文件'"+filename+"'未找到") ||
-          Warning("pond","Script file "+filename+" is not found.");
-        return 1;
+    }else if ( args.size() >= 2 ){
+      ////////////////////////////////////////////
+      if ( args.size() > 1 ){
+        string filename = args[1];
+        ifstream fcin(filename.c_str());
+        if ( fcin ){
+          Kernel kernel(&fcin, false, argc, argv, rcfile);
+          kernel.noprint = noprint;
+          res = kernel.Phrasing();
+        }else{
+          if ( lang == "zh" ){
+            Warning("pond","脚本文件'"+filename+"'未找到");
+          } else {
+            Warning("pond","Script file "+filename+" is not found.");
+          }
+          return 1;
+        }
+        fcin.close();
       }
-      fcin.close();
     }else{
-      zhWarning("pond","要求至少1个参数");
-      Warning("pond","1 argument is required.");
+      if ( lang == "zh" ){
+        Warning("pond","要求至少1个参数");
+      } else {
+        Warning("pond","1 argument is required.");
+      }
       return 1;
     }
   }catch ( const Error&err ){
-    //dout<<"got error in main"<<endl;
+    dout<<"got pond::Error in main"<<endl;
     cerr<<err.swhat()<<endl;
   }catch ( const exception &err){
-    cerr<<"Sourcecode::Error: "<<err.what()<<endl;
+    dout<<"got exception in main"<<endl;
+    if ( lang == "zh" ){
+      cerr<<"\nSourcecode::Error: "<<err.what()<<endl;
+    } else {
+      cerr<<"\n源代码::错误: "<<err.what()<<endl;
+    }
   }catch ( ... ){
-    cerr<<"\nSystem::Error: Unexpected error occured."<<endl;
+    if ( lang == "zh" ){
+      cerr<<"\nSystem::Error: Unexpected error occured."<<endl;
+    } else {
+      cerr<<"\n系统::错误: 出现未知错误."<<endl;
+    }
   }
  
   return res;

@@ -98,7 +98,7 @@ There are two things you can do about this warning:
 (require 'sql)
 (require 'web-mode)
 (require 'cuda)
-(require 'pond)
+(require 'pond-full)
 
 
 (require 'rjsx-mode)

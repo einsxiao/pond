@@ -78,16 +78,16 @@
 #define InitArray(array) ({InitNameArray(#array,array);})
 #define InitArrayPrint(array) ({InitNameArrayPrint(#array,array);})
 
-#define InitNameMatrix(name,matrix) ({int err=0;  \
-      Object tempObj;                             \
-      tempObj.SetSymbol(name);                    \
-      EvaKernel->Evaluate(tempObj);               \
-      if( not MatrixModule::MatrixQ(tempObj) ){   \
-        err=-1;                                   \
-      }else{                                      \
-        MatrixModule::MatrixSet(matrix,tempObj);  \
-      }                                           \
-      err;                                        \
+#define InitNameMatrix(name,matrix) ({int err=0;      \
+      Object tempObj;                                 \
+      tempObj.SetSymbol(name);                        \
+      EvaKernel->Evaluate(tempObj);                   \
+      if( not MatrixModule::MatrixQ(tempObj) ){       \
+        err=-1;                                       \
+      }else{                                          \
+        MatrixModule::Object2Matrix(tempObj,matrix);  \
+      }                                               \
+      err;                                            \
     })
 #define InitNameMatrixPrint(name,matrix) ({int err=0;                 \
       Object tempObj;                                                 \
@@ -96,7 +96,7 @@
       if( not MatrixModule::MatrixQ(tempObj) ){                       \
         err=-1;                                                       \
       }else{                                                          \
-        MatrixModule::MatrixSet(matrix,tempObj);                      \
+        MatrixModule::Object2Matrix(tempObj, matrix);                 \
       }                                                               \
       if( err >= 0 ){                                                 \
         cout<< name <<" is set to "<<tempObj.ToString()<<std::endl;;  \

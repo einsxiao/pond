@@ -222,19 +222,19 @@ u_int __EvaSymbolTable::GetOrNew(const char*key,u_char priLeft,u_char priRight,u
   return (ptr++);
 }
 
-#define declare_ref(obj,id) auto &obj= objs[id.i][id.j]
+#define declare_ref(obj,id) auto &obj= objs[id.row ][id.col ]
 
 Index __EvaStringTable::NewString(const char*str){
   Index id;
   id = __EvaTable::New();
-  objs[id.i][id.j ] = str;
+  objs[id.row][id.col ] = str;
   return id;
 }
 
 Index __EvaStringTable::NewString(Index id){
   Index newid;
   newid = __EvaTable::New();
-  objs[newid.i ][newid.j ] = objs[id.i ][id.j]; 
+  objs[newid.row ][newid.col ] = objs[id.row ][id.col ]; 
   return newid;
 }
 

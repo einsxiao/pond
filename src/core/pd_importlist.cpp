@@ -234,12 +234,14 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
             lineNumber++;
             //dout<<"comes to line "<<lineNumber<<" with depth = "<<depth<<endl;
             if ( listStack.Size() == 0 ){
+              //dout<<"listStack is empty, break"<<endl;
               break;
             }
             recordType rec;
             recordTypeInit( listStack.Size(), rec, listStack );
             //dout<<"meet return with state, oN ="<<int(rec.state)<<int(rec.oN)<<endl;
-            if ( listStack.Last().state() == RConnect or listStack.Last().state() == RRight  or rec.oN > 0 ){
+            if ( listStack.Last().state() == RConnect or
+                 listStack.Last().state() == RRight  or rec.oN > 0 ){
               //dout<<"break by connect by last"<<endl;
               break;
             }
@@ -256,8 +258,8 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               if ( rec.oN > 3 ){break;}
             }
 
-            // consider next word
-            {
+            // if not on interactive mode, consider next word
+            if ( not this->interactively ){
               // try get next element
               //dout<<" try get next element by GetList"<<endl;
               int oriP = pos;
@@ -295,6 +297,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
             //// an expression finished
             //dout<<"met newline and 2 cond, depth "<<depth<<endl;
             if ( depth == 0 ){
+              //dout<<"an expression end met"<<endl;
               listEnd = true;
               expressionEnd = true;
               break;
@@ -334,7 +337,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                 if ( not e0 or not e1 or not e2 ) {
                   zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
                     Erroring( "Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
-                  return 8;
+                  return -8;
                 }
                 //met string end
                 if ( (ch == '\"'&&currentWord.size()>0&& *currentWord.rbegin() != '\\') and
@@ -1083,7 +1086,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               if ( pond::SpecialCharecterQ(ch) and ch!='$' ){
                 zhErroring("语法","字符 \'"+ToString(ch)+"\' 是系统保留字符，不能在此处使用. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
                   Erroring("Syntax","Character \'"+ToString(ch)+"\' is reserved at line [ "+pond::ToString(lineNumber)+" ]" ) ;
-                return 8; 
+                return -8; 
               }
               currentWord.append(1,ch);
               char ch1;
@@ -1155,10 +1158,10 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           // u_char oT = GlobalPool.Symbols.GetOperType( listStack[1].ids() );
           u_char oN = GlobalPool.Symbols.GetOperNum( listStack[1].ids() );
           for (auto i=0; i< oN; i++ )
-            listStack.InsertNull( 1 );
+            listStack.PushBackNull();
         }else{
           if ( listStack.Last().state() > 0 && listStack.Last().state() != RLeft )
-            listStack.InsertNull( listStack.Size()+1 );
+            listStack.PushBackNull();
         }
         //dout<<" listStack after treated: "<<listStack<<endl;
         ////////////////////////////////////////////// reducement
@@ -1311,7 +1314,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                   listStack.PushBackNull();
                   // zhErroring("语法",listStack[p].ToString() + " 语句结构不完整. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
                   //   Erroring("Syntax",listStack[p].ToString() + " clause is not complete at line [ "+pond::ToString(lineNumber)+" ]" ) ;
-                  // return 8;
+                  // return -8;
                 }
                 if ( listStack[p-1].SymbolQ( SYMID_OF_LineBreak ) ){
                   //dout<< "p -1 is LineBreak delete and continue"<<endl;
@@ -1454,7 +1457,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               }else{
                 zhErroring("语法","操作符连接关系分析失败. 位置: 第 "+pond::ToString(lineNumber)+" 行")||
                   Erroring("Syntax","Failed to analyze operator connection relationship at line "+pond::ToString(lineNumber) ) ;
-                return 8;
+                return -8;
               }
             }
 
@@ -1476,7 +1479,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
         if ( listStack.Size()>1 ){
           zhErroring("语法","表达式分析失败. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
             Erroring("Syntax","Expression cannot be reduced at line ["+pond::ToString(lineNumber)+"]" ) ;
-          return 8;
+          return -8;
         }
         //dout<< " get one expression listStack = "<<listStack<<endl;
         //dout<< "  parentList = "<<parentList<<endl;

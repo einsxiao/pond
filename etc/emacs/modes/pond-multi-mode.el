@@ -23,11 +23,11 @@
 
 ;; configure these:
 (setq auto-mode-alist
-      (append '(("\\.ev\\'" . pond-multi-mode))   
+      (append '(("\\.pd\\'" . pond-multi-mode))   
               auto-mode-alist))
 
 
-(defvar default-mode (list "Pond" 'pond-ev-mode))
+(defvar default-mode (list "Pond" 'pond-mode))
 (defvar second-modes (list
                       (list "Matlab" "Matlab>>>" "<<<" 'c++-mode)
                       (list "Python" "Python>>>" "<<<" 'python-mode)

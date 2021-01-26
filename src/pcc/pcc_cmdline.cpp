@@ -195,12 +195,14 @@ string CmdLine::keep_pass_construct(string cc)//just pass forward
   if ( cc == "nvcc" ){
     options.push_back( "-Wno-deprecated-gpu-targets" );
   }
+  options.push_back( "-D_MWAITXINTRIN_H_INCLUDED" );
+  options.push_back( "-D_FORCE_INLINES" );
   options.push_back("-DOS_OF_LINUX");
   options.push_back("--compiler-options"); options.push_back("-fopenmp");
   options.push_back("--compiler-options"); options.push_back("-pthread");
   options.push_back("-lpd");
-  options.push_back("-lmpi_cxx");
-  options.push_back("-lmpi");
+  //options.push_back("-lmpi_cxx");
+  //options.push_back("-lmpi");
   if ( cc != "nvcc" and CommandExist("nvcc" ) ){
     options.push_back("-lcudart");
   }
@@ -241,6 +243,8 @@ string CmdLine::construct(string cc) //compile and file exist for sure
   if ( cc == "nvcc" ){
     options.push_back("-Wno-deprecated-gpu-targets" );
   }
+  options.push_back( "-D_MWAITXINTRIN_H_INCLUDED" );
+  options.push_back( "-D_FORCE_INLINES" );
   options.push_back("-DOS_OF_LINUX");
   options.push_back("--compiler-options"); options.push_back("-fopenmp");
   options.push_back("--compiler-options"); options.push_back("-pthread");

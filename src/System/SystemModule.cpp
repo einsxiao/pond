@@ -68,9 +68,9 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   AddAttribute("I",AttributeType::Protected );
 
   // systematic functions
-  {
-    RegisterFunction("Evaluate",Evaluate,this);
-  }
+  // {
+  //   RegisterFunction("Evaluate",Evaluate,this);
+  // }
   {
     RegisterFunction("Set",Set,this);
     AddAttribute("Set",AttributeType::HoldFirst);
@@ -119,10 +119,10 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   }
   ////////////////////////////////////////////////////////////////
   {
-    RegisterFunction("Options",Options,this);
+    // RegisterFunction("Options",Options,this);
   }
   {
-    RegisterFunction("Attributes",Attributes,this); 
+    // RegisterFunction("Attributes",Attributes,this); 
     AddAttribute("Attributes",AttributeType::Listable);
   }
   {
@@ -270,9 +270,9 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   RegisterFunction("clear",Clear,this,"Clear defination relating to symbol(s)."); 
   AddAttribute("clear",AttributeType::HoldAll);
 
-  RegisterFunction("Protect",Protect_Eva,this,"Add Protect Attribute to a Symbol.");
+  //RegisterFunction("Protect",Protect_Eva,this,"Add Protect Attribute to a Symbol.");
   AddAttribute("Protect",AttributeType::HoldAll);
-  RegisterFunction("UnProtect",UnProtect_Eva,this,"Remove Protect Attribute of a Symbol if exist.");
+  //RegisterFunction("UnProtect",UnProtect_Eva,this,"Remove Protect Attribute of a Symbol if exist.");
   AddAttribute("UnProtect",AttributeType::HoldAll);
   ///////////////////////////////////////////////////////////
   RegisterFunction("AbsoluteTime",AbsoluteTime,this,"Get Absolute time from 1970.");
@@ -304,14 +304,69 @@ SystemModule::SystemModule():Module(MODULE_NAME){
 SystemModule::~SystemModule(){
 };
 
-int SystemModule::Evaluate(Object &ARGV){
+int SystemModule::PD_Evaluate(Object &ARGV){
+  /*zh:
+    Evaluate(expr)
+        对处于Hold状态中的表达式expr进行求值
+    |||
+    Evaluate(expr)
+        Evaluate expr in 'Hold' state
+   */
   CheckShouldEqual(1);
   EvaKernel->Evaluate(ARGV[1],false);
   ARGV = ARGV[1];
   ReturnNormal;
 }
 
-int SystemModule::Options(Object & ARGV){
+int SystemModule::PD_EvaluateString(Object &ARGV){
+  /*zh:
+    EvaluateString(str)
+        解析str中的表达式并求值
+    |||
+    EvaluateString(str)
+        parse expression in str and evaluate the parsed result
+   */
+  CheckShouldEqual(1);
+  CheckShouldBeString(1);
+  string code = ARGV[1].Key(); 
+  pond::PondInnerStringRestoreNormal( code );
+  Object result;
+  EvaKernel->EvaluateString(code, result, 0, true);
+  ARGV = result;
+  Return(result);
+}
+
+int SystemModule::PD_EvaluateFile(Object &ARGV){
+  /*zh:
+    EvaluateFile(filename)
+        解析文件中的内容并求值
+    |||
+    EvaluateFile(filename)
+        parse content in file and evaluate the parsed result
+   */
+  CheckShouldEqual(1);
+  CheckShouldBeString(1);
+  Object result;
+  EvaKernel->EvaluateFile(ARGV[1].Key(), result, 0, false);
+  ReturnNull;
+}
+
+int SystemModule::PD_EvaluateFileWithReturn(Object &ARGV){
+  /*zh:
+    EvaluateFile(filename)
+        解析文件中的内容并求值
+    |||
+    EvaluateFile(filename)
+        parse content in file and evaluate the parsed result
+   */
+  CheckShouldEqual(1);
+  CheckShouldBeString(1);
+  Object result;
+  EvaKernel->EvaluateFile(ARGV[1].Key(), result, 0, false);
+  Return(result);
+}
+
+int SystemModule::PD_Options(Object & ARGV){
   ReturnHold;
 }
 
@@ -336,34 +391,40 @@ int SystemModule::SetAttribute(Object &left,Object&attris){
   bool *attri;
   if ( left.ListQ( SYMID_OF_Attributes) ){
     if ((left).Size() != 1 ) {
-      Erroring("SetAttributes","Attributes requires an Object as argument.");
+      zhErroring("SetAttributes","Attributes 要求以Object作为参数.")||
+        Erroring("SetAttributes","Attributes requires an Object as argument.");
       ReturnError; }
     if ( not left[1].SymbolQ() ) {
-      Erroring("SetAttribute","Only Symbol can assign attributes to.");
+      zhErroring("SetAttribute","只有符号变量才能被赋予属性.")||
+        Erroring("SetAttribute","Only Symbol can assign attributes to.");
       ReturnError;
     }
     attri = EvaKernel->GetAttributes( (left)[1].Key() );
   }else{
     if ( not left.SymbolQ() ) {
-      Erroring("SetAttribute","Only Symbol can assign attributes to.");
+      zhErroring("SetAttribute","只有符号变量才能被赋予属性.")||
+        Erroring("SetAttribute","Only Symbol can assign attributes to.");
       ReturnError;
     }
     attri = EvaKernel->GetAttributes( left );
   }
   if ( attri == NULL ) {
-    Erroring("SetAttributes","Can not create new attributes.");
+    zhErroring("SetAttributes","不能创建新的属性.")||
+      Erroring("SetAttributes","Can not create new attributes.");
     ReturnError;
   }
   
   AttributeType type;
   for (u_int i=1; i<=attris.Size(); i++ ){
     if ( not attris[i].StringQ() ) {
-      Erroring("SetAttributes","A attribute string is required.");
+      zhErroring("SetAttributes","要求一个属性字符串.")||
+        Erroring("SetAttributes","An attribute string is required.");
       ReturnError;
     }
     type = String2AttributeType( attris[i].Key() );
     if ( type == AttributeType::Null ) {
-      Erroring("SetAttribute",(string)"Unkonwn Attribute \""+attris[i].Key()+"\".");
+      zhErroring("SetAttribute",(string)"未知属性 \""+attris[i].Key()+"\".")||
+        Erroring("SetAttribute",(string)"Unkonwn Attribute \""+attris[i].Key()+"\".");
       ReturnError;
     }
     pond::SetAttribute(attri,type);
@@ -382,70 +443,113 @@ int SystemModule::AddAttribute_Eva(Object &ARGV){
   CheckShouldEqual(2);
   CheckShouldBeSymbol(1);
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
-  if ( rec == NULL )
-    { Erroring("AddAttribute","Can not get Symbol Attributes Object ."); ReturnError; }
-  if ( AttributeQ(rec->attributes,AttributeType::Protected) )
-    { Erroring("AddAttribute",(string)"Symbol "+ARGV[1].Key()+" is protected."); ReturnError; }
+  if ( rec == NULL ) {
+    zhErroring("AddAttribute","未能获取符号变量 '"+ARGV[1].ToString()+"' 的参数对象.")||
+      Erroring("AddAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
+    ReturnError;
+  }
+  if ( AttributeQ(rec->attributes,AttributeType::Protected) ) {
+    zhErroring("AddAttribute",(string)"符号变量'"+ARGV[1].Key()+"' 处于保护状态中.")||
+      Erroring("AddAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
+    ReturnError;
+  }
   if ( ARGV[2].SymbolQ() || ARGV[2].StringQ() ){
     AttributeType attriType = String2AttributeType( ARGV[2].Key() );
-    if ( attriType == AttributeType::Null )
-      { Erroring("AddAttribute","Attribute type specified is not right."); ReturnError; }
+    if ( attriType == AttributeType::Null ) {
+      zhErroring("AddAttribute",(string)"给出的属性类型'"+ARGV[2].Key()+"' 不正确.")||
+        Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
+      ReturnError;
+    }
     pond::SetAttribute(rec->attributes, attriType );
     ReturnNull;
   }else if ( ARGV[2].ListQ(SYMID_OF_List) ){
     AttributeType attriType;
     for ( u_int i =1; i<=ARGV[2].Size() ; i++){
       attriType = String2AttributeType( ARGV[2][i].Key() );
-      if ( attriType == AttributeType::Null )
-        { Erroring("AddAttribute","Attribute type specified is not right."); ReturnError; }
+      if ( attriType == AttributeType::Null ) {
+        zhErroring("AddAttribute",(string)"给出的属性类型'"+ARGV[2][i].Key()+"' 不正确.")||
+          Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
+        ReturnError;
+      }
       pond::SetAttribute( rec->attributes, attriType );
     }
     ReturnNull;
   }
-  { Erroring("AddAttribute","Attributes specified is not in the right form."); ReturnError; }
+  zhErroring("AddAttribute","给出的属性值形式不正确.")||
+    Erroring("AddAttribute","Attributes specified is not in the right form.");
+  ReturnError;
 };
 
 int SystemModule::RemoveAttributes_Eva(Object &ARGV){
   CheckShouldEqual(2);
   CheckShouldBeSymbol(1);
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
-  if ( rec == NULL )
-    { Erroring("RemoveAttribute","Can not get Symbol Attributes Object ."); ReturnError; }
-  if ( AttributeQ(rec->attributes,AttributeType::Protected) )
-    { Erroring("RemoveAttribute",(string)"Symbol "+ARGV[1].Key()+" is protected."); ReturnError; }
+  if ( rec == NULL ) {
+    zhErroring("RemoveAttribute","未能获取符号变量 '"+ARGV[1].ToString()+"' 的参数对象.")||
+      Erroring("RemoveAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
+    ReturnError;
+  }
+  if ( AttributeQ(rec->attributes,AttributeType::Protected) ) {
+    zhErroring("RemoveAttribute",(string)"符号变量'"+ARGV[1].Key()+"' 处于保护状态中.")||
+      Erroring("RemoveAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
+    ReturnError;
+  }
   if ( ARGV[2].SymbolQ() || ARGV[2].StringQ() ){
     AttributeType attriType = String2AttributeType( ARGV[2].Key() );
-    if ( attriType == AttributeType::Null )
-      { Erroring("RemoveAttribute","Attribute type specified is not right."); ReturnError; }
+    if ( attriType == AttributeType::Null ) {
+      zhErroring("RemoveAttribute",(string)"给出的属性类型'"+ARGV[2].Key()+"' 不正确.")||
+        Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
+      ReturnError;
+    }
     pond::SetAttribute( rec->attributes, attriType,false);
     ReturnNull;
   }else if ( ARGV[2].ListQ(SYMID_OF_List) ){
     AttributeType attriType;
     for ( u_int i =1; i<=ARGV[2].Size() ; i++){
       attriType = String2AttributeType( ARGV[2][i].Key() );
-      if ( attriType == AttributeType::Null )
-        { Erroring("RemoveAttribute","Attribute type specified is not right."); ReturnError; }
+      if ( attriType == AttributeType::Null ) {
+        zhErroring("RemoveAttribute",(string)"给出的属性类型'"+ARGV[2][i].Key()+"' 不正确.")||
+          Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
+        ReturnError;
+      }
       pond::SetAttribute( rec->attributes, attriType,false );
     }
     ReturnNull;
   }
-  { Erroring("RemoveAttribute","Attributes specified is not in the right form."); ReturnError; }
+  zhErroring("RemoveAttribute","给出的属性值形式不正确.")||
+    Erroring("RemoveAttribute","Attributes specified is not in the right form.");
+  ReturnError;
 };
 
-int SystemModule::Protect_Eva(Object &ARGV){
+int SystemModule::PD_Protect(Object &ARGV){
+  /*zh:
+    Protect( [sym] )
+        为[sym]添加保护属性(Protected)，禁止对[sym]进行修改操作
+    |||
+    Protect( [sym] )
+        Add a 'Protected' attribute to symbol [sym], prevent any change to [sym]
+  */
+     
   CheckShouldEqual(1);
   CheckShouldBeSymbol(1);
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
   if ( rec == NULL ) {
-    zhErroring("移除属性","不能获得符号"+ARGV[1].ToString()+"的属性对象")||
-      Erroring("RemoveAttribute","Can not get Attributes Object for Symbol"+ARGV[1].ToString());
+    zhErroring("Protect","不能获得符号'"+ARGV[1].ToString()+"'的属性对象")||
+      Erroring("Protect","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'");
     ReturnError;
   }
   pond::SetAttribute( rec->attributes, AttributeType::Protected, true);
   ReturnNull;
 };
 
-int SystemModule::UnProtect_Eva(Object &ARGV){
+int SystemModule::PD_UnProtect(Object &ARGV){
+  /*zh:
+    UnProtect( [sym] )
+        移除[sym]的保护属性(Protected)，恢复对[sym]进行修改操作的权限
+    |||
+    UnProtect( [sym] )
+        Remove 'Protected' attribute of symbol [sym]
+  */
   CheckShouldEqual(1);
   CheckShouldBeSymbol(1);
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
@@ -458,7 +562,7 @@ int SystemModule::UnProtect_Eva(Object &ARGV){
   ReturnNull;
 };
 
-int SystemModule::Attributes(Object & ARGV){
+int SystemModule::PD_Attributes(Object & ARGV){
   Set_Context(Attributes){
     return SetAttribute_Eva(ARGV);
   }
@@ -1554,7 +1658,8 @@ int func_elif(Object&ARGV,bool condi){ // if (a, elif(b,(c),d) )
     ReturnNormal;
   }else{ // need to check if else or elif
     if ( not ARGV[2].ListQ( SYMID_OF_Parenthesis ) ){
-      Erroring("elif","elif condition should enclosed with ()" );
+      zhErroring("elif","elif 的条件项应该放在 () 中" ) ||
+        Erroring("elif","elif condition should enclosed with ()" );
       ReturnError;
     }
     EvaKernel->Evaluate( ARGV[2] ); // evaluate c
@@ -1586,11 +1691,23 @@ int func_elif(Object&ARGV,bool condi){ // if (a, elif(b,(c),d) )
 }
 
 int SystemModule::PD_if(Object&ARGV){
-  // if ( a ) b  if(a,b)
-  //dout<<"try if "<<ARGV<<" depth ="<<EvaKernel->EvaluationDepth<<endl;
+  /*zh:
+    ----------------------
+    if ( condition ){
+      expr_true;
+    }
+    ----------------------
+    if ( condition ){
+      expr_true;
+    } else {
+      expr_false;
+    }
+    ----------------------
+   */
   CheckShouldEqual(2);
   if ( not ARGV[1].ListQ( SYMID_OF_Parenthesis ) ){
-    Erroring("if","if condition should enclosed with ()" );
+    zhErroring("if","if 条件项应该放在 () 中" ) ||
+      Erroring("if","if condition should enclosed with ()" );
     ReturnError;
   }
   EvaKernel->Evaluate(ARGV[1]);
@@ -1745,7 +1862,8 @@ int SystemModule::PD_for(Object&ARGV){
         Object newexpr;
         for ( auto iter = lists.Begin(); iter != lists.End(); iter++ ){
           if ( iter->Size() != vobj_list.Size() ) { 
-            Erroring("for::in::shape","List shape is not consistent with variable list."); 
+            zhErroring("for::in::shape","列表和变量列表的形状不一致.") ||
+              Erroring("for::in::shape","List shape is not consistent with variable list."); 
             ReturnError; 
           }
           for ( auto viter=vobj_list.Begin(),liter=(*iter).Begin();viter!=vobj_list.End();viter ++,liter++){
@@ -1767,10 +1885,12 @@ int SystemModule::PD_for(Object&ARGV){
         EvaKernel->SetStackToPtr( ptr );
       }
     }
-    Erroring("for:in","variable should be a symbol or list of symbols."); 
+    zhErroring("for:in","variable should be a symbol or list of symbols.")||
+      Erroring("for:in","变量应该是一个符号变量或者一个由符号变量构成的列表."); 
     ReturnHold;
   }
-  Erroring("for","for clause should be in form for ( i in [n1,n2,...nN] ) expr;"); 
+  zhErroring("for","for clause should be in form for ( i in [n1,n2,...nN] ) expr;")||
+    Erroring("for","for 语句应该形为 for ( i in [n1,n2,...nN] ) expr;"); 
   ReturnHold;
 }
 
@@ -2329,4 +2449,75 @@ int SystemModule::PD_ArrowFunction(Object&ARGV){
   function_def_process(ARGV);
   //dout<<"processed to"<<ARGV<<endl;
   return 1;
+}
+
+int SystemModule::PD_SetRunningMode(Object&Argv)
+{
+  CheckShouldEqual(1);
+  CheckShouldBeString(1);
+  if ( strcasecmp( Argv[1].Key(), "gpu" ) == 0 ){
+    EvaSettings::SetRunningMode( RunningModeGpu );
+  }else if ( strcasecmp( Argv[1].Key(), "cpu" ) == 0 ){
+    EvaSettings::SetRunningMode( RunningModeCpu );
+  }else{
+    ThrowError("SetRunningMode","Running mode "+Argv[1].ToString()+" is not recongnized.");
+  }
+  ReturnNull;
+}
+
+int SystemModule::PD_GetRunningMode(Object&Argv)
+{
+  CheckShouldEqual(0);
+  if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+    ReturnString("gpu");
+  }
+  ReturnString("cpu");
+}
+
+int SystemModule::PD_GPUDeviceQ(Object&Argv)
+{
+  if ( pond::Execute("nvidia-smi -L >/dev/null 2>&1") != 0 ){
+    ReturnString("No nVIDIA GPU Driver found.");
+  }
+  vector<string> res;
+  pond::System("nvidia-smi -L",res) ;
+  Argv.SetList();
+  for ( auto li: res){
+    Argv.PushBackString( li);
+  }
+  ReturnNormal;
+}
+
+int SystemModule::PD_SetCudaThreadsNumberPerBlock(Object&Argv)
+{
+  CheckShouldEqual(1);
+  CheckShouldBeNumber(1);
+  int num = (int)Argv[1];
+  if ( num <= 0 and num%32 != 0 and num > 1024 )
+    ThrowError("SetCudaThreadsNumberPerBlock","Thread number per block is suggested to be multiple of 32 and a number with 0 and 1024.");
+  EvaSettings::SetThreadNumberPerBlock( num );
+  ReturnNull;
+}
+
+int SystemModule::PD_SetCpuThreadsNumber(Object&Argv)
+{
+  CheckShouldEqual(1);
+  CheckShouldBeNumber(1);
+  int num = (int)Argv[1];
+  if ( num <= 0 )
+    ThrowError("SetEvawizCpuKernelThreadsNumber","Thread number should be a positive number.");
+  EvaSettings::SetThreadNumberPerKernel( num );
+  ReturnNull;
+}
+
+int SystemModule::PD_GetCudaThreadsNumberPerBlock(Object&Argv)
+{
+  CheckShouldEqual(0);
+  ReturnNumber( EvaSettings::threadNumberPerBlock );
+}
+
+int SystemModule::PD_GetCpuThreadsNumber(Object&Argv)
+{
+  CheckShouldEqual(0);
+  ReturnNumber( EvaSettings::threadNumberPerKernel );
 }

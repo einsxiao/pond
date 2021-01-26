@@ -2,12 +2,10 @@
 #include"dlfcn.h" //dlopen dlsym
 // #include<emscripten.h>
 #include<sstream>
-#define ModuleName EvaKernel
+#define __MODULE_NAME__ Kernel
 
 using namespace std;
 using namespace pond;
-
-
 
 EMSCRIPTEN_KEEPALIVE
 EvaRecord::EvaRecord(){
@@ -92,29 +90,19 @@ bool EvaRecord::isCallable(){
 
 static vector<Index> symidToPairIndex;
 
-Evaluation::Evaluation(bool debug){
+Evaluation::Evaluation(bool debug, bool pmark){
   // EvaKernel
   //dout<<"try initialize evaluation"<<endl;
   // exit(0);
   // __GlobalPoolPtr = new EvaMemoryPool();
   GlobalPool.Eva = this;
-  // maxRecursionDepth = 256;
   maxRecursionDepth = 256;
-  //dout<<"inited with EvaKernel = "<< EvaKernel <<endl;
-  //dout<<"---------------------"<<endl;
-  //Object obj1, obj2;
-  //dout<<"obj1 = "<<" objid = "<<obj1.objid<<endl;
-  //dout<<"obj2 = "<<" objid = "<<obj2.objid<<endl;
-  //obj1.SetList();
-  //dout<<"obj1 = "<<" objid = "<<obj1.objid<<endl;
-  //dout<<"obj2 = "<<" objid = "<<obj2.objid<<endl;
-  //obj2 = obj1;
-  //dout<<"obj1 = "<<obj1<<" objid = "<<obj1.objid<<endl;
-  //dout<<"obj2 = "<<obj2<<" objid = "<<obj2.objid<<endl;
-  //exit(0);
-  //check env var, if not set set to default ones
   /////////////
-  DebugMode = debug;
+  // init LANG info
+  this->lang = GetEnv("POND_LANG","zh");
+  /////////////
+  this->DebugMode   = debug;
+  this->pmark       = pmark;
   newContext();
   evaRecordTable.push_back(NULL);
   evaRecordTable.push_back(NULL); //Get Value will return a value ( > 2) when is a eva record
@@ -169,6 +157,17 @@ Evaluation::Evaluation(bool debug){
     Module::RegisterFunction("GetMemInfo",Evaluation::PD_GetMemInfo,NULL,""); 
     Module::RegisterFunction("GetStackInfo",Evaluation::PD_GetStackInfo,NULL,""); 
   }
+
+  {
+    Module::RegisterFunction("exit",Evaluation::PD_exit,NULL,"zh:退出程序|||exit current kernel"); 
+    Module::RegisterFunction("Exit",Evaluation::PD_exit,NULL,"zh:退出程序|||exit current kernel"); 
+
+    Module::RegisterFunction("help",Evaluation::PD_help,NULL,"zh:help([obj])\n  获得[obj]的帮助信息.|||help([obj])\n  get help info for [obj]."); 
+    Module::RegisterFunction("Help",Evaluation::PD_help,NULL,""); 
+    Module::AddAttribute("help",AttributeType::HoldAll);
+    Module::AddAttribute("Help",AttributeType::HoldAll);
+
+  }
   
 
   //dout<<"try load some preloaded modules"<<endl;
@@ -177,12 +176,19 @@ Evaluation::Evaluation(bool debug){
   GetModule("System");
   GetModule("Class");
   GetModule("String");
+  GetModule("OS");
   //dout<<"modules loaded"<<endl;
 
-  GetModule("Matrix");
-  GetModule("MPI");
-  GetModule("OS");
-  GetModule("Python"); 
+  if ( GetEnv("POND_ENABLE_PYTHON")   == "yes" ){
+    GetModule("Python"); 
+  }
+  if ( GetEnv("POND_ENABLE_MPI")      == "yes" ){
+    GetModule("MPI");
+  }
+  if ( GetEnv("POND_ENABLE_CUDA")     == "yes" ){
+    GetModule("Matrix");
+    GetModule("MatrixOperations");
+  }
   // ///////////////////////////
   // string matlab_root = GetEnv("MATLAB_ROOT");
   // if (  matlab_root != "" ){ 
@@ -261,7 +267,7 @@ Module *Evaluation::ModulePtr(string moduleName){
   return iter->second;
 }
 
-int Evaluation::GetModuleLib(string moduleName){
+int Evaluation::GetModuleLib(string moduleName,bool silent){
   //dout<< "try get lib of "<<moduleName<<" in "<<endl;
   //dout<<"start import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   //checking moduleName spell
@@ -305,9 +311,13 @@ int Evaluation::GetModuleLib(string moduleName){
              GetFileMD5(so_file) != GetFileMD5(temp_so_file) )          \
           System("rmcp "+so_file+" "+temp_dir );                        \
         lib_Handler=dlopen(temp_so_file.c_str(),RTLD_NOW|RTLD_GLOBAL ); \
-        if (!lib_Handler) {                                             \
-          ThrowError("GetModule","Fail to get binary '"                 \
-                     + moduleName+"' in.\n \t"+ std::string(dlerror()) ); \
+        if ( !lib_Handler ) {                                           \
+          if ( !this->DebugMode && silent ) return 1;                   \
+          zhErroring("GetModule", "未能成功载入模块 '"+moduleName+"' 的二进制包")|| \
+            Erroring("GetModule","Fail to get binary '" + moduleName+"' in."); \
+          const char* dlsym_error=dlerror();                            \
+          Warning("dlsym",((string)"dlsym_error::"+dlsym_error).c_str() ); \
+          return -1;                                                    \
         }                                                               \
         module_dir = _module_dir;                                       \
         break;                                                          \
@@ -380,18 +390,28 @@ int Evaluation::GetModuleLib(string moduleName){
   type_create* __create = (type_create*)dlsym(lib_Handler,("__create_"+moduleName+"Module").c_str() );
   const char* dlsym_error=dlerror();
   if ( __create == NULL || dlsym_error ){
-    { Erroring("GetModule", "Macro to init module '"+moduleName+"' not found. Please make sure you are following the standard template."); return -1; }
+    zhErroring("GetModule", "模块 '"+moduleName+"' 的初始化宏未找到. 请确保代码使用了正确的接口范式.") ||
+      Erroring("GetModule", "Macro to init module '"+moduleName+"' not found. Please make sure you are following the standard template.");
+    return -1;
   }
   type_destroy*__destroy = (type_destroy*)dlsym(lib_Handler,("__destroy_"+moduleName+"Module").c_str() );
   dlsym_error=dlerror();
-  if ( __destroy == NULL || dlsym_error ){Erroring("GetModule", "Macro to delete '"+moduleName+"' not found. Please make sure you are following the standard tempalte."); return -1;}
+  if ( __destroy == NULL || dlsym_error ){
+    zhErroring("GetModule", "模块 '"+moduleName+"' 的卸载宏未找到. 请确保代码使用了正确的接口范式.") ||
+      Erroring("GetModule", "Macro to delete '"+moduleName+"' not found. Please make sure you are following the standard tempalte.");
+    return -1;
+  }
   moduleCreateHandleTable[moduleName]=__create;
   moduleDestroyHandleTable[moduleName]=__destroy;//for destroy
   /////////////////////////////////////////////////////////////////////
   ///// Create module
   // registering to eva will happen once the new module being constructed.
   Module * new_module = __create();
-  if ( new_module == NULL ){ Erroring("GetModule"," Error while new module."); return -1; }
+  if ( new_module == NULL ){
+    zhErroring("GetModule"," 创建模块时遇到错误.") ||
+      Erroring("GetModule"," Error while new module.");
+    return -1;
+  }
   // register functions created by DefineFunction(func)
   type_return_functions *__return_functions = (type_return_functions*)dlsym(lib_Handler,("__return_functions_"+moduleName).c_str() );
   dlsym_error=dlerror();
@@ -412,7 +432,8 @@ int Evaluation::GetModuleLib(string moduleName){
         //dout<<(void*)regfunc << " - "<<new_module  << " : "<<  func << endl;
         dlsym_error=dlerror();
         if ( regfunc == NULL || dlsym_error ){
-          Warning("GetModule","Failed to register function "+ func+ ". Please check your code style for proper usage of DefineFunction(func).");
+          zhWarning("GetModule","未能成功注册函数 '"+ func+ "'. 请检查代码是否符合标准范式.")||
+            Warning("GetModule","Failed to register function "+ func+ ". Please check if your code follows the standard template.");
         } else {
           // register function by handler defined by mactor in pd_module.h
           // it should be noted that sysIdToPairIndex should be updated properly
@@ -425,8 +446,10 @@ int Evaluation::GetModuleLib(string moduleName){
     //dout<<"after import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   }
   dlsym_error=dlerror();
-  if ( dlsym_error )
-    Warning("dlsym",((string)"error at end of GetLib:"+dlsym_error).c_str() );
+  if ( dlsym_error ){
+    zhWarning("dlsym",((string)"GeModule的最后出现dl错误:"+dlsym_error).c_str() ) ||
+      Warning("dlsym",((string)"error at end of GetLib:"+dlsym_error).c_str() );
+  }
   return 1;
 }
 
@@ -459,23 +482,30 @@ int Evaluation::ImportLoad(Object&ARGV){
 int Evaluation::PD_Import(Object&ARGV){
   //deout<<" depth addr "<< &(EvaKernel->EvaluationDepth) <<endl;
 
-  //dout<<"Import operation in depth:"<<EvaKernel->EvaluationDepth<<endl;
-  // if ( EvaKernel->EvaluationDepth != 0 ){
-  //   //cerr<<"try import "<<ARGV<<" in depth "<< EvaKernel->EvaluationDepth <<endl;
-  //   zhErroring("导入","导入操作只能在代码最上层级进行") ||
-  //     Erroring("import","Import operation can only be done on the top level of source code.") ;
-  //   ReturnError;
-  // }
+  // check if slient option present
+  static INIT_SYMID_OF(silent);
+  bool is_silent = false;
+  for (int i=1; i<=ARGV.Size(); i++ ){
+    //dout<<"check "<<ARGV[i]<<","<<ARGV[i].ListQ(SYMID_OF_Set) <<endl;
+    if ( ARGV[i].ListQ(SYMID_OF_Set) && ARGV[i].Size() == 2  ){
+      if ( ARGV[i][1].SymbolQ(SYMID_OF_silent) ){
+        is_silent = ARGV[i][2].Boolean();
+      }
+    }
+  }
+  //dout<<"is slient load:"<< is_silent <<endl;
+
   for (int i=1; i<= ARGV.Size(); i++ ){
     if ( ARGV[i].StringQ() or ARGV[i].SymbolQ() ){
-      EvaKernel->GetModule( ARGV[i].Key() );
+      //dout<<"try load "<< ARGV[i] << is_silent <<endl;
+      EvaKernel->GetModule( ARGV[i].Key(), is_silent );
     }else if ( ARGV[i].ListQ(SYMID_OF_as) ){
       // import with as, collectting in a namespace(a variable)
       //dout<<"try import "<<ARGV[i][1]<<" as "<<ARGV[i][2]<<endl;
       Object module_context_pair;
       // EvaKernel->newContext( vartable, patternTable );
       //dout<<"load module in a context with keyword 'as'"<<endl;
-    }else if ( ARGV[i].ListQ() ){
+    } else if ( ARGV[i].ListQ() && not ARGV[i].ListQ(SYMID_OF_Set)  ){
       EvaKernel->PD_Import( ARGV[i] );
     }
   }
@@ -560,21 +590,24 @@ int Evaluation::GetModulePyPathReady(string moduleName){
 
 int Evaluation::GetModulePondScript(string moduleName){
   string sysdir,filename;
-#define __GET_PATH(dir) {                               \
-    filename=dir+"/"+moduleName+".pd";                  \
-    if ( FileExistQ(filename) )                         \
-      return EvaluateString(GetFileContent(filename) ); \
+  Object tmp;
+#define __GET_PATH(dir) {                                   \
+    filename=dir+"/"+moduleName+".pd";                      \
+    if ( FileExistQ(filename) ) {                           \
+      EvaluateString(GetFileContent(filename),tmp );        \
+      return 0;                                             \
+    }                                                       \
   }
   __GET_PATH( GetCwd() );
   __GET_PATH( GetEnv("POND_HOME")+"/"+moduleName );
   __GET_PATH( GetEnv("POND_ROOT")+"/modules/"+moduleName );
   __GET_PATH( GetEnv("POND_ROOT")+"/lib/"+moduleName );
 #undef __GET_PATH
-  return 0;
+  return -1;
 }
 
 EMSCRIPTEN_KEEPALIVE
-int Evaluation::GetModule(string moduleName){ //fetch resources from remote server and load into
+int Evaluation::GetModule(string moduleName,bool silent){ //fetch resources from remote server and load into
   if ( moduleName.size() == 0 )
     return -1;
 
@@ -586,57 +619,30 @@ int Evaluation::GetModule(string moduleName){ //fetch resources from remote serv
     return -1;
   }
   //dout<<"prepare send signal"<<endl;
-  string sofile;
-
-  //cout<<"is a normal module"<<endl;
-  // tmp_file_.* will be ready at this moment
-  // only normal module file need to be checked
-  // pond::CleanMessage( "modpp.pd" );
-  // pond::CleanMessage( "modpp.wasm" );
-
-  // pond::PostMessage( moduleName+"modpp" );
-
-  // pond::WaitForMessage( "modpp.wasm", 8 );
-
-  // sofile = "/pond/assets/modules/"+moduleName+"@@lib"+moduleName+"Module.wasm";
-  // if ( pond::idb_existsQ( sofile.c_str() ) ){
-  //   pond::idb_load_to_file( sofile.c_str() );
-  //   GetModuleLib( moduleName );
-  // }else{
-  //   Warning("Kernel::GetModule","file" +sofile+" not loaded.");
-  // }
-
   try{
+    bool success = false;
     if ( moduleName[0] < 'A' or moduleName[0] > 'Z' ){
       GetModuleDependence(moduleName);
       // GetModulePathReady(moduleName);
       // GetModuleMatPathReady(moduleName);
       GetModulePyPathReady(moduleName);
-      GetModulePondScript(moduleName);
+      success  = (GetModulePondScript(moduleName)>=0) || success;
     }
-    GetModuleLib(moduleName);
+    success  = (GetModuleLib(moduleName, silent)>=0) || success;
+    if ( not success && not silent ){
+      zhWarning("GetModule","模块'"+moduleName+"' 未找到") ||
+        Warning("GetModule","Module '"+moduleName+"' not found.") ;
+      return -1;
+    }
   }catch ( const Error&err ){
-    cerr<<err.what()<<endl;
+    cerr<<err.swhat()<<endl;
   }catch ( const exception &err){
-    cerr<<"Sourcecode::Error: "<<err.what()<<endl;
+    zhErroring("源代码",err.what() )||
+      Erroring("Sourcecode",err.what() );
   }catch ( ... ){
-    cerr<<"System::Error: Unexpected error occured."<<endl;
+    zhErroring("系统","出现未预料到的错误." )||
+      Erroring("System","Unexpected error occured." );
   }
-
-  // if ( moduleName[0] <'A' or moduleName[0] > 'Z' ){
-  //   string pdfile = "/pond/assets/modules/"+moduleName+"@@"+moduleName+"Module.pd";
-  //   //dout<<"try wait pd signal"<<endl;
-  //   pond::WaitForMessage( "modpp.pd", 8 );
-  //   if ( pond::idb_existsQ( pdfile.c_str() ) ){
-  //     cout<<"load pd lib for "<<moduleName<<endl;
-  //     string pdcont = pond::idb_load( pdfile.c_str() );
-  //     EvaKernel->EvaluateString(pdcont);
-  //     //cout<<"load pd lib done"<<endl;
-  //   }else{
-  //     Warning("Kernel::GetModule","file" +pdfile+" not loaded.");
-  //   }
-  // }
-
   return 0;
 }
 
@@ -860,14 +866,18 @@ int Evaluation::AttributeProcessing(Object&ARGV,bool *attri,bool isHold,bool ofD
 // 1 normal return
 // -1 some error occur, but nothing matter
 
-// #define QuitReturn(r) ({QuitOccured=true; return(r||NormalQuitCode);})
-
 #define EvaReturn(expr) {                       \
     int res = expr;                             \
     EvaluationDepth--;                          \
     return res;                                 \
   }
 
+int Evaluation::Evaluate(Object&ARGV){
+  return this->Evaluate(ARGV, false, false);
+}
+int Evaluation::Evaluate(Object&ARGV, bool isHold){
+  return this->Evaluate(ARGV, isHold, false);
+}
 int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
   //dout<<"try evaluate "<<ARGV<<" depth ="<<EvaluationDepth<<endl;
   //dout<<" depth addr "<< &(EvaKernel->EvaluationDepth) <<endl;
@@ -887,7 +897,9 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
     EvaReturn(0);
   case ObjectType::Symbol:{
     if ( ARGV.ids() == 0 ) EvaReturn(0);
-    // if ( ARGV.ids() == SYMID_OF_Exit ) QuitReturn(0);
+    // if ( ARGV.ids() == SYMID_OF_Exit || ARGV.ids() == SYMID_OF_exit ){
+    //   return PD_exit( ARGV );
+    // }
     // special ones like $  just return
     if ( ARGV.ids() == SYMID_OF___Variable or
          ARGV.ids() == SYMID_OF_FunctionVariable or
@@ -1032,13 +1044,17 @@ int Evaluation::EvaluateContinue(const string&excont){
   return 0;
 }
 
-int Evaluation::EvaluateString(const string&cont,const int depth){
+int Evaluation::EvaluateString(const string&cont, Object&result){
+  return this->EvaluateString(cont, result, 0, false);
+}
+int Evaluation::EvaluateString(const string&cont, Object&result, const int depth, const bool noprint){
   // static INIT_SYMID_OF( IMPORT );
   ////////////////////////////////////////////////////
   EvaKernel->statusCode = 0;
   EvaKernel->statusObject.SetVoid();
   ImportList importList( cont );
   Object superlist(__List__,SYMID_OF_List);
+  Object list;
   static INIT_SYMID_OF( Import );
   while ( !importList.End() ){
     // result = 0;
@@ -1047,7 +1063,7 @@ int Evaluation::EvaluateString(const string&cont,const int depth){
     }
     //dout<< "deal "<<superlist<<endl;
     if ( superlist.Size() > 0 ){
-      Object list = superlist.Back();
+      list = superlist.Back();
       superlist.PopBack();
       if ( not list.NullQ() ){
         if ( list.ListQ( SYMID_OF_import ) or
@@ -1068,7 +1084,8 @@ int Evaluation::EvaluateString(const string&cont,const int depth){
         if ( sprec == NULL ){
           sprec = GetEvaRecord( "SimpleSimplify" );
           if ( sprec == NULL ) {
-            Erroring("Kernel","SimpleSimplify from 'System' is not loaded properly."); 
+            zhErroring("Kernel","未能成功从'System'模块中载入'SimpleSimplify'函数.")||
+              Erroring("Kernel","'SimpleSimplify' from 'System' is not loaded properly."); 
             EvaKernel->Println( list.ToString() );
             break; 
           }
@@ -1078,18 +1095,21 @@ int Evaluation::EvaluateString(const string&cont,const int depth){
 
         if ( EvaKernel->statusCode == KernelStatusQuit ) break;
         if ( EvaKernel->statusCode == KernelStatusErrorThrow ) break;
-        if ( ! list.NullQ() ){
+        if ( ! list.NullQ() && ! noprint ){
           EvaKernel->Println( list.ToString() );
         }
         continue;
       }
     }
   }
-
+  result = list;
   return 0;
 }
 
-int Evaluation::EvaluateFile(const string filename,int depth){
+int Evaluation::EvaluateFile(const std::string filename, Object&result){
+  return this->EvaluateFile(filename, result, 0, false );
+}
+int Evaluation::EvaluateFile(const std::string filename, Object&result, int depth, bool noprint){
   ifstream ifs( filename.c_str() , ios::in );
   if ( !ifs ){
     Warning("Get","file "+filename+" cannot be opened.");
@@ -1099,7 +1119,7 @@ int Evaluation::EvaluateFile(const string filename,int depth){
   string cont(beg,end);
   ifs.close();
   ////////////////////////////////////////////////////
-  return this->EvaluateString(cont, depth);
+  return this->EvaluateString(cont, result, depth, noprint);
 };
 
 ////////////////////////////////////////////////////////
@@ -1526,24 +1546,6 @@ int Evaluation::RemoveComplexMatrix(string name){
 }
 
 ///////////////////////////////////////////// 
-static int specialCharReplace(string &str,string ori,string rep){
-  int pos = 0;
-  while ( (pos <(int)str.size())&&pos>=0 ){
-    pos = str.find(ori);
-    if (pos>=0) str.replace(pos,ori.size(),rep);
-  }
-  return 0;
-}
-static int specialCharReplacement(string &str){
-  specialCharReplace(str,"\\n","\n");
-  specialCharReplace(str,"\\t","\t");
-  specialCharReplace(str,"\\r","\r");
-  specialCharReplace(str,"\\\\","\\");
-  specialCharReplace(str,"\\\"","$QUOTATION_MARK$");
-  specialCharReplace(str,"\"","");
-  specialCharReplace(str,"$QUOTATION_MARK$","\"");
-  return 0;
-}
 int Evaluation::PD_Print(Object & ARGV){
   static INIT_SYMID_OF(end);
   // static INIT_SYMID_OF(END);
@@ -1582,7 +1584,7 @@ int Evaluation::PD_Print(Object & ARGV){
     str += ( (*iter).ToString()+(isEnd?"":sep) );
   }
   str += end;
-  specialCharReplacement(str);
+  PondInnerStringRestoreNormal(str);
   // pond::PostMessage( str+"print" );
   printf("%s",str.c_str() );
   ReturnNull;
@@ -1755,8 +1757,8 @@ int Evaluation::PD_SetMaxRecursionDepth(Object&ARGV){
 
 int Evaluation::PD_GetMemInfo(Object&ARGV){
   // CheckShouldEqual(0);
-  cout<<"GlobalPool    Objects" <<"  size :"<<GlobalPool.Objects.idx.i*GlobalPool.Objects.RowSize+ GlobalPool.Objects.idx.j<< "    buffer :"<<GlobalPool.Objects.freeObjs.size()<<endl;
-  cout<<"              Lists  " <<"  size :"<<GlobalPool.Lists.idx.i*GlobalPool.Objects.RowSize+ GlobalPool.Lists.idx.j    << "    buffer :"<<GlobalPool.Lists.freeObjs.size()<<endl;
+  cout<<"GlobalPool    Objects" <<"  size :"<<GlobalPool.Objects.idx.row*GlobalPool.Objects.RowSize+ GlobalPool.Objects.idx.col<< "    buffer :"<<GlobalPool.Objects.freeObjs.size()<<endl;
+  cout<<"              Lists  " <<"  size :"<<GlobalPool.Lists.idx.row*GlobalPool.Objects.RowSize+ GlobalPool.Lists.idx.col << "    buffer :"<<GlobalPool.Lists.freeObjs.size()<<endl;
   ReturnNull;
 }
 
@@ -1764,4 +1766,72 @@ int Evaluation::PD_GetStackInfo(Object&ARGV){
   cout<<"EvaKernel valueTable size = "<<EvaKernel->valueTables.size()<<endl;
   cout<<"EvaKernel EvaluationDption = "<<EvaKernel->EvaluationDepth<<endl;
   ReturnNull;
+}
+
+// static INIT_OPER_SYMID_OF( exit,         0,220,   1,1    );
+static INIT_SYMID_OF(exit);
+
+int Evaluation::PD_exit(Object&ARGV){
+  EvaKernel->statusCode = KernelStatusQuit;
+  if ( ARGV.Size() == 1 && ARGV[1].NumberQ() ){
+    EvaKernel->statusObject = ARGV[1];
+  }
+  ReturnNull;
+}
+
+//static INIT_OPER_SYMID_OF(help,         0,220,   1,1    );
+static INIT_SYMID_OF(help);
+int Evaluation::PD_help(Object&ARGV){
+  CheckShouldEqual(1);
+  if ( ARGV[1].ListQ( SYMID_OF_Parenthesis ) ){
+    ARGV[1] = ARGV[1][1];
+    CheckShouldEqual(1);
+  }
+  const char *sym = ARGV[1].Key();
+  EvaRecord *rec = EvaKernel->GetEvaRecord( sym );
+  string res;
+  if ( rec ){
+    string doc = rec->description+"|||";
+    int start_p = 0, split_p=-1;
+    while ( true ){
+      split_p = doc.find( "|||", start_p );
+      if ( split_p < 0 ){
+        break;
+      } else {
+        while ( doc[start_p] == '\n'
+                || doc[start_p] == '\r'
+                || doc[start_p] == ' '
+                || doc[start_p] == '\t' ){
+          start_p += 1;
+        }
+        res = doc.substr(start_p, split_p-start_p);
+        //dout<<"update res to >"<<res<<endl;
+        start_p = split_p + 3;
+        if ( res.substr(0,3) == (EvaKernel->lang + ":") ){
+          res = res.substr(3, res.size()-3);
+          while ( res.size()>0 && res[0] == ' ' ){
+            res = res.substr(1, res.size()-1);
+          }
+          if ( res.size()>0 && res[0] == '\n' ){
+            res = res.substr(1, res.size()-1);
+          }
+          break;
+        }
+      }
+    }
+
+    if ( res.size() > 0 ){
+      cout << endl<< res << endl;
+    } else {
+      cout<<endl;
+      zhMessage("没有找到 '"+(string)ARGV[1].Key()+"' 的帮助信息.") ||
+        Message("Help info for '"+(string)ARGV[1].Key()+"' is not found.");
+    }
+  } else {
+    cout<<endl;
+    zhMessage("'"+(string)ARGV[1].Key()+"' 是一个尚未注册的符号变量.") ||
+      Message("'"+(string)ARGV[1].Key()+"' is an unregistered symbol.");
+  }
+  ReturnNull;
+  //ReturnNormal;
 }

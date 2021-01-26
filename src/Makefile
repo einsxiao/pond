@@ -1,53 +1,76 @@
 #compile setting
-NVCC := nvcc
-FLAGS := -std=c++11 
-
-DNVFLAGS := $(FLAGS) -G -g --compiler-options -g3  --compiler-options -Wall --compiler-options -Wextra -D DEBUG --compiler-options -Wno-unused-parameter --compiler-options -fopenmp  -Wno-deprecated-gpu-targets
-NVFLAGS := $(FLAGS) -O2 --compiler-options -fopenmp  -Wno-deprecated-gpu-targets
-
 ##################################################################################
 #DIRS := system Algebraic System Arithmatics List Matrix OS Class MPI MatrixOperations Python String Guis Mathematica MatlabEngine
 #DIRS := core pcc Algebraic System Arithmatics List Matrix OS Class MPI MatrixOperations Python String Guis Mathematica MatlabEngine
-DIRS := core pcc List System Arithmatics Matrix OS Class MPI MatrixOperations Python String
+#DIRS := core pcc List System Arithmatics Matrix OS Class MPI MatrixOperations Python String
+DIRS := core pcc List System Arithmatics Matrix OS Class MPI MatrixOperations String
 ##################################################################################
-BUILDDIRS = $(DIRS:%=build-%)
-INSTALLDIRS = $(DIRS:%=install-%)
-CLEANDIRS = $(DIRS:%=clean-%)
+INCLUDE       = `pond-path nvcc` -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES
+LIB           = -lpd
 
-CUSRCS = $(wildcard *.cu) 
-OBJECTS = $(patsubst %.cu, %.o, $(CUSRCS))
-DOBJECTS = $(patsubst %.cu, %.dev.o, $(CUSRCS))
 
-INCLUDE = `pond-path pcc` 
-#RPATH = $(shell evarpath tcu MAIN_EVA)
-MAKE = make
-OUT = pond
-DOUT = pond
+##################################################################################
 
-debug: debug-prepare DALL
+BUILDDIRS     = $(DIRS:%=build-%)
+INSTALLDIRS   = $(DIRS:%=install-%)
+CLEANDIRS     = $(DIRS:%=clean-%)
+
+CUSRCS        = $(wildcard *.cu) 
+OBJECTS       = $(patsubst %.cu, %.o, $(CUSRCS))
+DOBJECTS      = $(patsubst %.cu, %.dev.o, $(CUSRCS))
+
+NVCC         := nvcc
+FLAGS        := -std=c++11 
+MAKE          = make
+SHELL        := /bin/bash
+
+DNVFLAGS     := $(FLAGS) -G -g --compiler-options -g3  --compiler-options -Wall --compiler-options -Wextra -D DEBUG --compiler-options -Wno-unused-parameter --compiler-options -fopenmp  -Wno-deprecated-gpu-targets
+NVFLAGS      := $(FLAGS) -O2 --compiler-options -fopenmp  -Wno-deprecated-gpu-targets
+
+OUT           = pond
+DOUT          = pond
+
+debug: all-prepare debug-prepare DALL
 debug-prepare:
 	@echo "Debug Version"
 	$(eval MODE = debug )
-release: prepare ALL
+release: all-prepare prepare ALL
 prepare:
 	@echo "Release Version"
 	$(eval MODE = release )
 
-ALL: $(BUILDDIRS) pond
-	cp -f $(OUT) ../bin/
-	rm  ../lib/*-dev.so
+all-prepare:
 
-pond: $(OBJECTS)
-	$(NVCC) $(NVFLAGS) -o $(OUT) $(OBJECTS) $(INCLUDE) -lpd -lmpi
+
+ALL: dir pond #pypond.so
+	cp -f $(OUT) ../bin/
+
+dir:$(BUILDDIRS) 
+	@if [ $(POND_ENABLE_PYTHON) == "yes" ]; then cd Python; make $(MODE); cd ..; fi
+
+pond: main.o
+	$(NVCC) $(NVFLAGS) -o pond main.o $(INCLUDE) $(LIB)
+
+pypond.so: pypond.o
+	pcc $(NVFLAGS) -shared -o pypond.so pypond.o $(INCLUDE) $(LIB)
+
+pypond.o: pypond.cu
+	pcc $(NVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
 
 %.o: %.cu
 	$(NVCC) $(NVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
 
-DALL: $(BUILDDIRS) pond-dev
+DALL: pond-dev #pypond-dev.so
 	cp -f $(OUT) ../bin/
 
-pond-dev: $(DOBJECTS)
-	$(NVCC) $(DNVFLAGS)  -o $(DOUT) $(DOBJECTS) $(INCLUDE) -lpd -lmpi
+pond-dev: main.dev.o
+	$(NVCC) $(DNVFLAGS)  -o pond main.dev.o $(INCLUDE) $(LIB)
+
+pypond-dev.so: pypond-dev.o
+	pcc $(DNVFLAGS) -shared -o pypond.so pypond-dev.o $(INCLUDE) $(LIB)
+
+pypond-dev.o: pypond.cu
+	pcc $(DNVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
 
 %.dev.o: %.cu
 	$(NVCC) $(DNVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
@@ -58,12 +81,14 @@ $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%) $(MODE)
 #	@cp $(@:build-%=%)/*.so ../lib/
 install: 
-	rmcp -f $(OUT) ../bin/
+	rmcp $(OUT) ../bin/
 clean: $(CLEANDIRS)
-	rm *.o;rm $(OUT)
+	rm *.o; rm $(OUT)
+#	rm ../lib/*
+#	rm ../include/*
 $(CLEANDIRS): 
 	-$(MAKE) -C $(@:clean-%=%) clean
 #install: $(INSTALLDIRS) release
-#	rmcp -f $(OUT) ../bin
+#	rmcp $(OUT) ../bin
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install

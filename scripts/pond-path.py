@@ -49,8 +49,8 @@ add_lib('./');
 add_include('./');
 add_lib( os.path.join(pond_root,'lib') )
 add_include( os.path.join(pond_root,'include') )
-add_lib( os.path.join(pond_root,'packages','lib') )
-add_include( os.path.join(pond_root,'packages','include') )
+#add_lib( os.path.join(pond_root,'packages','lib') )
+#add_include( os.path.join(pond_root,'packages','include') )
 
 #POND_INCLUDE_PATH
 pond_include_path = os.getenv("POND_INCLUDE") or ''

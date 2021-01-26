@@ -84,8 +84,17 @@ def request(argv,options):
         #empty repo, prepare files by templates from pond_root
         print("repo is empty, initializing the repo.")
         os.system( os.path.join( pond_root, 'bin', 'pond-init-module-files.sh')+" "+module_name )
+        pass
+
+    #print("content on server:", res.get('hfile') )
+    if res.get('hfile')   : file_content_set( module_name+"Module.h", res.get('hfile') )
+    if res.get('pdfile')  : file_content_set( module_name+"Module.pd", res.get('pdfile') )
+    if res.get('cppfile') : file_content_set( module_name+"Module.cpp", res.get('cppfile') )
+
+    if len( files ) == 1 and files[0] == '.git':
         os.system(pond_git_cmd+" add .")
         os.system(pond_git_cmd+" commit -m '{0} initializing'".format(module_name) )
+        #print("first push with command >",cmd)
         cmd = pond_git_cmd+ " push origin master"
         os.system( cmd )
         pass

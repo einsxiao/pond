@@ -14,9 +14,13 @@ using namespace pond;
 // static INIT_OPER_SYMID_OF(等于,                  130,129,   3,1);
 // static INIT_OPER_SYMID_OF(不等于,                130,129,   3,1); 
 
+static INIT_SYMID_OF( INF );
+
 __DEBUG_MAIN__("input.pd");
 
 ArithmaticsModule::ArithmaticsModule():Module(MODULE_NAME){
+  AddAttribute("INF",AttributeType::Protected );
+
   {
     Object S(ObjectType::Symbol,"Pi"),  v(ObjectType::Number,3.1415926535897932385);
 

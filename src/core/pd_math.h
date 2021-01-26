@@ -375,22 +375,22 @@ namespace pond{
   }
 
   struct Index{
-    u_int i,j;
+    u_int row, col;
     ////////////////////////////////////
     Index() = default;
     ~Index() = default;
     explicit Index(const double value){
       *(reinterpret_cast<double*>(this)) = value;
     }
-    Index(const u_int f,const u_int s){
-      i = f;  j = s;
+    Index(const u_int r,const u_int c){
+      row = r;  col = c;
     }
     Index&operator=(const Index&ind)=default;
     inline bool zeroQ()const{  return *(reinterpret_cast<const double*>(this)) == 0; }
     inline bool nonzeroQ()const{  return *(reinterpret_cast<const double*>(this)) != 0; }
     inline void zero(){  *(reinterpret_cast<double*>(this))=0; }
     /* inline void set(double val){ *(reinterpret_cast<double*>(this)) = val; }; */
-    inline void set(u_int f,u_int s){ i=f; j=s;};
+    inline void set(u_int r,u_int c){ row=r; col=c;};
 #define _deal(oper)                                                     \
     inline friend bool operator oper(const Index&ind1,const Index&ind2){ \
       return *reinterpret_cast<const double*>(&ind1) oper *reinterpret_cast<const double*>(&ind2); \
@@ -398,9 +398,6 @@ namespace pond{
     _deal(  == );
     _deal(  != );
 #undef _deal
-    /* inline friend bool operator<(const Index ind1,const Index ind2){  */
-    /*   return  ind1.i < ind2.i  or ind1.i == ind2.j and ind1.j < ind2.j ; */
-    /* }; */
     inline friend std::ostream& operator<<(std::ostream &os,const Index c){
       os<<pond::ToString(c);
       return os;
@@ -417,6 +414,10 @@ namespace pond{
     static bool          NumberQ(std::string);
     static std::string   OrderForm(int id);
   };
+
+  // the inverse of a matrix
+  int GaussCMInverse(double *AA,double *B,int n);
+  int GaussCMInverse(double *AA,double *A, double *B,int n);
 
 };
 

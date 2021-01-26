@@ -82,15 +82,16 @@ namespace pond{
   ////////////////////////////////////////////////////////////////////////////////////////
 #define __DEBUG_MAIN__(file)                                            \
   int main(int argc,char*argv[]){                                       \
+    pond::Object tmp;                                                   \
     pond::dout<<">>>debug main to run '"<<file<<"'<<<"<<std::endl;      \
     pond::Evaluation eva(true);                                         \
     eva.argc = argc; eva.argv = argv;                                   \
     try{                                                                \
-      eva.EvaluateFile(file);                                           \
+      eva.EvaluateFile(file,tmp);                                       \
     }catch ( const pond::ExceptionQuit&err ){                           \
       return err.code;                                                  \
     }catch ( const pond::Error&err){                                    \
-      std::cerr<<std::endl<<err.what()<<std::endl;                      \
+      std::cerr<<std::endl<<err.swhat()<<std::endl;                     \
     }catch ( const std::exception &err){                                \
       std::cerr<<std::endl<<"Sourcecode::Error: "<<err.what()<<std::endl; \
       return 1;                                                         \

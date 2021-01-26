@@ -27,7 +27,7 @@ cp -rf $POND_ROOT/Template/.gitignore          ./
 change_from_to ./ Template ${module_name} 2>&1 >/dev/null
 change_from_to ./ DATE "`date`" 2>&1>/dev/null
 chmod +r ~/.pond.user.auth
-change_from_to ./ AUTHOR "`cat ~/.pond.user.auth |json nickname`" 2>&1>/dev/null
+change_from_to ./ AUTHOR "`json-item ~/.pond.user.auth nickname`" 2>&1>/dev/null
 chmod -r ~/.pond.user.auth
 change_from_to ./ VERSION "0.1.0" 2>&1>/dev/null
 

@@ -2,8 +2,9 @@
 #include "syntax_launch_kernel.h"
 
 int launch_kernel::Init(){
-  //cout<<"try init lank"<<endl;
+  dout<<"try init lank"<<endl;
   //check self
+  dout<<"check self"<<endl;
   if ( pragma->self->eles.size() != 4 ){
     warnErrorAtPos( pragma->self->start,
                     "kernel profile and kernel function arguments and input variable list is expected. No other things allowed.");
@@ -12,9 +13,9 @@ int launch_kernel::Init(){
     if ( pragma->self->eles.size() < 4 )
       throwCCErrorAtPos( pragma->self->end-1,"argument list is missed.");
   }
-  //cout<<"length check done"<<endl;
+  dout<<"length check done"<<endl;
   // check args list format
-  //cout<<"check args list"<<endl;
+  dout<<"check args list"<<endl;
   if ( pragma->self->eles[2]->type != "<<<>>>" )
     throwCCErrorAtPos( pragma->self->eles[3]->start, "a kernel dimension profile enclosed by '<<<' and  '>>>' is expected here.");
   if ( pragma->self->eles[3]->type != "bracket" )
@@ -24,7 +25,9 @@ int launch_kernel::Init(){
   if ( pragma->parent->type != "block" ){
     throwCCErrorAtPos( pragma->self->start,"pragma launch_kernel is not properly used within current context.");
   }
+  dout<<"args check done"<<endl;
 
+  dout<<"args block"<<endl;
   int p_pos = pragma->pos; //NodeIndex insert_pos;
   if ( tree->eles[p_pos]->type != "block" )
     throwCCErrorAtPos( pragma->self->start,"pragma launch_kernel is not properly used within current context.");
@@ -38,17 +41,29 @@ int launch_kernel::Init(){
          tree->eles[p_pos]->type == "pragma" ) 
       break;
   }
+
+  dout<<"try declare insert position"<<endl;
   declare_insert_pos = tree->eles[p_pos+1]->start;
-  //get content position
+
+  dout<<"try get content position"<<endl;
+  //get content position, may many newlines, skip it
+  dout<< pragma->parent->eles.size()<<","<< pragma->level_pos+1 <<endl;
+  p_pos = 1;
+  // skip newline
+  while ( pragma->level_pos+1 >= pragma->parent->eles.size() or
+          pragma->parent->eles[pragma->level_pos+p_pos]->type == "newline" ){
+    p_pos += 1;
+  }
   if ( pragma->level_pos+1 >= pragma->parent->eles.size() or
-       pragma->parent->eles[pragma->level_pos+1]->type != "block"){
+       pragma->parent->eles[pragma->level_pos+p_pos]->type != "block"){
+    dout<<"block not closed by {} error"<<endl;
     throwCCErrorAtPos( pragma->self->end,"pragma launch_kernel should followed by a block enclosed by '{' and '}'.");
   }
-  content_start_pos = pragma->parent->eles[pragma->level_pos+1]->start ;
-  content_end_pos   = pragma->parent->eles[pragma->level_pos+1]->end ;
+  content_start_pos = pragma->parent->eles[pragma->level_pos+p_pos]->start ;
+  content_end_pos   = pragma->parent->eles[pragma->level_pos+p_pos]->end ;
 
   //iter iterator profile
-  //cout<<" deal iter profile"<<endl;
+  dout<<" deal iter profile"<<endl;
   this->iterNode  = pragma->self->eles[2];
   iters_start_pos = this->iterNode->start.column;
   if ( this->iterNode->eles.size() == 0 )
@@ -119,7 +134,7 @@ int launch_kernel::Init(){
   }
   // block node
   // this->blockNode = pragma->parent->eles[ pragma->
-  //cout<<"launch kernel init done"<<endl;
+  dout<<"launch kernel init done"<<endl;
   return 0;
 }
 
@@ -267,7 +282,7 @@ string launch_kernel::define_cpu(char part)
   int size = iters.size();
   string out;
   if ( part == 'f' ){
-    out = declare_cpu() + " {\n#pragma omp parallel for num_threads( EvaSettings::threadNumberPerKernel )";
+    out = declare_cpu() + " {\n#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )";
     return out;
   }
   out = string(declare_cpu().size(),' ') + "  ";

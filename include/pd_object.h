@@ -50,7 +50,7 @@ namespace pond{
   };
 };
 #include"pd_memory_manage.h"
-#define _obj_at_objid GlobalPool.Objects.objs[objid.i][objid.j ]
+#define _obj_at_objid GlobalPool.Objects.objs[objid.row][objid.col ]
 namespace pond{
   class Object{//need not to be the pod type, for the convenions we get
   public:
@@ -180,10 +180,10 @@ namespace pond{
     ////////////////////////////////////////////////////////
     static int          Dimensions(const Object&list,Object&dim,int n=-1);
     Object 	            &ElementAt(const u_int id){
-      return GlobalPool.Lists.objs[ idx().i ][ idx().j][ id ];
+      return GlobalPool.Lists.objs[ idx().row ][ idx().col][ id ];
     };
     Object 	            &_ElementAt(const u_int id)const{
-      return GlobalPool.Lists.objs[ idx().i ][ idx().j][ id ];
+      return GlobalPool.Lists.objs[ idx().row ][ idx().col][ id ];
     };
     inline Object 	    &operator[](const u_int id){      return ElementAt(id);  };
     inline Object 	    &operator()(const u_int id)const{ return _ElementAt(id); };

@@ -15,18 +15,19 @@ int main(){
   cout <<"original arr = "<<arr<<endl;
 
   arr.HostToDevice();
-#pragma launch_kernel<<<i:Ni,j:Nj,k:Nk,l:Nl>>>(Matrix arr:arr,int a:6)
-  {
-    printf("%d %d %d %d\n",i,j,k,l);
-    arr(i,j,k,l)=(i+j+k+l)*a;
-  }
+// #pragma launch_kernel<<<i:Ni,j:Nj,k:Nk,l:Nl>>>(Matrix arr:arr,int a:6)
+//   {
+//     printf("%d %d %d %d\n",i,j,k,l);
+//     arr(i,j,k,l)=(i+j+k+l)*a;
+//   }
   arr.DeviceToHost();
 
   cout<<"arr altered = "<<arr<<endl;
 //   cout<<"test for omp things"<<endl;
-// #pragma launch_kernel<<<i:10>>>(int a:3)
-//   {
-//   }
+#pragma launch_kernel<<<i: 1333>>>(int a:344)
+  {
+    a = a*3;
+  }
 
   return 0; 
   

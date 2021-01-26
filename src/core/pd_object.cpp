@@ -4,7 +4,7 @@
 using namespace pond;
 using namespace std;
 
-#define _obj  GlobalPool.Objects.objs[ objid.i ][ objid.j ]
+#define _obj  GlobalPool.Objects.objs[ objid.row ][ objid.col ]
 #define _sym  GlobalPool.Symbols.GetKey( ids() )
 #define _str  GlobalPool.Strings.Get( idx() )
 #define _list GlobalPool.Lists.Get( idx() )
@@ -1234,7 +1234,7 @@ string Object::ToFullFormString()const{
     }else if ( ids() == SYMID_OF_FunctionVariable ){
       return "$"+pond::ToString( (int)re() );
     }else if ( ids() == SYMID_OF_SerialCode ){
-      return "$$_"+pond::ToString( idx().i )+"_"+pond::ToString( idx().j );
+      return "$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col );
     }
     return _sym;
   case ObjectType::List:{
@@ -1298,7 +1298,7 @@ string Object::ToString()const{
     }else if ( ids() == SYMID_OF_FunctionVariable ){
       return "$"+pond::ToString( (int)re() );
     }else if ( ids() == SYMID_OF_SerialCode ){
-      return "$$_"+pond::ToString( idx().i )+"_"+pond::ToString( idx().j );
+      return "$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col );
     }
     return res+ _sym;
   }
@@ -1933,7 +1933,7 @@ string Object::DumpToJson(bool isLeft)const{
     }else if ( ids() == SYMID_OF_FunctionVariable ){
       return "\"$"+pond::ToString( (int)re() )+"\"";
     }else if ( ids() == SYMID_OF_SerialCode ){
-      return "\"$$_"+pond::ToString( idx().i )+"_"+pond::ToString( idx().j )+"\"";
+      return "\"$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col )+"\"";
     }
     return string("\"")+_sym+"\"";
   case ObjectType::List:{

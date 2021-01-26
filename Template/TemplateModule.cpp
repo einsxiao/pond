@@ -3,7 +3,8 @@ Author          : AUTHOR
 Version         : Template.VERSION  
 R-Copyleft(r-ɔ) : DATE
 **********************************/
-#include <pond>
+#include "pond.h"
+#include "MatrixModule.h"
 #include "TemplateModule.h" 
 /****************************/
 using namespace std;
@@ -22,9 +23,25 @@ TemplateModule :: ~TemplateModule(){
 }
 
 /****************************/
-int TemplateModule::PD_hello(Object&Argv){
+int TemplateModule::PD_hello(Object&argv){
   /* comment lines following will be doc for this function */
-  cout << "Welcome to DocRun!!!"  << endl;
-  ReturnNull;
+  cout << "Welcome to PHPP!!!"  << endl;
+  complex a(3,4);
+  cout << a<< endl;
+  argv.SetNull();
+  return 0;
+}
+
+int TemplateModule::PD_matX2(Object&argv){
+  Matrix mat;
+  MatrixModule::Object2Matrix(argv[1],mat);
+  mat.HostToDevice();
+#pragma launch_kernel<<<i:mat.Size()>>>(Matrix mat: mat)
+  {
+    mat(i) *= 2;
+  }
+  mat.DeviceToHost();
+  MatrixModule::Matrix2Object( mat, argv );
+  return 0;
 }
 

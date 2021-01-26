@@ -18,43 +18,48 @@ namespace pond{
     Matrix&operator()(std::string id);
     Matrix&operator[](std::string id);
     ///////////////////////////////
-    static int Array2List(Object&Argv,int*arr,int*dim);
-    static int Array2List(Object&Argv,long long*arr,int*dim);
-    static int Array2List(Object&Argv,float*arr,int*dim);
-    static int Array2List(Object&Argv,double*arr,int*dim);
-    static int Array2List(Object&Argv,complex*arr,int*dim);
-    static int MatrixGet(Matrix&,Object&);
-    static int MatrixGet(ComplexMatrix&,Object&);
-    int MatrixGet(std::string,Object&); //get matrix from table
-    static int List2Array(Object&Argv,double*arr);
-    static int List2Array(Object&Argv,complex*arr);
-    static int MatrixSet(Matrix&,Object&);
-    static int MatrixSet(ComplexMatrix&,Object&);
-    static int MatrixSet(FloatMatrix&,Object&);
-    static int MatrixSet(FloatComplexMatrix&,Object&);
-    static int MatrixSet(IntMatrix&,Object&);
-    int MatrixSet(std::string,Object&); //store Matrix to table
+    /* static int       List2Array(Object&Argv,double*arr); */
+    /* static int       List2Array(Object&Argv,complex*arr); */
+
+    static int       Object2Matrix(Object&,    Matrix&);
+    static int       Object2Matrix(Object&,    ComplexMatrix&);
+    //store Matrix to table
+    int              Object2Matrix(Object&,    std::string matname); 
     ///////////////////////////////
-    int PD_Matrix(Object&Argv);
+    static int       Array2List(Object&Argv,  int       *arr,   int  *dim);
+    static int       Array2List(Object&Argv,  long long *arr,   int  *dim);
+    static int       Array2List(Object&Argv,  float     *arr,   int  *dim);
+    static int       Array2List(Object&Argv,  double    *arr,   int  *dim);
+    static int       Array2List(Object&Argv,  complex   *arr,   int  *dim);
+
+    static int       Matrix2Object(Matrix&,              Object&);
+    static int       Matrix2Object(ComplexMatrix&,       Object&);
+    static int       Matrix2Object(FloatMatrix&,         Object&);
+    static int       Matrix2Object(FloatComplexMatrix&,  Object&);
+    static int       Matrix2Object(IntMatrix&,           Object&);
+    //get matrix from mat table
+    int              Matrix2Object(std::string,          Object&); 
     ///////////////////////////////
-    static bool MatrixQ(Object&obj,Object&dim);
-    static bool MatrixQ(Object&obj);
-    bool MatrixExist(std::string name);
-    int PD_MatrixExist(Object&);
+    int              PD_Matrix(Object&Argv);
     ///////////////////////////////
-    int MatrixPosition(Object&);
-    int MatrixSetPosition(Object&);
+    static bool      MatrixQ(Object&obj,Object&dim);
+    static bool      MatrixQ(Object&obj);
+    bool             MatrixExist(std::string name);
+    int              PD_MatrixExist(Object&);
+    ///////////////////////////////
+    int              PD_GetMatrixPosition(Object&);
+    int              PD_SetMatrixPosition(Object&);
     ///////////////////////////////
   };
   
   inline int operator>>(Object Argv,Matrix &matrix)
   {
-    return MatrixModule::MatrixSet(matrix,Argv);
+    return MatrixModule::Matrix2Object(matrix,Argv);
   }
 
   inline int operator>>(Matrix &matrix,Object Argv )
   {
-    return MatrixModule::MatrixGet(matrix,Argv);
+    return MatrixModule::Object2Matrix(Argv, matrix);
   }
 
   
@@ -142,7 +147,7 @@ namespace pond{
     Matrix_T<type>     &NewNormalDevice()
     {
 #if defined(__CUDACC__)
-      if ( EvaSettings::RunningMode() == RunningModeGpu ){
+      if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
         if ( typeid(type) == typeid(double) ){
           curandGenerateNormalDouble(Gen_dev,
                                      (double*)Matrix_T<type>::DataDevice,
@@ -166,7 +171,7 @@ namespace pond{
 
     Matrix_T<type>     &NewNormal()
     {
-      if ( EvaSettings::MatrixPosition() == MatrixDevice ){
+      if ( EvaSettings::GetMatrixPosition() == MatrixDevice ){
         return NewNormalDevice();
       }else{
         for (int i=0; i < Matrix_T<type>::Size(); i++)

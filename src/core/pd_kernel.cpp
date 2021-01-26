@@ -3,17 +3,22 @@
 using namespace std;
 using namespace pond;
 
-Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[]){
+#define __MODULE_NAME__ 
+
+Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[],
+               string rcfile,bool pmark){
   //dout<<"try init kernel"<<endl;
   superList.SetList();
   inputList.SetList();
   //dout<<"init import list"<<endl;
   importList = new ImportList(istr_in,interactively);
   //dout<<"init eva kernel"<<endl;
+  
+  this->pmark = pmark;
 #ifdef DEBUG
-  evaluation = new Evaluation(true);
+  evaluation = new Evaluation(true, pmark);
 #else
-  evaluation = new Evaluation();
+  evaluation = new Evaluation(false,pmark);
 #endif
   //dout<<"nealy done"<<endl;
   // evaluation->superList = this->superList;
@@ -23,6 +28,15 @@ Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[]){
   evaluation->argc = argc;
   evaluation->argv = argv;
   //dout<<"kernel initialized"<<endl;
+
+  // evaluate the rcfile content
+  if ( FileExistQ( rcfile ) ){
+    //dout<<"try init rcfile"<<endl;
+    Object tmp;
+    evaluation->EvaluateFile( rcfile, tmp );
+  } else {
+    //dout<<"rcfile file not found"<<rcfile<<endl;
+  }
 }
 
 Kernel::~Kernel(){
@@ -41,8 +55,11 @@ int Kernel::Phrasing( ){
         cout<<"In["<<printQuan+1<<"]:="; // print the head
         printed = true;
       }
-      if ( importList->GetList( superList , 0) < 0 ){
+      const int g_res = importList->GetList( superList , 0);
+      //dout<< "read list with result "<< g_res <<" " <<superList.Size() << endl;
+      if (  g_res < 0 ){
         if ( interactively ) cout<<"\n";
+        printed = false;
         continue; //get Argv
       }
       if ( superList.Size() > printQuan ){
@@ -62,22 +79,25 @@ int Kernel::Phrasing( ){
         ssrec->staticFunction( superList.Last() );
         //dout<<"   evaluate finished, printing: "<< superList.Last() << endl;
         static const INIT_SYMID_OF( FullForm );
+        if ( this->noprint ) continue;
         if ( superList.Last().ListQ( SYMID_OF_FullForm ) ){
           if ( superList.Last().Size()!=1 ){
             ThrowError("FullForm",(string)"FullForm called with "+ToString(superList.Last().Size())+" arguments; 1 argument is expected.");
           }
-          if ( interactively )
+          if ( interactively ){
             cout<<"Out["<<printQuan<<"]//FullForm= ";
+          }
           string strout =superList.Last()[1].ToFullFormString();
-          //dout<<"strout to print is:"<<strout<<endl;
-          if ( strout != "" ) cout<<strout<<"\n";
+          if ( strout == "" ) continue;
+          cout<<strout<<"\n";
         }else{
           string strout =superList.Last().ToString();
-          //dout<<"strout to print is: "<<strout<<endl;
-          if ( superList.Last().NullQ() ) strout = "";
-          if ( interactively && strout!="")
+          if ( !this->pmark && superList.Last().NullQ() ) continue;
+          if ( strout == "" ) continue;
+          if ( interactively ){
             cout<<"Out["<<printQuan<<"]= ";
-          if ( strout != "" ) cout<<strout<<"\n";
+          }
+          cout<<strout<<"\n";
         }
       }
       if ( interactively ) cout<<"\n";
@@ -87,19 +107,25 @@ int Kernel::Phrasing( ){
     }catch ( const ExceptionQuit&err ){
       return err.code;
     }catch ( const Error&err){
-      //dout<<"get error in kernel.cpp:"<<err.swhat()<<endl;
+      //dout<<"get pond::Error in kernel.cpp:"<<err.swhat()<<endl;
       cerr<<err.swhat()<<endl;
       evaluation->EvaluationDepth = 0;
       evaluation->ClearValueTablesTo(1);
     }catch ( const exception &err){
-      cerr<<"Sourcecode::Error: "<<err.what()<<endl;
+      //dout<<"get exception in kernel.cpp:"<<err.what()<<endl;
+      zhErroring("源代码",err.what() )||
+        Erroring("Sourcecode",err.what() );
       evaluation->EvaluationDepth = 0;
       evaluation->ClearValueTablesTo(1);
     }catch ( ... ){
-      cerr<<"System::Error: Unexpected error occured."<<endl;
+      zhErroring("系统","出现未预料到的错误." )||
+        Erroring("System","Unexpected error occured." );
       evaluation->EvaluationDepth = 0;
       evaluation->ClearValueTablesTo(1);
     }
+  }
+  if ( evaluation->statusObject.NumberQ() ){
+    return evaluation->statusObject.Number();
   }
   return 0;
 }

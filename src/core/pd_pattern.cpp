@@ -10,7 +10,7 @@ public:
     tableName = "PatternUnifyPairs";
   };
   void  FreePairs(Index id){
-    objs[id.i][id.j].clear();
+    objs[id.row][id.col].clear();
     ///waitAndLock(); //should check 
     // std::lock_guard<std::mutex> lock(mt);
     freeObjs.push_back(id);

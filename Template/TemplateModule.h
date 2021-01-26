@@ -20,6 +20,7 @@ namespace pond{
       返回值为 int 的函数，将自动注册到pond中，并可在 pond 脚本中调用.
     *******************************************************************/
     int     PD_hello(Object&);
+    int     PD_matX2(Object&);
   };
 };
 

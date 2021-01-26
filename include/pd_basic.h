@@ -92,6 +92,8 @@ namespace pond{
   std::string    ToString(const Index        num);
   std::string    ToString(const float        num);
   std::string    ToString(const double       num);
+  std::string    ToString(const complex      num);
+  std::string    ToString(const floatcomplex num);
   std::string    ToString(const void        *num);
   std::string    ToString(const ObjectType   type);
   std::string    ToString(const char        *val);
@@ -125,7 +127,7 @@ namespace pond{
   std::string    RandomString(int len);
   std::string    RandomNumberString(int len);
   std::string    RemoveFirstWord(std::string str,std::string &leftword);
-  std::string    GetEnv(std::string name);
+  std::string    GetEnv(std::string name, std::string default_value="");
   int            SetEnv(std::string var,std::string expr,bool overwrite=false);
   std::string    GetDirectory();
   std::string    GetBaseName(std::string path);
@@ -152,6 +154,7 @@ namespace pond{
   inline double  Rand(){ return (double)rand()/RAND_MAX; }
   double         GaussRand(double mean = 0.0, double variance = 1.0);
   ////////////////
+  int            PondInnerStringRestoreNormal(std::string &str);
   
 };
 

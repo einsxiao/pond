@@ -240,6 +240,19 @@ namespace pond{
 #endif
   };
 
+#define _check_dimN(N) if ( ND != 1 ){                                  \
+    Erroring("Matrix::at","try get element of "+                        \
+             ToString((int)ND)+" Dimension(s) Matrix with 1 index ");   \
+    return 0;                                                           \
+  }
+#define _check_dimith(N) if ( p##N >= D##N ){                   \
+    Erroring("Matrix","index of dimension "#N" out of range."); \
+    return 0;                                                   \
+  }
+#define _check_fdimith(N) if ( p##N > D##N ){                   \
+    Erroring("Matrix","index of dimension "#N" out of range."); \
+    return 0;                                                   \
+  }
   //1
   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1){
 #ifdef __CUDA_ARCH__
@@ -252,31 +265,20 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1 ];
 #else
-    if ( ND != 1 ){
-      Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 1 index ");
-      return 0;
-    }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
+    _check_dimN(1);
+    _check_dimith(1);
     return Data[ p1 ];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,u_int p1){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[ p1-1 ]; */
-/* #else */
-/*     return Data[ p1-1 ]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1-1 ];
 #else
-    if ( ND != 1 ){ Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 1 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
+    _check_dimN(1);
+    _check_fdimith(1);
     return Data[ p1-1 ];
 #endif
   };
-
 
 
   //2
@@ -291,26 +293,19 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1*D2+p2 ];
 #else
-    if ( ND != 2 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 2 index "); return 0;}
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0;}
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0;}
+    _check_dimN(2);
+    _check_dimith(1);
+    _check_dimith(2);
     return Data[ p1*D2+p2 ];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[ (p2-1)*D2+p1-1 ]; */
-/* #else */
-/*     return Data[ (p2-1)*D2+p1-1 ]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2){
 #ifdef __CUDA_ARCH__
     return DataDevice[ (p2-1)*D2+p1-1 ];
 #else
-    if ( ND != 2 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 2 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); }
+    _check_dimN(2);
+    _check_fdimith(1);
+    _check_fdimith(2);
     return Data[ (p2-1)*D2+p1-1 ];
 #endif
   };
@@ -327,28 +322,21 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[(p1*D2+p2)*D3+p3 ];
 #else
-    if ( ND != 3 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 2 index "); }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); }
+    _check_dimN(3);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
     return Data[(p1*D2+p2)*D3+p3 ];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2,int p3){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[((p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #else */
-/*     return Data[((p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3){
 #ifdef __CUDA_ARCH__
     return DataDevice[((p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
-    if ( ND != 3 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 2 index "); }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); }
+    _check_dimN(3);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
     return Data[((p3-1)*D2+p2-1)*D1+p1-1 ];
 #endif
   };
@@ -365,30 +353,23 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #else
-    if ( ND != 4 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 4 index "); }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 >= D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
+    _check_dimN(4);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
+    _check_dimith(4);
     return Data[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2,int p3,int p4){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[ (((p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #else */
-/*     return Data[ (((p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4){
 #ifdef __CUDA_ARCH__
     return DataDevice[ (((p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
-    if ( ND != 4 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 4 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 > D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
+    _check_dimN(4);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
+    _check_fdimith(4);
     return Data[ (((p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #endif
   };
@@ -405,32 +386,25 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #else
-    if ( ND != 5 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 5 index "); return 0; }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 >= D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 >= D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
+    _check_dimN(5);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
+    _check_dimith(4);
+    _check_dimith(5);
     return Data[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch, int p1,int p2,int p3,int p4,int p5){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[((((p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #else */
-/*     return Data[((((p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
-    if ( ND != 5 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 5 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 > D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 > D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
+    _check_dimN(5);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
+    _check_fdimith(4);
+    _check_fdimith(5);
     return Data[((((p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #endif
   };
@@ -447,34 +421,27 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #else
-    if ( ND != 6 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 6 index "); return 0; }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 >= D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 >= D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 >= D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
+    _check_dimN(6);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
+    _check_dimith(4);
+    _check_dimith(5);
+    _check_dimith(6);
     return Data[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2,int p3,int p4,int p5,int p6){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[(((((p1-1)*D5+p2-1)*D4+p3-1)*D3+p4-1)*D2+p5-1)*D1+p6-1]; */
-/* #else */
-/*     return Data[(((((p1-1)*D5+p2-1)*D4+p3-1)*D3+p4-1)*D2+p5-1)*D1+p6-1]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
-    if ( ND != 6 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 6 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 > D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 > D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 > D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
+    _check_dimN(6);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
+    _check_fdimith(4);
+    _check_fdimith(5);
+    _check_fdimith(6);
     return Data[(((((p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #endif
   };
@@ -491,36 +458,29 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #else
-    if ( ND != 7 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 7 index "); return 0; }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 >= D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 >= D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 >= D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
-    if ( p7 >= D7 ) { Erroring("Matrix","index of dimension 7 out of range."); return 0; }
+    _check_dimN(7);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
+    _check_dimith(4);
+    _check_dimith(5);
+    _check_dimith(6);
+    _check_dimith(7);
     return Data[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2,int p3,int p4,int p5,int p6,int p7){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[((((((p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1]; */
-/* #else */
-/*     return Data[((((((p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((((p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
-    if ( ND != 7 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 7 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 > D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 > D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 > D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
-    if ( p7 > D7 ) { Erroring("Matrix","index of dimension 7 out of range."); return 0; }
+    _check_dimN(7);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
+    _check_fdimith(4);
+    _check_fdimith(5);
+    _check_fdimith(6);
+    _check_fdimith(7);
     return Data[((((((p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #endif
   };
@@ -537,41 +497,37 @@ namespace pond{
 #ifdef __CUDA_ARCH__
     return DataDevice[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #else
-    if ( ND != 8 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 8 index "); return 0; }
-    if ( p1 >= D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 >= D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 >= D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 >= D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 >= D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 >= D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
-    if ( p7 >= D7 ) { Erroring("Matrix","index of dimension 7 out of range."); return 0; }
-    if ( p8 >= D8 ) { Erroring("Matrix","index of dimension 8 out of range."); return 0; }
+    _check_dimN(8);
+    _check_dimith(1);
+    _check_dimith(2);
+    _check_dimith(3);
+    _check_dimith(4);
+    _check_dimith(5);
+    _check_dimith(6);
+    _check_dimith(7);
+    _check_dimith(8);
     return Data[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #endif
   };
-/*   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){ */
-/* #ifdef __CUDA_ARCH__ */
-/*     return DataDevice[(((((((p8-1)*D7+p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1]; */
-/* #else */
-/*     return Data[(((((((p8-1)*D7+p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1]; */
-/* #endif */
-/*   }; */
   template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((((p8-1)*D7+p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
-    if ( ND != 8 ) { Erroring("Matrix::at","try get element of "+ToString((int)ND)+" Dimension(s) Matrix with 8 index "); return 0; }
-    if ( p1 > D1 ) { Erroring("Matrix","index of dimension 1 out of range."); return 0; }
-    if ( p2 > D2 ) { Erroring("Matrix","index of dimension 2 out of range."); return 0; }
-    if ( p3 > D3 ) { Erroring("Matrix","index of dimension 3 out of range."); return 0; }
-    if ( p4 > D4 ) { Erroring("Matrix","index of dimension 4 out of range."); return 0; }
-    if ( p5 > D5 ) { Erroring("Matrix","index of dimension 5 out of range."); return 0; }
-    if ( p6 > D6 ) { Erroring("Matrix","index of dimension 6 out of range."); return 0; }
-    if ( p7 > D7 ) { Erroring("Matrix","index of dimension 7 out of range."); return 0; }
-    if ( p8 > D8 ) { Erroring("Matrix","index of dimension 8 out of range."); return 0; }
+    _check_dimN(8);
+    _check_fdimith(1);
+    _check_fdimith(2);
+    _check_fdimith(3);
+    _check_fdimith(4);
+    _check_fdimith(5);
+    _check_fdimith(6);
+    _check_fdimith(7);
+    _check_fdimith(8);
     return Data[(((((((p8-1)*D7+p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #endif
   };
+#undef _check_dimN
+#undef _check_dimith
+#undef _check_fdimith
 
 
   template<class type> template<class otype>
@@ -703,7 +659,7 @@ namespace pond{
     }
     Malloc();
 #if defined(__CUDACC__)
-    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::RunningMode() == RunningModeGpu ){
+    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::GetRunningMode() == RunningModeGpu ){
       MallocDevice();
     }
 #endif
@@ -726,7 +682,7 @@ namespace pond{
 #undef CP
     Malloc();
 #if defined(__CUDACC__)
-    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::RunningMode() == RunningModeGpu ){
+    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::GetRunningMode() == RunningModeGpu ){
       MallocDevice();
     }
 #endif
@@ -791,7 +747,7 @@ namespace pond{
 
   template<class type> int Matrix_T<type>::MallocDevice(){
 #if defined(__CUDACC__)
-    if ( DataDevice == NULL and EvaSettings::RunningMode() == pond::RunningModeGpu ){
+    if ( DataDevice == NULL and EvaSettings::GetRunningMode() == pond::RunningModeGpu ){
       cudaMalloc((void**)&DataDevice,sizeof(type)*Size() );
       CUDA_LAST_ERROR();
     }
@@ -802,7 +758,7 @@ namespace pond{
   template<class type> int Matrix_T<type>::HostToDevice()
   {
 #if defined(__CUDACC__)
-    if (Data == NULL or EvaSettings::RunningMode() == RunningModeCpu ) return -1;
+    if (Data == NULL or (EvaSettings::GetRunningMode() == RunningModeCpu) ) return -1;
     MallocDevice();
     cudaMemcpy((void*)DataDevice,(void*)Data,sizeof(type)*Size(),cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
@@ -815,7 +771,7 @@ namespace pond{
   int Matrix_T<type>::DeviceToHost()
   {
 #if defined(__CUDACC__)
-    if (DataDevice == NULL or EvaSettings::RunningMode() == RunningModeCpu )  return -1;
+    if (DataDevice == NULL or (EvaSettings::GetRunningMode() == RunningModeCpu) )  return -1;
     Malloc();
     cudaMemcpy((void*)Data, (void*)DataDevice, sizeof(type)*Size(),cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
@@ -1080,7 +1036,7 @@ namespace pond{
       Erroring("Matrix::Set","Right Matrix is Empty."); return (*this); 
     }
     if ( not SameDimensionQ(other) )
-      Init(other,EvaSettings::MatrixPosition() ); 
+      Init(other,EvaSettings::GetMatrixPosition() ); 
 #ifdef __CUDACC__
     if ( EvaSettings::IsOnHost() ){
       if ( other.Data != NULL and Data != NULL ){
@@ -1149,10 +1105,14 @@ namespace pond{
 #define OPER_MATRIX_OVERLOAD_CU(name,oper,func)                         \
   template<class type> template<class otype>                            \
   Matrix_T<type> &Matrix_T<type>::operator oper(const Matrix_T<otype>&other){ \
-    if ( other.Size() <= 0 )                                            \
-      { Erroring("Matrix::"#name,"Right Matrix is Empty.");return (*this); } \
-    if ( not SameDimensionQ(other) )                                    \
-      { Erroring("Matrix::"#name,"Two Matrix is not the same size."); return 0; } \
+    if ( other.Size() <= 0 ) {                                          \
+      Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
+      return (*this);                                                   \
+    }                                                                   \
+    if ( not SameDimensionQ(other) )  {                                 \
+      Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
+      return (*this);                                                   \
+    }                                                                   \
     if ( EvaSettings::IsOnHost() ){                                     \
       if ( other.Data != NULL and Data != NULL )                        \
         func##_host(Data,Data,other.Data,Size());                       \
@@ -1169,8 +1129,10 @@ namespace pond{
   };                                                                    \
   template<class type> template<class vtype>                            \
     Matrix_T<type> &Matrix_T<type>::operator oper(const vtype value){   \
-    if ( Size() <= 0 )                                                  \
-      { Erroring("Matrix::"#name,"Matrix is Empty."); return *this; }   \
+    if ( Size() <= 0 ){                                                 \
+      Erroring("Matrix::"#name,"Matrix is Empty.");                     \
+      return *this;                                                     \
+    }                                                                   \
     if ( EvaSettings::IsOnHost() ){                                     \
       func##_host(Data,Data,value,Size() );                             \
     }else                                                               \
@@ -1184,10 +1146,14 @@ namespace pond{
 #define OPER_MATRIX_OVERLOAD(name,oper,func)                            \
   template<class type> template<class otype>                            \
   Matrix_T<type> &Matrix_T<type>::operator oper(const Matrix_T<otype>&other){ \
-    if ( other.Size() <= 0 )                                            \
-      { Erroring("Matrix::"#name,"Right Matrix is Empty."); return *this; } \
-    if ( not SameDimensionQ(other) )                                    \
-      { Erroring("Matrix::"#name,"Two Matrix is not the same size."); return *this; } \
+    if ( other.Size() <= 0 ) {                                          \
+      Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
+      return *this;                                                     \
+    }                                                                   \
+    if ( not SameDimensionQ(other) ) {                                  \
+      Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
+      return *this;                                                     \
+    }                                                                   \
     if ( other.Data != NULL and Data != NULL ){                         \
       func##_host(Data,Data,other.Data,Size());                         \
     }                                                                   \
@@ -1258,7 +1224,7 @@ namespace pond{
   type Matrix_T<type>::TotalDevice()
   {
 #ifdef __CUDACC__ 
-    if ( EvaSettings::RunningMode() == RunningModeGpu ){
+    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
       int n_in=Size();
       int tn = __CudaThreadNumberPerBlock;
       int bn;
@@ -1294,7 +1260,7 @@ namespace pond{
   template<class type>
   type Matrix_T<type>::Total()
   {
-    if ( EvaSettings::MatrixPosition() == MatrixDevice )
+    if ( EvaSettings::GetMatrixPosition() == MatrixDevice )
       return TotalDevice();
     else
       return TotalHost();
@@ -1318,7 +1284,7 @@ namespace pond{
     if (not (data1.SameDimensionQ(data2) ))                             \
       { Erroring("Matrix::"#name,"Try to "#func" two Matrixs of different size."); return arrout; } \
     if ( !(arrout.SameDimensionQ(data1)) )                              \
-      arrout.Init(data1,EvaSettings::MatrixPosition() ) ;               \
+      arrout.Init(data1,EvaSettings::GetMatrixPosition() ) ;               \
     if (EvaSettings::IsOnHost()  )                                      \
       func##_host( arrout.Data, 		data1.Data, 	data2.Data, 	data1.Size() ); \
     else if (EvaSettings::IsOnDevice())                                 \
@@ -1335,7 +1301,7 @@ namespace pond{
   template<class type,class type1,class type2>                          \
   Matrix_T<type> &name(Matrix_T<type> &arrout,Matrix_T<type1> &data1,type2 num){ \
     if ( not (arrout.SameDimensionQ(data1) ))                           \
-      arrout.Init(data1,EvaSettings::MatrixPosition() ) ;               \
+      arrout.Init(data1,EvaSettings::GetMatrixPosition() ) ;            \
     if (EvaSettings::IsOnHost()  )                                      \
       func##_host( arrout.Data, 		data1.Data, 	num, 	data1.Size() ); \
     else if (EvaSettings::IsOnDevice())                                 \

@@ -6,4 +6,5 @@ exe
 *.map
 *.swp
 */build/
+/packages/
 */__pycache__/

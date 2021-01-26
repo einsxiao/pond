@@ -1,4 +1,5 @@
 #
+print("load pond pretty printers")
 
 ##############################################################################
 class StdStringPrinter(object):

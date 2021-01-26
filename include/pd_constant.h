@@ -56,9 +56,9 @@ namespace pond{
     static void   SetMatrixPosition(int pos){
       matrixPosition = pos;
     };
-    static int    MatrixPosition(){
+    static int    GetMatrixPosition(){
 #ifdef __CUDACC__
-      if ( RunningMode() == RunningModeGpu )
+      if ( GetRunningMode() == RunningModeGpu )
         return matrixPosition;
       else
         return MatrixHost;
@@ -69,19 +69,19 @@ namespace pond{
     static void   SetExecutePosition(int pos){
       SetMatrixPosition( pos );
     };
-    static int    ExecutePosition(){
-      return MatrixPosition();
+    static int    GetExecutePosition(){
+      return GetMatrixPosition();
     };
     inline static bool   IsOnHost(){
 #ifdef __CUDACC__
-      return MatrixPosition() == MatrixHost or MatrixPosition() == MatrixHostDevice;
+      return GetMatrixPosition() == MatrixHost or GetMatrixPosition() == MatrixHostDevice;
 #else
       return true;
 #endif
     };
     inline static bool   IsOnDevice() {
 #ifdef __CUDACC__
-      return MatrixPosition() == MatrixDevice or MatrixPosition() == MatrixHostDevice;
+      return GetMatrixPosition() == MatrixDevice or GetMatrixPosition() == MatrixHostDevice;
 #else
       return false;
 #endif
@@ -89,7 +89,7 @@ namespace pond{
     inline static void   SetRunningMode(int mode) {
       runningMode = mode;
     };
-    inline static int    RunningMode() {
+    inline static int    GetRunningMode() {
 #ifdef __CUDACC__
       return runningMode;
 #else

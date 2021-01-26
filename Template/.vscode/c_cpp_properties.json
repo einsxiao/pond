@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${POND_ROOT}/include",
+                "${POND_ROOT}/packages/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64",
+            "compilerArgs": [
+                "-std=c++11",
+                "-fPIC",
+                "-DDEBUG",
+                "-I./",
+                "-D_MWAITXINTRIN_H_INCLUDED ",
+                "-D_FORCE_INLINES ",
+                "-DOS_OF_LINUX ",
+                "-I~/.pond/packages/include ",
+                "-I~/.pond/include "
+            ]
+        }
+    ],
+    "version": 4
+}

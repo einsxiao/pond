@@ -7,10 +7,10 @@ namespace pond{
   public:
     OSModule(); ~OSModule();
     /////////////////////////////////
-    static int Import(std::string filename,bool willBroken=false);
+    /* static int Import(std::string filename,bool willBroken=false); */
     /////////////////////////////////
-    int PD_Get(Object&);
-    int PD_Import(Object&);
+    /* int PD_Get(Object&); */
+    /* int PD_Import(Object&); */
     int PD_Put(Object&);
     int PD_Export(Object&);
     /////////////////////////////////

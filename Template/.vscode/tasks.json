@@ -1,0 +1,43 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "pond-debug build",
+            "command": "make",
+            "args": [
+                "debug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "make debug version."
+        },
+        {
+            "type": "cppbuild",
+            "label": "pond-release build",
+            "command": "make",
+            "args": [
+                "debug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "make debug version."
+        }
+    ],
+    "version": "2.0.0"
+}

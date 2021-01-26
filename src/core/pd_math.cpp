@@ -61,83 +61,83 @@ bool Math::NumberQ(string str){
 }
 
 
-// int pond::GaussCMInverse(double *AA,double *B,int n){
-//   int i,j,k;
-//   double temp;
-//   double *A;
-//   A = new double[n*n];
+int pond::GaussCMInverse(double *AA,double *B,int n){
+  int i,j,k;
+  double temp;
+  double *A;
+  A = new double[n*n];
 
-//   for (int i=0;i<n;i++)
-//     for (int j=0;j<n;j++){
-//       if (i==j) B[i*n+j]=1;else B[i*n+j]=0;
-//       A[i*n+j]=AA[i*n+j];
-//     }
-//   for (i=0;i<n;i++){
-//     //find the maximum one  ...
-//     k=i;
-//     temp=abs(A[i*n+i]);
-//     for (j=i;j<n;j++)
-//       if (abs(A[j*n+i])>temp){ k=j;temp=abs(A[j*n+i]); }
-//     //if no answer return error code -1
-//     if (temp==0){ delete A; return -1;}
-//     //change the one with the maximum one  ...
-//     if (i!=k)
-//       for (j=0;j<n;j++){
-//         temp=A[i*n+j];A[i*n+j]=A[k*n+j]; A[k*n+j]=temp;
-//         temp=B[i*n+j];B[i*n+j]=B[k*n+j]; B[k*n+j]=temp;
-//       }
-//     //dismiss 
-//     for (j=0;j<n;j++){
-//       if (j==i) continue;
-//       temp=A[j*n+i]/A[i*n+i];
-//       for (k=0;k<n;k++) {
-//         A[j*n+k]=A[j*n+k]-A[i*n+k]*temp;
-//         B[j*n+k]=B[j*n+k]-B[i*n+k]*temp;
-//       }
-//     }
-//     temp=A[i*n+i];
-//     for (j=0;j<n;j++){ A[i*n+j]=A[i*n+j]/temp;B[i*n+j]=B[i*n+j]/temp;}
-//   }
-//   delete A;
-//   return 0;
-// }
+  for (int i=0;i<n;i++)
+    for (int j=0;j<n;j++){
+      if (i==j) B[i*n+j]=1;else B[i*n+j]=0;
+      A[i*n+j]=AA[i*n+j];
+    }
+  for (i=0;i<n;i++){
+    //find the maximum one  ...
+    k=i;
+    temp=abs(A[i*n+i]);
+    for (j=i;j<n;j++)
+      if (abs(A[j*n+i])>temp){ k=j;temp=abs(A[j*n+i]); }
+    //if no answer return error code -1
+    if (temp==0){ delete A; return -1;}
+    //change the one with the maximum one  ...
+    if (i!=k)
+      for (j=0;j<n;j++){
+        temp=A[i*n+j];A[i*n+j]=A[k*n+j]; A[k*n+j]=temp;
+        temp=B[i*n+j];B[i*n+j]=B[k*n+j]; B[k*n+j]=temp;
+      }
+    //dismiss 
+    for (j=0;j<n;j++){
+      if (j==i) continue;
+      temp=A[j*n+i]/A[i*n+i];
+      for (k=0;k<n;k++) {
+        A[j*n+k]=A[j*n+k]-A[i*n+k]*temp;
+        B[j*n+k]=B[j*n+k]-B[i*n+k]*temp;
+      }
+    }
+    temp=A[i*n+i];
+    for (j=0;j<n;j++){ A[i*n+j]=A[i*n+j]/temp;B[i*n+j]=B[i*n+j]/temp;}
+  }
+  delete A;
+  return 0;
+}
 
-// int pond::GaussCMInverse(double *AA,double *A, double *B,int n){
-//   // in which A is a temp for AA for no change in the original AA matrix
-//   int i,j,k;
-//   double temp;
-//   for (int i=0;i<n;i++)
-//     for (int j=0;j<n;j++){
-//       if (i==j) B[i*n+j]=1;else B[i*n+j]=0;
-//       A[i*n+j]=AA[i*n+j];
-//     }
-//   for (i=0;i<n;i++){
-//     //find the maximum one  ...
-//     k=i;
-//     temp=abs(A[i*n+i]);
-//     for (j=i;j<n;j++)
-//       if (abs(A[j*n+i])>temp){ k=j;temp=abs(A[j*n+i]); }
-//     //if no answer return error code -1
-//     //if (temp==0){ delete A; return -1;}
-//     if (temp==0){ return -1;}
-//     //change the one with the maximum one  ...
-//     if (i!=k)
-//       for (j=0;j<n;j++){
-//         temp=A[i*n+j];A[i*n+j]=A[k*n+j]; A[k*n+j]=temp;
-//         temp=B[i*n+j];B[i*n+j]=B[k*n+j]; B[k*n+j]=temp;
-//       }
-//     //dismiss 
-//     for (j=0;j<n;j++){
-//       if (j==i) continue;
-//       temp=A[j*n+i]/A[i*n+i];
-//       for (k=0;k<n;k++) {
-//         A[j*n+k]=A[j*n+k]-A[i*n+k]*temp;
-//         B[j*n+k]=B[j*n+k]-B[i*n+k]*temp;
-//       }
-//     }
-//     temp=A[i*n+i];
-//     for (j=0;j<n;j++){ A[i*n+j]=A[i*n+j]/temp;B[i*n+j]=B[i*n+j]/temp;}
-//   }
-//   return 0;
-// }
+int pond::GaussCMInverse(double *AA,double *A, double *B,int n){
+  // in which A is a temp for AA for no change in the original AA matrix
+  int i,j,k;
+  double temp;
+  for (int i=0;i<n;i++)
+    for (int j=0;j<n;j++){
+      if (i==j) B[i*n+j]=1;else B[i*n+j]=0;
+      A[i*n+j]=AA[i*n+j];
+    }
+  for (i=0;i<n;i++){
+    //find the maximum one  ...
+    k=i;
+    temp=abs(A[i*n+i]);
+    for (j=i;j<n;j++)
+      if (abs(A[j*n+i])>temp){ k=j;temp=abs(A[j*n+i]); }
+    //if no answer return error code -1
+    //if (temp==0){ delete A; return -1;}
+    if (temp==0){ return -1;}
+    //change the one with the maximum one  ...
+    if (i!=k)
+      for (j=0;j<n;j++){
+        temp=A[i*n+j];A[i*n+j]=A[k*n+j]; A[k*n+j]=temp;
+        temp=B[i*n+j];B[i*n+j]=B[k*n+j]; B[k*n+j]=temp;
+      }
+    //dismiss 
+    for (j=0;j<n;j++){
+      if (j==i) continue;
+      temp=A[j*n+i]/A[i*n+i];
+      for (k=0;k<n;k++) {
+        A[j*n+k]=A[j*n+k]-A[i*n+k]*temp;
+        B[j*n+k]=B[j*n+k]-B[i*n+k]*temp;
+      }
+    }
+    temp=A[i*n+i];
+    for (j=0;j<n;j++){ A[i*n+j]=A[i*n+j]/temp;B[i*n+j]=B[i*n+j]/temp;}
+  }
+  return 0;
+}
 

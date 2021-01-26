@@ -7,11 +7,13 @@ namespace pond{
   public:
     Object       superList; //super Argv of lists readin
     Object       inputList; //historical Argv of lists readin
-    bool         interactively;
     ImportList  *importList;
     Evaluation  *evaluation;
+    bool         interactively;
+    bool         noprint       = false;
+    bool         pmark         = false;
     ///////////////////////////////
-    Kernel(std::istream *istr_in,bool interactively,int argc,char*argv[]);
+    Kernel(std::istream *istr_in,bool interactively,int argc,char*argv[],std::string rcfile, bool pmark=false);
     ~Kernel();
     //////////////////////////////////////////////
     int   Phrasing();

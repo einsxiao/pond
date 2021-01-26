@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+import sys
+import json
+
+if len(sys.argv) == 1:
+    exit(0)
+
+auth_file = sys.argv[1]
+with open(auth_file, "r") as f :
+    data = json.load(f)
+    #print('get data',data, len(sys.argv) )
+    if len(sys.argv) == 2:
+        print( json.dumps(data) )
+        exit(0)
+        pass
+    for item in sys.argv[2:]:
+        res = data.get(item)
+        if res:
+            print( json.dumps(res) )
+            pass
+        pass
+    pass
+
+
+    
+

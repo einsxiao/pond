@@ -12,10 +12,10 @@ void pond::Error::trace()const{
 
 const string pond::Error::swhat()const throw(){
   //print backtrace information
-  // dout<<"pond error throwed with what calculated"<<endl;
-  // dout<<"module = "<<module<<endl;
-  // dout<<"function = "<<function<<endl;
-  // dout<<"message = "<<message<<endl;
+  //dout<<"pond error throwed with what calculated"<<endl;
+  //dout<<"module = "<<module<<endl;
+  //dout<<"function = "<<function<<endl;
+  //dout<<"message = "<<message<<endl;
   string res;
   if ( module != "" ){
     res = module+"::"+function+"::Error: "+message;
@@ -26,7 +26,7 @@ const string pond::Error::swhat()const throw(){
       res = "Error: "+message;
     }
   }
-  // dout<<"what calculated :"<< res <<endl;
+  //dout<<"what calculated :"<< res <<endl;
   return res;
 }
 

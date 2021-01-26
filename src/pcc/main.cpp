@@ -18,7 +18,7 @@ int main(int argc,char* argv[]){
     //cerr<<"try processing"<<endl;
     return eng.processing();
   }catch (const cc_err &err){
-    //cerr<< err.info() <<endl;
+    cerr<< err.info() <<endl;
     return 1;
   }catch (const Error &err){
     cerr<<"pcc:  error:  "<<err.message<<endl;

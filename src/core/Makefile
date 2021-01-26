@@ -48,7 +48,7 @@ post-work:
 DALL: debugsharelib 
 
 debugsharelib: $(DALLOBJECTS)
-	$(PPCC) $(DFLAGS) -shared -o $(OUT) $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
+	$(PPCC) $(DFLAGS) -shared -o $(DOUT) $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
 
 build/debug/%.tcpp.o: %.cpp $(HEADERS)
 	$(PPCC) $(DFLAGS) -c -fPIC $< -o $@ -I. $(INCLUDE)
@@ -65,5 +65,5 @@ build/release/%.tcpp.o: %.cpp $(HEADERS)
 #########################################################################################################
 
 clean: 
-	@rm *.so
-	@rm -rf build
+	@-rm *.so
+	@-rm -rf build

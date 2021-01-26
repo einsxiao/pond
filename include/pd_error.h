@@ -107,6 +107,22 @@ namespace pond{
     false                                                   \
     )
 
+#define Message(mes) ({                                       \
+      std::cout << std::string(mes) << "\n";                  \
+      true;                                                   \
+    })
+
+  // multi language support
+
+#define zhMessage(mes)                                      \
+  ( ( EvaKernel->lang ==  "zh" )?                           \
+    ({                                                      \
+      std::cerr<< std::string(mes) << "\n";                 \
+      true;                                                 \
+    })                                                      \
+    :                                                       \
+    false                                                   \
+    )
 
 };
 

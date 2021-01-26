@@ -69,7 +69,7 @@ string pond::ToString(const u_long num){
 
 string pond::ToString(const Index num){
   char chs[64];
-  sprintf(chs,"%d&%d",num.i, num.j );
+  sprintf(chs,"$$_%d&%d",num.row, num.col );
   return string(chs);
 }
 
@@ -115,19 +115,19 @@ string pond::ToString(double num){
   return ss.str();
 }
 
-// string pond::ToString(complex num){
-//   Index idx = ostringsPool.New();
-//   ostringstream&ss = ostringsPool.Get(idx);
-//   ss.str("");
-//   ss.precision(EvaSettings::precision);
-//   if ( EvaSettings::scientificFormat ){
-//     ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
-//   }else{
-//     ss<<"("<<num.re<<","<<num.im<<")";
-//   }
-//   ostringsPool.Free(idx);
-//   return ss.str();
-// }
+string pond::ToString(complex num){
+  Index idx = ostringsPool.New();
+  ostringstream&ss = ostringsPool.Get(idx);
+  ss.str("");
+  ss.precision(EvaSettings::precision);
+  if ( EvaSettings::scientificFormat ){
+    ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
+  }else{
+    ss<<"("<<num.re<<","<<num.im<<")";
+  }
+  ostringsPool.Free(idx);
+  return ss.str();
+}
 
 string pond::ToString(float num){
   Index idx = ostringsPool.New();
@@ -144,19 +144,19 @@ string pond::ToString(float num){
   return ss.str();
 }
 
-// string pond::ToString(floatcomplex num){
-//   Index idx = ostringsPool.New();
-//   ostringstream&ss = ostringsPool.Get(idx);
-//   ss.str("");
-//   ss.precision(EvaSettings::precision);
-//   if ( EvaSettings::scientificFormat ){
-//     ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
-//   }else{
-//     ss<<"("<<num.re<<","<<num.im<<")";
-//   }
-//   ostringsPool.Free(idx);
-//   return ss.str();
-// }
+string pond::ToString(floatcomplex num){
+  Index idx = ostringsPool.New();
+  ostringstream&ss = ostringsPool.Get(idx);
+  ss.str("");
+  ss.precision(EvaSettings::precision);
+  if ( EvaSettings::scientificFormat ){
+    ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
+  }else{
+    ss<<"("<<num.re<<","<<num.im<<")";
+  }
+  ostringsPool.Free(idx);
+  return ss.str();
+}
 
 double pond::ToNumber(const char*str){
   double num;
@@ -327,11 +327,11 @@ string pond::RemoveFirstWord(string str,string &leftword){
   return word;
 }
 
-string pond::GetEnv(string name){
+string pond::GetEnv(string name,string default_value){
   string content = "";
   char *p;
   if ( !(p = getenv(name.c_str())) ){
-    return "";
+    return default_value;
   }
   content = p;
   return content;
@@ -650,4 +650,23 @@ void pond::sleep_micro(int sec)
 void pond::sleep_sec(int sec)
 {
   usleep( sec*1000000);
+}
+
+static int specialCharReplace(string &str,string ori,string rep){
+  int pos = 0;
+  while ( (pos <(int)str.size())&&pos>=0 ){
+    pos = str.find(ori);
+    if (pos>=0) str.replace(pos,ori.size(),rep);
+  }
+  return 0;
+}
+int pond::PondInnerStringRestoreNormal(string &str){
+  specialCharReplace(str,"\\n","\n");
+  specialCharReplace(str,"\\t","\t");
+  specialCharReplace(str,"\\r","\r");
+  specialCharReplace(str,"\\\\","\\");
+  specialCharReplace(str,"\\\"","$QUOTATION_MARK$");
+  specialCharReplace(str,"\"","");
+  specialCharReplace(str,"$QUOTATION_MARK$","\"");
+  return 0;
 }

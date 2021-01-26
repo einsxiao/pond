@@ -440,7 +440,7 @@ int Syntax::processing(Node&parent,int level,bool endReturn = false,bool colonRe
       }
       goto __default_goto_label;
     }
-    case '0': case '2':  case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
+    case '0': case '1': case '2':  case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
       nodes.push_back( new Node("number",idx-1,level) );
       string word;
       getRecentNumberString(word,ch);
@@ -573,18 +573,21 @@ int Syntax::prepare_insert(NodeIndex&insert_pos,int insertedLinesN)
 
 #include"syntax_launch_kernel.h"
 void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
+  dout<<"find the launch kernel pragma source postion"<<endl;
+  dout<<"deal "<< serialN<<endl;
+
   launch_kernel lan_ker;
   lan_ker.pragma           = &pragma;
   lan_ker.serial_number    = serialN + 1;
   lan_ker.filePath         = filePath;
   lan_ker.tree             = &tree;
   lan_ker.content          = &fileContent;
+  dout<<"try init lan_ker"<<endl;
   lan_ker.Init();
   //insert 
-  //cout<<"find the source postion and see what need to do, prepare insert  "<<endl;
 
   //declare
-  //cout<<"declare parts"<<endl;
+  dout<<"declare parts"<<endl;
   int source_insert_pos;
   //cout<<"find insert pos"<<endl;
   if ( fileType == "cu" )
@@ -592,7 +595,7 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
   else
     source_insert_pos = prepare_insert( lan_ker.declare_insert_pos, 1 );
 
-  //cout<<"do insert pos with insert parts "<< source_insert_pos<<endl;
+  dout<<"do insert pos with insert parts "<< source_insert_pos<<endl;
   if ( fileType == "cu" )
     source.insert( source.begin() + source_insert_pos,
                    __line_info(true, pragma.self->start.row, 0, 0, lan_ker.declare_gpu()+";" ) );
@@ -600,7 +603,7 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
                  __line_info(true, pragma.self->start.row, 0, 0, lan_ker.declare_cpu()+";" ) );
 
   //calling
-  //cout<<"calling parts"<<endl;
+  dout<<"calling parts"<<endl;
   if ( fileType == "cu" )
     source_insert_pos = prepare_insert( lan_ker.pragma->self->end, 3 );
   else
@@ -615,9 +618,11 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
                                lan_ker.call_gpu() +"\n}else" ));
     source.insert( source.begin() + source_insert_pos,
                    __line_info(true, pragma.self->start.row, 0, 0,
-                               "if ( pond::EvaSettings::MatrixPosition() == pond::MatrixDevice ){\n") );
+                               "if ( pond::EvaSettings::GetMatrixPosition() == pond::MatrixDevice ){\n") );
   }
+
   //define
+  dout<<"define parts"<<endl;
   if ( fileType == "cu" )
     source_insert_pos = prepare_insert( lan_ker.define_insert_pos, 3 );
   else
@@ -734,16 +739,21 @@ void Syntax::rewrite(){
 
   // pondd launch_kernel pragma
   dout<<"try rewrite"<<endl;
+  dout<<"try deal kernel pragma"<<endl;
   for (u_int i = 0; i < pragmas.size(); i++){
     __node_rec &para  = pragmas[i];
     deal_launch_kernel( para, i);
   }
 
   // pd module constructor deconstructor
+  dout<<"try deal pd module"<<endl;
   deal_pd_module();
 
   // pd_functions
+  dout<<"try deal pd functions"<<endl;
   deal_pd_functions();
+
+  dout<<"rewrite done"<<endl;
 
 }
 
@@ -755,8 +765,8 @@ void Syntax::phrasing(){
   idx = NodeIndex(0,0,0);
   //lineInfo.push_back( pair<int,int>(0,0) );
   processing(tree,0);
-  dout<<"source content processing done. parsed content is:"<<endl;
-  tree.output();
+  dout<<"source content processing done. "<<endl;
+  dout<<"parsed content is:\n"<< endl;  tree.output();
 
   //construct the newLines and old_2_new
   int ch_count = 0;

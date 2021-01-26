@@ -72,7 +72,7 @@ DALL: dexe debugsharelib
 
 debugsharelib: $(DALLOBJECTS)
 	$(CC) $(DFLAGS) -shared -o lib$(MODULE_NAME)-dev.so $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
-	@chmod -x lib$(MODULE_NAME)-dev.so
+#	@chmod +x lib$(MODULE_NAME).so
 build/debug/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tcpp.o: %.cpp $(HEADERS)
@@ -87,7 +87,7 @@ ALL: sharelib
 
 sharelib: $(ALLOBJECTS)
 	$(CC) $(FLAGS) -shared -o lib$(MODULE_NAME).so $(ALLOBJECTS) $(INCLUDE)  $(LIBS) 
-	@chmod -x lib$(MODULE_NAME).so
+#	@chmod -x lib$(MODULE_NAME).so
 build/release/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/release/%.tcpp.o: %.cpp $(HEADERS)

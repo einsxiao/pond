@@ -30,14 +30,6 @@ MatrixModule::MatrixModule():Module(MODULE_NAME){
   {
     // RegisterFunction("MatrixExist",(MemberFunction)(&MatrixModule::MatrixExist_Eva));
   }
-  {
-    RegisterFunction("MatrixPosition",(MemberFunction)(&MatrixModule::MatrixPosition), this);
-    AddAttribute("MatrixPosition","Protected");
-  }
-  {
-    RegisterFunction("MatrixSetPosition",(MemberFunction)(&MatrixModule::MatrixSetPosition), this);
-    AddAttribute("MatrixSetPosition","Protected");
-  }
 }
 
 MatrixModule::~MatrixModule(){
@@ -100,7 +92,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       }
       CheckArgsShouldBeList(operobj,1);
       Matrix* matptr = GetOrNewMatrix( matname );
-      MatrixSet( *matptr, operobj[1] );
+      Matrix2Object( *matptr, operobj[1] );
       // ARGV.SetTo(1);
       ARGV = ARGV[1];
       ReturnNormal;
@@ -160,7 +152,8 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       if ( matptr == NULL ) ThrowError("Matrix","ToList",matobj.ToString()+" does not exist yet." );
       CheckArgsShouldEqual(operobj,0);
       Object res;
-      MatrixGet( *matptr, res );
+      //MatrixGet( *matptr, res );
+      Matrix2Object( *matptr, res );
       ARGV = res;
       ReturnNormal;
     }
@@ -245,7 +238,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
     CheckArgsShouldEqual(ARGV[1],1);
     CheckArgsShouldBeString(ARGV[1],1);
     EvaKernel->Evaluate( ARGV[2] );
-    MatrixSet( ARGV[1][1].Key(), ARGV[2] );
+    Matrix2Object( ARGV[1][1].Key(), ARGV[2] );
     // ARGV.SetTo(2);
     ARGV = ARGV[2];
     ReturnNormal;
@@ -306,7 +299,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       Matrix *mat = GetMatrix(name);
       if ( mat == NULL ){
         mat = GetOrNewMatrix(name);
-        MatrixSet( *mat, ARGV[1] );
+        Matrix2Object( *mat, ARGV[1] );
         ARGV.DeleteElements();
         ARGV.PushBackString( name );
         break;
@@ -318,34 +311,18 @@ int MatrixModule::PD_Matrix(Object &ARGV){
   ReturnHold;
 }
 
-int MatrixModule::MatrixGet(string name,Object &ARGV){//mat of Object form
-  Matrix * mat = GetMatrix(name);
-  if ( mat == NULL ){
-    ARGV.SetNull();
-    return 0;
-  }else{
-    MatrixModule::MatrixGet(*mat,ARGV);
-    return 1;
-  }
-}
 
-
-int MatrixModule::MatrixSet(string name,Object&ARGV){
-  Matrix *mat = GetOrNewMatrix(name);
-  return MatrixSet(*mat,ARGV); 
-} 
-
-int MatrixModule::MatrixPosition(Object &ARGV){
+int MatrixModule::PD_GetMatrixPosition(Object &ARGV){
   CheckArgsShouldEqual(ARGV,0)
-  if ( EvaSettings::MatrixPosition() == MatrixDevice )
+  if ( EvaSettings::GetMatrixPosition() == MatrixDevice )
     ARGV.SetString("Device");
-  else if ( EvaSettings::MatrixPosition() == MatrixHostDevice )
+  else if ( EvaSettings::GetMatrixPosition() == MatrixHostDevice )
     ARGV.SetString("HostDevice");
   else ARGV.SetString("Host");
   ReturnNormal;
 }
 
-int MatrixModule::MatrixSetPosition(Object &ARGV){
+int MatrixModule::PD_SetMatrixPosition(Object &ARGV){
   CheckArgsShouldEqual(ARGV,1);
   CheckShouldBeString(1);
   if ( ARGV[1].StringQ( "Host" ) )
@@ -416,13 +393,15 @@ int MatrixModule::PD_MatrixExist(Object &ARGV){
   ReturnNormal;
 }
 
+///////////////////////////////////////////////////////////////
+// array2list && matrix2object parts
 #define LOCAL_ARRAY_2_LIST(type,to_type)                                \
   static int LocalArray2List(Object &ARGV,type*arr,int *dim,int pdim, int parr){ \
     if ( pdim>dim[0] ){                                                 \
       ARGV.SetNumber( (to_type) arr[parr] );                            \
       return parr+1;                                                    \
     }                                                                   \
-    ARGV.SetList();                                                \
+    ARGV.SetList();                                                     \
     for (int i=0; i<dim[pdim]; i++){                                    \
       ARGV.PushBackNull();                                              \
       parr=LocalArray2List( ARGV[i+1],arr,dim,pdim+1,parr);             \
@@ -436,90 +415,73 @@ LOCAL_ARRAY_2_LIST(float,double)
 LOCAL_ARRAY_2_LIST(double,double)
 LOCAL_ARRAY_2_LIST(complex,complex)
 #undef LOCAL_ARRAY_2_LIST
-#define ARRARY_2_LIST(type) \
-int MatrixModule::Array2List(Object &ARGV,type*arr,int *dim){ \
-  LocalArray2List( ARGV,arr,dim,1,0); \
-  return 0; \
-}
-ARRARY_2_LIST(int)
-ARRARY_2_LIST(long long)
-ARRARY_2_LIST(float)
-ARRARY_2_LIST(double)
-ARRARY_2_LIST(complex)
-#undef ARRARY_2_LIST
+#define ARRAY_2_LIST(type)                                      \
+  int MatrixModule::Array2List(Object &ARGV,type*arr,int *dim){ \
+    LocalArray2List( ARGV,arr,dim,1,0);                         \
+    return 0;                                                   \
+  }
+ARRAY_2_LIST(int)
+ARRAY_2_LIST(long long)
+ARRAY_2_LIST(float)
+ARRAY_2_LIST(double)
+ARRAY_2_LIST(complex)
+#undef ARRAY_2_LIST
+#define MATRIX_2_OBJECT(b_type)                                         \
+  int MatrixModule::Matrix2Object(Matrix_T<b_type> &matrix, Object &ARGV){ \
+    ARGV.SetList();                                                     \
+    if ( not matrix.Size() == 0 ){                                      \
+      int *dim = matrix.NewDimArray();                                  \
+      Array2List(ARGV,matrix.Data,dim);                                 \
+      delete []dim;                                                     \
+    }else{                                                              \
+      return -1;                                                        \
+    }                                                                   \
+    return 1;                                                           \
+  }
+MATRIX_2_OBJECT(int)
+// MATRIX_2_OBJECT(long long)
+MATRIX_2_OBJECT(float)
+MATRIX_2_OBJECT(double)
+MATRIX_2_OBJECT(complex)
+#undef MATRIX_2_OBJECT
 
-int MatrixModule::MatrixGet(Matrix&matrix,Object &ARGV){
-  ARGV.SetList();
-  if ( not matrix.Size() == 0 ){
-    int *dim = matrix.NewDimArray();
-    Array2List(ARGV,matrix.Data,dim);
-    delete []dim;
+int MatrixModule::Matrix2Object(string name,Object &ARGV){//mat of Object form
+  Matrix * mat = GetMatrix(name);
+  if ( mat == NULL ){
+    ARGV.SetNull();
+    return 0;
   }else{
-    return -1;
+    MatrixModule::Matrix2Object(*mat,ARGV);
+    return 1;
   }
-  return 1;
-}
-
-int MatrixModule::MatrixGet(ComplexMatrix&matrix,Object &ARGV){
-  if ( matrix.Size() != 0 ){
-    int *dim = matrix.NewDimArray();
-    Array2List(ARGV,matrix.Data,dim);
-    delete []dim;
-  }else{
-    return -1;
-  }
-  return 1;
-}
-
-static int LocalList2Array(Object &ARGV,double*arr, int parr){
-  if ( ARGV.AtomQ() ){
-    if ( ARGV.NumberQ() ){
-      arr[parr] = double(ARGV);
-      return parr+1;
-    }else{
-      Warning("List2Array","Non-number encontered in operation of ARGV to array.");
-      return -1;
-    }
-  }
-  for (u_int i=0; i<ARGV.Size(); i++){
-    parr=LocalList2Array( ARGV[i+1],arr,parr);
-    if ( parr<0 ) return -1;
-  }
-  return parr;
 }
 
 
-static int LocalList2Array(Object &ARGV,complex*arr, int parr){
-  if ( ARGV.AtomQ() ){
-    if ( ARGV.NumberQ() ){
-      arr[parr] = ARGV.Number();
-      return parr+1;
-    }else{
-      Warning("List2Array","Non-number encontered in operation of ARGV to array.");
-      return -1;
-    }
-  }
-  for (u_int i=0; i<ARGV.Size(); i++){
-    parr=LocalList2Array( ARGV[i+1],arr,parr);
-    if ( parr<0 ) return -1;
-  }
-  return parr;
-}
+///////////////////////////////////////////////////////////////////////
+// template<type>
+// static int LocalList2Array(Object &ARGV,type*arr, int parr){
+//   if ( ARGV.AtomQ() ){
+//     if ( ARGV.NumberQ() ){
+//       arr[parr] = type(ARGV);
+//       return parr+1;
+//     }else{
+//       Warning("List2Array","Non-number encontered in operation of ARGV to array.");
+//       return -1;
+//     }
+//   }
+//   for (u_int i=0; i<ARGV.Size(); i++){
+//     parr=LocalList2Array( ARGV[i+1], arr, parr);
+//     if ( parr<0 ) return -1;
+//   }
+//   return parr;
+// }
 
-int MatrixModule::List2Array(Object &ARGV,double*arr){
-  LocalList2Array(ARGV,arr,0);
-  return 0;
-}
-int MatrixModule::List2Array(Object &ARGV,complex*arr){
-  LocalList2Array(ARGV,arr,0);
-  return 0;
-}
 
 template<class type1>
-void localMatrixSet(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
+void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
   if ( ARGV.ListQ() ){
     for(u_int i=1;i<=ARGV.Size();i++){
-      localMatrixSet(mat,ARGV[i],ind);
+      localObject2Matrix(mat,ARGV[i],ind);
     }
     return;
   }else if ( ARGV.NumberQ() ){
@@ -527,19 +489,19 @@ void localMatrixSet(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
     ind++;
     return;
   }
-  ThrowError("MatrixSet","Object is not all numbers.");
+  ThrowError("Matrix2Object","Object is not all numbers.");
 }
 
-#define _MATRIX_SET(type_basic)                                         \
-  int MatrixModule::MatrixSet(Matrix_T<type_basic>&matrix,Object&ARGV){ \
+#define OBJECT_2_MATRIX(type_basic)                                     \
+  int MatrixModule::Object2Matrix(Object&ARGV,Matrix_T<type_basic>&matrix){ \
     if ( ARGV.NumberQ() ){                                              \
       if ( matrix.Size() == 0  )                                        \
-        ThrowError("MatrixSet","Assign a number to an empty Matrix is not allowd."); \
+        ThrowError("Matrix2Object","Assign a number to an empty Matrix is not allowd."); \
       matrix = ARGV.Number();                                           \
     }                                                                   \
-    Object dim; dim.SetList();                                     \
+    Object dim; dim.SetList();                                          \
     if ( not MatrixQ( ARGV, dim ) )                                     \
-      ThrowError("MatrixSet","Matrix assignment from list should be of Matrix form."); \
+      ThrowError("Matrix2Object","Matrix assignment from list should be of Matrix form."); \
     int n =dim.Size();                                                  \
     int *arr= new int[n+2];                                             \
     arr[0]=n;                                                           \
@@ -548,61 +510,20 @@ void localMatrixSet(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
     }                                                                   \
     matrix.Init( arr ,MatrixHost);                                      \
     u_long ind=0;                                                       \
-    localMatrixSet( matrix, ARGV, ind);                                 \
+    localObject2Matrix( matrix, ARGV, ind);                             \
     delete []arr;                                                       \
     return 1;                                                           \
   }; 
-_MATRIX_SET(complex);
-_MATRIX_SET(double);
-_MATRIX_SET(float);
-_MATRIX_SET(floatcomplex);
-_MATRIX_SET(int);
-#undef _MATRIX_SET
+OBJECT_2_MATRIX(complex);
+OBJECT_2_MATRIX(double);
+// OBJECT_2_MATRIX(float);
+// OBJECT_2_MATRIX(floatcomplex);
+// OBJECT_2_MATRIX(int);
+#undef OBJECT_2_MATRIX
 
+int MatrixModule::Object2Matrix(Object&ARGV,string name){
+  Matrix *mat = GetOrNewMatrix(name);
+  return Object2Matrix(ARGV, *mat); 
+} 
 
-/*
-Matrix &MatrixModule::GetTempMatrix(Matrix mat)
-{
-  int first = 0, final = tempMatrix.size() -1, pos = 0,result = 0;
-  auto sIter = tempMatrix.begin();
-  vector<Matrix*>::iterator iter;
-  while ( first <= final ){
-    pos = first + ( final - first )/2;
-    result = mat.DimensionCompare( tempMatrix[pos].first );
-    if ( result == 0 ){
-      sIter = tempMatrix.begin() + pos;
-      break;
-    }else if ( result < 0 ){
-      final = pos -1;
-    }else{
-      first = pos +1;
-    }
-  }
-  if ( result != 0 ){
-    if ( pos >= (int)tempMatrix.size() ){
-      tempMatrix.push_back(  pair<int*,vector<Matrix*> >() );
-      tempMatrix.rbegin()->first = mat.NewDimArray();
-      sIter = tempMatrix.end() - 1;
-    }else{
-      if ( result > 0 ) pos++;
-      tempMatrix.insert( tempMatrix.begin()+pos, pair<int*,vector<Matrix*> >() );
-      sIter =  tempMatrix.begin()+pos;
-    }
-  }
-  iter = sIter->second.begin();
-  for(;;) {
-    if ( iter == sIter->second.end() ){
-      Matrix *tM = new Matrix;
-      (*tM).Init( sIter->first ,MatrixHostDevice );
-      sIter->second.push_back( tM );
-      return *tM;
-    }
-    if ( (**iter).state == 2 ){
-      (**iter).state = 3;
-      return (**iter);
-    }else
-      iter++;
-  }
-}
-*/
 

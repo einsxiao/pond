@@ -8,21 +8,24 @@ namespace pond{
     //DeclareFunction(Test);
     ///////////////////////////////
     //Evaluate
-    static int Evaluate(Object &);
+    int PD_Evaluate(Object &);
+    int PD_EvaluateString(Object &);
+    int PD_EvaluateFile(Object &);
+    int PD_EvaluateFileWithReturn(Object &);
     //Options && Attributes
-    static int Options(Object &);
+    int PD_Options(Object &);
     static int SetOptions(Object &);
     static int CurrentValue(Object &);
     ///////////////////////////////
-    static int Attributes(Object &);
+    int PD_Attributes(Object &);
     static int SetAttribute(Object&left,Object&attris);
     static int SetAttribute_Eva(Object &);
     static int AddAttribute_Eva(Object &);
     static int AddLocalAttribute_Eva(Object &);
     static int RemoveAttributes_Eva(Object &);
     static int RemoveLocalAttributes_Eva(Object &);
-    static int Protect_Eva(Object &);
-    static int UnProtect_Eva(Object &);
+    int PD_Protect(Object &);
+    int PD_UnProtect(Object &);
     ///////////////////////////////
     static int Parenthesis(Object &);
     static int CompoundExpression(Object &);
@@ -75,13 +78,13 @@ namespace pond{
     static int Input(Object&);
     static int SystemArgv(Object&);
     ///////////////////////////////
-    // static int SetRunningMode(Object&);
-    // static int GetRunningMode(Object&);
-    // static int GPUDeviceQ(Object&);
-    // static int SetCudaThreadsNumberPerBlock(Object&);
-    // static int GetCudaThreadsNumberPerBlock(Object&);
-    // static int SetPONDCpuKernelThreadsNumber(Object&);
-    // static int GetPONDCpuKernelThreadsNumber(Object&);
+    int PD_SetRunningMode(Object&);
+    int PD_GetRunningMode(Object&);
+    int PD_GPUDeviceQ(Object&);
+    int PD_SetCudaThreadsNumberPerBlock(Object&);
+    int PD_GetCudaThreadsNumberPerBlock(Object&);
+    int PD_SetCpuThreadsNumber(Object&);
+    int PD_GetCpuThreadsNumber(Object&);
     ///////////////////////////////
     static int ShowHelpInfo(Object &);
     static int Clear(Object &);

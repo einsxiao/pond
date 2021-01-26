@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import os
 import sys
-import commands
+import subprocess
 
 args = sys.argv;
 if len(args) < 3:
@@ -22,4 +22,4 @@ for ori_file in args[1:-1]:
     des_file = os.path.join(des_dir,bfile)
     if os.path.exists( des_file ):
         os.remove( des_file );
-    commands.getstatusoutput("cp -rf %s %s"%(ori_file,des_file))
+    os.system("cp -rf %s %s"%(ori_file,des_file))

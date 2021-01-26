@@ -36,13 +36,12 @@ namespace pond{
     //    88:       return         obj:  return arg;
     //    44:       break          obj:  not defined;
     /* int                                         statusEnv     = 0; */
-    int                                         statusCode    = 0;
+    int                                         statusCode        = 0;
     Object                                      statusObject;
   private:
     int                                         maxRecursionDepth = 256;
     int                                         EvaluationDepth;
     bool                                        DebugMode;
-    /* bool                                        InteractivelyMode; */
     //////////////////////////////////////////////////////////////
     ///////  moduleTables
     std::map<std::string, Module*>				      moduleTable;
@@ -76,8 +75,9 @@ namespace pond{
     int                                         flag     = 0    ;
     std::string                                 lang     = "zh" ; // user language
     std::map<std::string,std::string>           messages; // main thread message
+    bool                                        pmark    = false;
   public:
-    Evaluation(bool debug = false);  ~Evaluation();
+    Evaluation(bool debug = false, bool pmark=false);  ~Evaluation();
     //////////////////////////////////////////////////////////////
     ///// Evaluate something
     //  ofDelay if the calling form of delay function, all delayfunction attribute is apply to this form
@@ -88,7 +88,9 @@ namespace pond{
     void            EvaluateRest(       Object&obj,bool isHold=false); 
     void            EvaluateAll(        Object&obj,bool isHold=false); 
     int             ListableEvaluate(   Object&obj,bool isHold=false);
-    int             Evaluate(           Object&obj,bool isHold=false,bool isRef=false); 
+    int             Evaluate(           Object&obj, bool isHold, bool isRef); 
+    int             Evaluate(           Object&obj, bool isHold); 
+    int             Evaluate(           Object&obj); 
     int  	          SetMaxRecursionDepth(int n); 
     static int  	  PD_SetMaxRecursionDepth(Object&); 
     Object          EvaluateExpression(const std::string&expr); // a single expression string
@@ -96,8 +98,10 @@ namespace pond{
     std::vector< std::pair<ImportList*,Object> >  inputs;
     std::set<std::string>                         readyModules;
     int                                           moduleRequesting = 0;
-    int             EvaluateString(const std::string&cont, int depth = 0);
-    int             EvaluateFile(const std::string filename, int depth=0);
+    int             EvaluateString(const std::string&cont, Object&result, int depth,bool noprint);
+    int             EvaluateString(const std::string&cont, Object&result);
+    int             EvaluateFile(const std::string filename, Object&result, int depth, bool noprint);
+    int             EvaluateFile(const std::string filename, Object&result);
     ///////////////////////////////////////////////////////////////
     int             EvaluateContinue(const std::string&extra_cont); //with extra content before continue
     /* int             EvaluateAppend(std::string&expr_cont); */
@@ -117,8 +121,8 @@ namespace pond{
     int             GetModuleMatPathReady(     std::string moduleName);
     int             GetModulePyPathReady(      std::string moduleName);
     //////////////////////////////
-    int             GetModuleLib(              std::string moduleName);
-    int             GetModule(                 std::string moduleName);
+    int             GetModuleLib(              std::string moduleName, bool silent=false);
+    int             GetModule(                 std::string moduleName, bool silent=false);
     //////////////////////////////////////////////////////////////
     int             RemoveModule(              std::string moduleName);
     int             InsertModule(              std::string moduleName,Module* module);
@@ -215,27 +219,29 @@ namespace pond{
     int              RemoveComplexMatrix(       std::string matrixName);
     ////////////////////////////////////////
     ////////////////////////////////////////
-    static int       PD_Print(                   Object&Argv); 
-    static int       PD_Println(               Object&Argv);
+    static int       PD_Print(                   Object&); 
+    static int       PD_Println(                 Object&);
     /* static int       PD_Console(                 Object&Argv); */
     /* static int       PD_Profiling(               Object&Argv); */
     static int       Print(                      const std::string);
     static int       Println(                    const std::string="");
     /* static int       Println(); */
-    static int       PrintJson(                  Object&obj);
-    static int       PD_PrintJson(               Object&Argv);
-    static int       PD_DumpToJson(              Object&Argv);
+    static int       PrintJson(                  Object&);
+    static int       PD_PrintJson(               Object&);
+    static int       PD_DumpToJson(              Object&);
     ////////////////////////////////////////
-    static int       PD_WriteFile(               Object&Argv);
-    /* static int       PD_InitializeDin(           Object&Argv); */
+    static int       PD_WriteFile(               Object&);
+    /* static int       PD_InitializeDin(           Object&); */
     ////////////////////////////////////////
-    static int       PD_FetchFullContext(        Object&Argv);
-    static int       PD_FetchContext(            Object&Argv);
+    static int       PD_FetchFullContext(        Object&);
+    static int       PD_FetchContext(            Object&);
     /* static int       GetMemInfo(); */
-    static int       PD_GetMemInfo(              Object&Argv);
-    static int       PD_GetStackInfo(            Object&Argv);
+    static int       PD_GetMemInfo(              Object&);
+    static int       PD_GetStackInfo(            Object&);
     /* static int       FetchAllVariablesToJson_Eva(   Object&Argv); */
     /* static int       FetchCurrentVariablesToJson_Eva(  Object&Argv); */
+    static int       PD_exit(                    Object&);
+    static int       PD_help(                    Object&);
   };
 #define INIT_VALUETABLEPAIR_ID_OF(sym) Index VALUETABLEPAIR_ID_OF_##sym = EvaKernel->GetOrNewValuePairRefAtTop(#sym).objid
 

@@ -19,23 +19,22 @@ OSModule::~OSModule(){
 
 };
 
-int OSModule::Import(string filename,bool willBroken){
-  return EvaKernel->EvaluateFile(filename,willBroken);
-}
+// int OSModule::Import(string filename,bool willBroken){
+//   return EvaKernel->EvaluateFile(filename,willBroken);
+// }
 
-int OSModule::PD_Import(Object&Argv)
-{
-  CheckShouldEqual(1);
-  CheckShouldBeString(1);
-  if ( !Argv[1].StringQ() ) ThrowError(Argv.Key(),(string)"Argument of "+Argv.Key()+" should be string.");
-  Import( Argv[1].Key() );
-  ReturnNull;
-}
+// int OSModule::PD_Import(Object&Argv)
+// {
+//   CheckShouldEqual(1);
+//   CheckShouldBeString(1);
+//   Import( Argv[1].Key() );
+//   ReturnNull;
+// }
 
 int OSModule::PD_Export(Object&Argv)
 {
   CheckShouldEqual(2);
-  CheckShouldBeString (1);
+  CheckShouldBeString(1);
   if ( Argv[1].StringQ( "" ) ){
     ThrowError("Export","Empty filename is not allowed.");
   }
@@ -47,14 +46,14 @@ int OSModule::PD_Export(Object&Argv)
 
   
 
-int OSModule::PD_Get(Object&Argv)
-{
-  CheckShouldEqual(1);
-  CheckShouldBeString(1);
-  if ( !Argv[1].StringQ() ) ThrowError(Argv.Key(),(string)"Argument of "+Argv.Key()+" should be string.");
-  Import( Argv[1].Key(), true);
-  ReturnNull;
-}
+// int OSModule::PD_Get(Object&Argv)
+// {
+//   CheckShouldEqual(1);
+//   CheckShouldBeString(1);
+//   if ( !Argv[1].StringQ() ) ThrowError(Argv.Key(),(string)"Argument of "+Argv.Key()+" should be string.");
+//   Import( Argv[1].Key(), true);
+//   ReturnNull;
+// }
 
 int OSModule::PD_Put(Object&Argv)
 {

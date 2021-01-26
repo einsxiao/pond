@@ -104,7 +104,7 @@ namespace pond{
       /*   Erroring("Pool","Try get elements out of range."); */
       /*   return objs[0][0]; */
       /* } */
-      return objs[ v.i ][ v.j ];
+      return objs[ v.row ][ v.col ];
     }
     Index New(){
       //waitAndLock();
@@ -117,15 +117,15 @@ namespace pond{
         //dout<<tableName<<"Table ele newed from freeObjs:"<<res<<std::endl;
         return res;
       }else{
-        if ( idx.j == RowSize ){
+        if ( idx.col == RowSize ){
           type* row = new type[ RowSize+1 ];
           objs.push_back(row);
-          idx.i ++; 
-          idx.j = 0;
+          idx.row ++; 
+          idx.col = 0;
           //dout<<tableName<<"Table ele newed from new row:"<<idx<<std::endl;
           return idx;
         }else{
-          idx.j ++;
+          idx.col ++;
           //dout<<tableName<<"EvaTable ele newed from exists row:"<<idx<<std::endl;
           return idx;
         }

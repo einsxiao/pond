@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding:utf-8
 ################################################
 ## author: Eins Xiao
@@ -21,7 +21,10 @@ import subprocess
 import traceback
 import inspect
 import json
-import requests
+try:
+    import requests
+except Exception as e:
+    pass
 DEBUG = False
 
 POND_SERVER        = os.getenv("POND_SERVER")
@@ -40,7 +43,6 @@ if ( not pond_root ):
 if ( not pond_home ):
     pond_home = os.path.join(user_home,"pond-modules")
     pass
-pond_git_cmd = os.getenv("POND_GIT_CMD")
 
 BLK_SIZE      = 1020
 
@@ -413,7 +415,6 @@ def get_pond_auth_info():
     hfile = open(auth_file)
     info = hfile.readline()
     hfile.close()
-    os.system('chmod 000 '+auth_file)
     try:
         return json.loads( info )
     except Exception as e:
@@ -426,6 +427,13 @@ def get_pond_auth_info():
 __info__   = get_pond_auth_info()
 POND_AUTH_TOKEN    = __info__.get('token')    or ''
 POND_AUTH_USERNAME = __info__.get('username') or  ''
+
+
+pond_author = POND_AUTH_USERNAME.replace('@','_AT_')
+pond_git_cmd="GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git -c user.name='{1}' -c user.email='{1}@doc.run' ".format(
+    pond_home, pond_author,
+)
+#pond_git_cmd = os.getenv("POND_GIT_CMD")
 
 def module_request(operation_url,data):
     try:
