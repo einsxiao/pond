@@ -298,6 +298,11 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   AddAttribute("Profile",AttributeType::HoldAll);
 
   //dout<<"System register funtion list = "<< __module_function_list <<" id="<<__module_function_list.objid<<endl;
+  AddAttribute("type",   AttributeType::HoldAll);
+  AddAttribute("String", AttributeType::Protected);
+  AddAttribute("Number", AttributeType::Protected);
+  AddAttribute("Symbol", AttributeType::Protected);
+  AddAttribute("List",   AttributeType::Protected);
 
 };
 
@@ -649,26 +654,6 @@ int SystemModule::CompoundExpression(Object & ARGV){
   ReturnNormal;
 }
 
-static int specialCharReplace(string &str,string ori,string rep){
-  int pos = 0;
-  while ( (pos <(int)str.size())&&pos>=0 ){
-    pos = str.find(ori);
-    if (pos>=0) str.replace(pos,ori.size(),rep);
-  }
-  return 0;
-}
-
-static int specialCharReplacement(string &str){
-  specialCharReplace(str,"\\n","\n");
-  specialCharReplace(str,"\\t","\t");
-  specialCharReplace(str,"\\r","\r");
-  specialCharReplace(str,"\\\\","\\");
-  specialCharReplace(str,"\\\"","$QUOTATION_MARK$");
-  specialCharReplace(str,"\"","");
-  specialCharReplace(str,"$QUOTATION_MARK$","\"");
-  return 0;
-}
-
 int SystemModule::ToString_Eva(Object& ARGV)
 {
   string content;
@@ -679,7 +664,6 @@ int SystemModule::ToString_Eva(Object& ARGV)
       content += ARGV[i].ToString();
     }
   }
-  // specialCharReplacement( content );
   ARGV.SetString( content );
   ReturnNormal;
 }
@@ -1332,7 +1316,7 @@ int system_with_print(string cmd, vector<string>&result){
   return result.size();
 }
 
-int SystemModule::System(Object &ARGV){
+int SystemModule::PD_System(Object &ARGV){
   CheckArgsShouldEqual(ARGV,1);
   EvaKernel->Evaluate( ARGV[1] );
   if ( !ARGV[1].StringQ() ) { Erroring(ARGV.Key(),"First argument should be a string."); ReturnError; }
@@ -2441,6 +2425,19 @@ int SystemModule::PD_context(Object&args){
   EvaKernel->statusObject = NullObject;
   EvaKernel->deleteContext();
   return res;
+}
+
+int SystemModule::PD_type(Object&args){
+  CheckShouldEqual(1);
+  switch( args[1].type() ){
+  case ObjectType::Number : ReturnSymbol( "Number" );
+  case ObjectType::String : ReturnSymbol( "String" );
+  case ObjectType::Symbol : ReturnSymbol( "Symbol" );
+  case ObjectType::List   : ReturnSymbol( "List"   );
+  }
+  zhErroring("Object::type","") ||
+    Erroring("Object::type","");
+  ReturnError;
 }
 
 int SystemModule::PD_ArrowFunction(Object&ARGV){

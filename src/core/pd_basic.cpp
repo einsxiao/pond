@@ -652,11 +652,14 @@ void pond::sleep_sec(int sec)
   usleep( sec*1000000);
 }
 
-static int specialCharReplace(string &str,string ori,string rep){
+int pond::specialCharReplace(string &str, const string ori, const string rep){
   int pos = 0;
   while ( (pos <(int)str.size())&&pos>=0 ){
     pos = str.find(ori);
-    if (pos>=0) str.replace(pos,ori.size(),rep);
+    if (pos>=0){
+      str.replace(pos,ori.size(),rep);
+      pos += rep.size() - ori.size();
+    }
   }
   return 0;
 }
@@ -665,8 +668,9 @@ int pond::PondInnerStringRestoreNormal(string &str){
   specialCharReplace(str,"\\t","\t");
   specialCharReplace(str,"\\r","\r");
   specialCharReplace(str,"\\\\","\\");
-  specialCharReplace(str,"\\\"","$QUOTATION_MARK$");
-  specialCharReplace(str,"\"","");
-  specialCharReplace(str,"$QUOTATION_MARK$","\"");
+  // specialCharReplace(str,"\\\"","$QUOTATION_MARK$");
+  // specialCharReplace(str,"\\\'","$QUOTATION_SMARK$");
+  // specialCharReplace(str,"$QUOTATION_MARK$","\"");
+  // specialCharReplace(str,"$QUOTATION_SMARK$","\'");
   return 0;
 }

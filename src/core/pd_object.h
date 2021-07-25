@@ -52,7 +52,12 @@ namespace pond{
 #include"pd_memory_manage.h"
 #define _obj_at_objid GlobalPool.Objects.objs[objid.row][objid.col ]
 namespace pond{
-  class Object{//need not to be the pod type, for the convenions we get
+  /*
+    pond::Object is the core class for pond, every expression in pond has
+    a responding object of type pond::Object.
+   */
+  class Object{
+    //need not to be the pod type, for the convenions we get
   public:
     Index objid;
   private:
@@ -242,7 +247,7 @@ namespace pond{
     ////////////////////////////////////////////////////////////////
     std::string	        ToFullFormString()const;
     std::string         ToString(const Object&parentList)const;
-    std::string         ToString()const;
+    std::string         ToString(const bool is_print=false)const;
     ////////////////////////////////////////////////////////////////
     Object              &LoadFromJson(const std::string);
     std::string         DumpToJson(bool isLeft=false)const;

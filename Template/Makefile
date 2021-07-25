@@ -125,7 +125,7 @@ all-prepare:
 	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
 	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )
 	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
-	$(shell cp $(MODULE_NAME).h $(POND_ROOT)/include/ )
+	$(shell if [ -w $(POND_ROOT) ]; then cp $(MODULE_NAME).h $(POND_ROOT)/include/; fi )
 post-work:
 	$(shell if [ -w $(POND_ROOT) ]; then cp *.so $(POND_ROOT)/lib/; fi)
 

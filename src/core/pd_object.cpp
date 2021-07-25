@@ -50,6 +50,11 @@ using namespace std;
 // #undef __check_state_uncomplete
 // #define __check_state_uncomplete(ret)
 
+static int specialCharReplacement(string &str){
+  specialCharReplace(str,"\"","$QUOTATION_MARK$");
+  specialCharReplace(str,"$QUOTATION_MARK$","\\\"");
+  return 0;
+}
 
 void Object::Malloc(){
   if ( voidQ() ){
@@ -1280,7 +1285,7 @@ string Object::ToString(const Object&parentList)const{
 #define should_lt(val) if ( Size()>=(val) ) goto default_label_for_goto;
 #define CT(key) case pond::RSimpleHashCodeOfString(#key)
 //refed
-string Object::ToString()const{
+string Object::ToString(const bool is_print)const{
   //dout<<"Try to print "<<ToRawString()<<endl;
   if ( voidQ() ) return "Null";
   string res;
@@ -1291,7 +1296,13 @@ string Object::ToString()const{
     else
       return pond::ToString(re());
   case ObjectType::String:
-    return res+"\""+_str+"\"";
+    if ( is_print ) {
+      return _str;
+    } else {
+      res = _str;
+      specialCharReplacement( res );
+      return "\""+res+"\"";
+    }
   case ObjectType::Symbol:{
     if ( ids() == SYMID_OF___Variable ){
       return "$_"+pond::ToString( (int)re() );
@@ -1300,7 +1311,7 @@ string Object::ToString()const{
     }else if ( ids() == SYMID_OF_SerialCode ){
       return "$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col );
     }
-    return res+ _sym;
+    return _sym;
   }
   case ObjectType::List:{
     if ( _list.size() == 0 )
@@ -1895,21 +1906,6 @@ Object Object::Copy()const{
   Object tmp;
   tmp.CopyObject( *this );
   return tmp;
-}
-
-static int specialCharReplace(string &str,string ori,string rep){
-  int pos = 0;
-  while ( (pos <(int)str.size())&&pos>=0 ){
-    pos = str.find(ori);
-    if (pos>=0) str.replace(pos,ori.size(),rep);
-  }
-  return 0;
-}
-
-static int specialCharReplacement(string &str){
-  specialCharReplace(str,"\"","$QUOTATION_MARK$");
-  specialCharReplace(str,"$QUOTATION_MARK$","\\\"");
-  return 0;
 }
 
 string Object::DumpToJson(bool isLeft)const{

@@ -64,7 +64,7 @@ namespace pond{
     ///////////////////////////////
     static int Foreach(Object &); //Foreach[i,{...},expr]
     ///////////////////////////////
-    static int System(Object &);
+    int PD_System(Object &);
     static int SystemWithoutOutput(Object &);
     ///////////////////////////////
     static int Set(Object  &Argv);
@@ -114,6 +114,8 @@ namespace pond{
     int PD_is(Object&);
 
     int PD_context(Object&);
+
+    int PD_type(Object&);
 
     int PD_ArrowFunction(Object&);
     int PD_Unpack(Object&);

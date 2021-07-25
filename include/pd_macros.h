@@ -171,10 +171,10 @@
 #ifdef DEBUG
 #  define OUT(str,var) ({ std::cerr<<__FILE__<<"("<<__LINE__<<#var<<"):"<<str<<" = "<<(var)<<std::endl; })
 #  define VOUT(var) ({ std::cerr<<__FILE__<<"("<<__LINE__<<"):"<<#var<<" = "<<(var)<<std::endl; })
-#  define MOUT(mat)  ({ std::cerr<<"matrix output "<<__FILE__<<"("<<__LINE__<<"):"<<#mat; \
+#  define MOUT(mat)  ({ std::cerr<<"matrix output "<<__FILE__<<"("<<__LINE__<<"):"<<#mat << std::endl; \
       (mat).DumpFile(#mat ".dat"); })
 #  ifdef __CUDACC__
-#    define DMOUT(mat) ({ std::cerr<<"matrix device output "<<__FILE__<<"("<<__LINE__<<"):"<<#mat; \
+#    define DMOUT(mat) ({ std::cerr<<"matrix device output "<<__FILE__<<"("<<__LINE__<<"):"<<#mat<<std::endl; \
       (mat).DeviceToHost(); (mat).DumpFile(#mat ".dat"); })
 #  else
 #    define DMOUT(mat) (mat).DumpFile(#mat ".dat");

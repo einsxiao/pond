@@ -27,7 +27,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2> void set_host( T1 *arr1, T2 *arr2, int n ){
-	  for (int i=0;i<n;i++) arr1[i]=T1(arr2[i]);
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int i=0;i<n;i++){
+      arr1[i]=T1(arr2[i]);
+    }
   }
   // *arr = num
 #if defined(__CUDACC__)
@@ -46,8 +49,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2> void set_host( T1 *arr, T2 num, int n ){
-    for (int i=0;i<n;i++) 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int i=0;i<n;i++){
       arr[i]=T1(num);
+    }
   }
   //define + ---------------------------------------------------
   //number add *out = num + (*in) or (*in) + num
@@ -72,11 +77,16 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 num,T3 *arrin,int n){
-    for (int i=0;i<n;i++) arrout[i]= T1(num + arrin[i]);
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int i=0;i<n;i++){
+      arrout[i]= T1(num + arrin[i]);
+    }
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 *arrin,T3 num,int n){
-    for (int i=0;i<n;i++) 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int i=0;i<n;i++){
       arrout[i]= T1(num + arrin[i]);
+    }
   }
   //add: *out = *in1 + *in2
 #if defined(__CUDACC__)
@@ -95,8 +105,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-    for (int tid =0;tid<n;tid++) 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid =0;tid<n;tid++) {
       arrout[tid]= T1( arrin1[tid] + arrin2[tid]);
+    }
   }
   //define - ----------------------------------------------------
   //  *out = *in - num
@@ -116,7 +128,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 *arrin,T3 num,int n){
-    for (int i=0;i<n;i++) arrout[i] = T1( arrin[i] - num);
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int i=0;i<n;i++){
+      arrout[i] = T1( arrin[i] - num);
+    }
   }
 
   //minus  *out = num - *in
@@ -137,8 +152,10 @@ namespace pond{
   }
 
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 num,T3 *arrin,int n){
-    for (int tid=0;tid<n;tid++)  
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0;tid<n;tid++)  {
       arrout[tid] = T1( num-arrin[tid] );  
+    }
   }
 
   //minus  *out = *in1 - *in2
@@ -157,7 +174,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-    for (int tid=0;tid<n;tid++)  arrout[tid] = T1( arrin1[tid]-arrin2[tid] );
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0;tid<n;tid++){
+      arrout[tid] = T1( arrin1[tid]-arrin2[tid] );
+    }
   }
 
   //define * ---------------------------------------------------
@@ -182,10 +202,16 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 num,T3 *arrin,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( arrin[tid]*num ); 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( arrin[tid]*num ); 
+    }
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 *arrin,T3 num,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( arrin[tid] * num ); 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( arrin[tid] * num ); 
+    }
   }
   //multi: *out = *in1 * *in2
 #if defined(__CUDACC__)
@@ -203,7 +229,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( arrin1[tid]* arrin2[tid] );
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( arrin1[tid]* arrin2[tid] );
+    }
   }
   //define / ----------------------------------------------------
   //numDiv  *out = *in / num
@@ -222,7 +251,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 *arrin,T3 num,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( arrin[tid] / num );
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( arrin[tid] / num );
+    }
   }
 
   //numDiv  *out = num / *in
@@ -241,7 +273,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 num,T3 *arrin,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( num / arrin[tid]  );
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( num / arrin[tid]  );
+    }
   }
   //div  *out = *in1 / *in2
 #if defined(__CUDACC__)
@@ -259,7 +294,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-    for (int tid=0; tid<n; tid++) arrout[tid] = T1( arrin1[tid] / arrin2[tid]  );
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){
+      arrout[tid] = T1( arrin1[tid] / arrin2[tid]  );
+    }
   }
   //define ^ ----------------------------------------------------
   //numDiv  *out = *in ^ num
@@ -278,8 +316,10 @@ namespace pond{
 #endif
   }
   template<class T1, class T2,class T3> void power_host(T1 *arrout, T2 *arrin,T3 num,int n){
-    for (int tid=0; tid<n; tid++) 
+#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+    for (int tid=0; tid<n; tid++){ 
       arrout[tid] = T1( pow(arrin[tid],(double)num) );
+    }
   }
 
 };

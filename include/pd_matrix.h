@@ -38,12 +38,17 @@ namespace pond{
     int                        MallocDevice();
     int                        HostToDevice();
     int                        DeviceToHost();
+
+    type                       MinRevised();
+    type                       MaxRevised();
+
+    type                       TotalRevised();
     type                       TotalDevice();
     type                       TotalHost();
-    type                       Total();
+
+    int                        Count(type cut_value);
     type                       CountDevice(type cut_value);
     type                       CountHost(type cut_value);
-    int                        Count(type cut_value);
 
     __cond_host_device__ type &Part(int *pArr);
     __cond_host_device__ type &Index(int *pArr);
@@ -1207,6 +1212,34 @@ namespace pond{
 
 #ifdef __CUDACC__ 
   template<class type>
+  __global__ void Matrix_Min_Kernel(type *arr,int n_in)
+  {
+    int tid= blockIdx.x*blockDim.x+threadIdx.x;
+    int n_cal= gridDim.x*blockDim.x;
+    int n_out= n_in/2;
+    int n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
+    while (tid<n_out){
+      if ( arr[tid+n_inc] < arr[tid] ){
+        arr[tid] = arr[tid+n_inc];
+      }
+      tid+=n_cal;
+    }
+  }
+  template<class type>
+  __global__ void Matrix_Max_Kernel(type *arr,int n_in)
+  {
+    int tid= blockIdx.x*blockDim.x+threadIdx.x;
+    int n_cal= gridDim.x*blockDim.x;
+    int n_out= n_in/2;
+    int n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
+    while (tid<n_out){
+      if ( arr[tid+n_inc] > arr[tid] ){
+        arr[tid] = arr[tid+n_inc];
+      }
+      tid+=n_cal;
+    }
+  }
+  template<class type>
   __global__ void Matrix_Total_Kernel(type *arr,int n_in)
   {
     int tid= blockIdx.x*blockDim.x+threadIdx.x;
@@ -1221,15 +1254,89 @@ namespace pond{
 #endif
 
   template<class type>
-  type Matrix_T<type>::TotalDevice()
+  type Matrix_T<type>::MinRevised()
   {
+    int n_in=Size();
 #ifdef __CUDACC__ 
     if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
-      int n_in=Size();
       int tn = __CudaThreadNumberPerBlock;
       int bn;
-      if ( n_in == 0 or DataDevice == NULL )
-        { Erroring("Matrix_T::TotalDevice","Matrix_T has no data on device side."); return 0; }
+      if ( n_in == 0 or DataDevice == NULL ) {
+        Erroring("Matrix_T::MinRevised","Matrix_T has no data on device side."); return 0;
+      }
+      while (n_in >1){
+        bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
+        if (tn > n_in/2) {tn =n_in/2; bn=1;}
+        Matrix_Min_Kernel<<<bn, tn>>>(DataDevice, n_in);
+        n_in = (n_in+1)/2;
+        cudaDeviceSynchronize();
+      }
+      type sum;
+      cudaMemcpy(&sum,DataDevice,sizeof(type),cudaMemcpyDeviceToHost); // only the final sum is needed
+      return sum;
+    }
+#endif
+    if ( n_in == 0 or Data == NULL ) {
+      Erroring("Matrix_T::MinRevised","Matrix_T has no data on host side."); return 0;
+    }
+    type value = Data[0];
+#pragma omp parallel for reduction(min:value)
+    for (int i =1; i< Size(); i++){
+      if ( Data[i] < value ){
+        value = Data[i];
+      }
+    }
+    return value;
+  }
+
+  template<class type>
+  type Matrix_T<type>::MaxRevised()
+  {
+    type value;
+    int n_in=Size();
+#ifdef __CUDACC__ 
+    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+      int tn = __CudaThreadNumberPerBlock;
+      int bn;
+      if ( n_in == 0 or DataDevice == NULL ) {
+        Erroring("Matrix_T::MaxRevised","Matrix_T has no data on device side."); return 0;
+      }
+      while (n_in >1){
+        bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
+        if (tn > n_in/2) {tn =n_in/2; bn=1;}
+        Matrix_Max_Kernel<<<bn, tn>>>(DataDevice, n_in);
+        n_in = (n_in+1)/2;
+        cudaDeviceSynchronize();
+      }
+      cudaMemcpy(&value,DataDevice,sizeof(type),cudaMemcpyDeviceToHost); // only the final sum is needed
+      return value;
+    }
+#endif
+    if ( n_in == 0 or Data == NULL ) {
+      Erroring("Matrix_T::MaxRevised","Matrix_T has no data on host side."); return 0;
+    }
+    value = Data[0];
+#pragma omp parallel for reduction(max:value)
+    for (int i =1; i< Size(); i++){
+      if ( Data[i] > value ){
+        value = Data[i];
+      }
+    }
+    return value;
+  }
+
+  template<class type>
+  type Matrix_T<type>::TotalRevised()
+  {
+    type sum;
+    int n_in=Size();
+#ifdef __CUDACC__ 
+    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+      int tn = __CudaThreadNumberPerBlock;
+      int bn;
+      if ( n_in == 0 or DataDevice == NULL ) {
+        Erroring("Matrix_T::TotalRevised","Matrix_T has no data on device side."); return 0;
+      }
       while (n_in >1){
         bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
         if (tn > n_in/2) {tn =n_in/2; bn=1;}
@@ -1237,33 +1344,33 @@ namespace pond{
         n_in = (n_in+1)/2;
         cudaDeviceSynchronize();
       }
-      type sum;
       cudaMemcpy(&sum,DataDevice,sizeof(type),cudaMemcpyDeviceToHost); // only the final sum is needed
       return sum;
-    }else
-      return Total();
-#else
-    return Total();
+    }
 #endif
+    if ( n_in == 0 or Data == NULL ) {
+      Erroring("Matrix_T::TotalRevised","Matrix_T has no data on host side."); return 0;
+    }
+    sum = Data[0];
+#pragma omp parallel for reduction(+:sum)
+    for (int i =1; i< Size(); i++){
+      sum += Data[i];
+    }
+    return sum;
   }
 
   template<class type>
   type Matrix_T<type>::TotalHost()
   {
-    type sum=0;
-    int size = Size();
-    for (auto i=0;i<size;i++)
-      sum+=Data[i];
-    return sum;
+    Warning("Matrix_T::TotalRevised","TotalHost will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
+    return TotalRevised();
   }
 
   template<class type>
-  type Matrix_T<type>::Total()
+  type Matrix_T<type>::TotalDevice()
   {
-    if ( EvaSettings::GetMatrixPosition() == MatrixDevice )
-      return TotalDevice();
-    else
-      return TotalHost();
+    Warning("Matrix_T::TotalRevised","TotalDevice will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
+    return TotalRevised();
   }
   
 

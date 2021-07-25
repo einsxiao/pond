@@ -71,7 +71,7 @@ DALL: dexe debugsharelib
 
 debugsharelib: $(DALLOBJECTS)
 	$(CC) $(DFLAGS) -shared -o lib$(MODULE_NAME)-dev.so $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
-	@chmod -x lib$(MODULE_NAME).so
+	@chmod -x lib$(MODULE_NAME)-dev.so
 build/debug/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tcpp.o: %.cpp $(HEADERS)

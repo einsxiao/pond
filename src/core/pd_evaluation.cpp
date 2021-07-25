@@ -1581,7 +1581,7 @@ int Evaluation::PD_Print(Object & ARGV){
     bool isEnd = (  iter == ARGV.End() -1 );
     // check if is end
     if(  (*iter).NullQ() ) continue;
-    str += ( (*iter).ToString()+(isEnd?"":sep) );
+    str += ( (*iter).ToString(true)+(isEnd?"":sep) );
   }
   str += end;
   PondInnerStringRestoreNormal(str);

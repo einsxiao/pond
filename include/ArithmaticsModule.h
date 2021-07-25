@@ -9,39 +9,39 @@ namespace pond{
   public:
     ArithmaticsModule(); ~ArithmaticsModule();
     ///////////////////////////////
-    static int Plus(Object&);
-    static int Times(Object&);
-    static int Power(Object&);
-    static int Log(Object&);
+    int PD_Plus(Object&);
+    int PD_Times(Object&);
+    int PD_Power(Object&);
+    int PD_Log(Object&);
     /* static int Complex(Object&); */
     ///////////////////////////////
-    static int AddTo(Object&);
-    static int SubtractFrom(Object&);
-    static int TimesBy(Object&);
-    static int DivideBy(Object&);
-    static int PowerWith(Object&);
+    int PD_AddTo(Object&);
+    int PD_SubtractFrom(Object&);
+    int PD_TimesBy(Object&);
+    int PD_DivideBy(Object&);
+    int PD_PowerWith(Object&);
     ///////////////////////////////
-    static int PreIncrement(Object&);
-    static int PreDecrement(Object&);
-    static int Increment(Object&);
-    static int Decrement(Object&);
+    int PD_PreIncrement(Object&);
+    int PD_PreDecrement(Object&);
+    int PD_Increment(Object&);
+    int PD_Decrement(Object&);
     ///////////////////////////////
-    static int Greater(Object&);
-    static int GreaterEqual(Object&);
-    static int Less(Object&);
-    static int LessEqual(Object&);
-    static int Equal(Object&);
-    static int UnEqual(Object&);
+    int PD_Greater(Object&);
+    int PD_GreaterEqual(Object&);
+    int PD_Less(Object&);
+    int PD_LessEqual(Object&);
+    int PD_Equal(Object&);
+    int PD_UnEqual(Object&);
     ///////////////////////////////
-    static int Not(Object&);
-    static int And(Object&);
-    static int Or(Object&);
+    int PD_Not(Object&);
+    int PD_And(Object&);
+    int PD_Or(Object&);
     ///////////////////////////////
-    static int Abs(Object&);
-    static int Factorial(Object&);
+    int PD_Abs(Object&);
+    int PD_Factorial(Object&);
     ///////////////////////////////
-    static int SetRandomSeed(Object&);
-    static int Random(Object&);
+    int PD_SetRandomSeed(Object&);
+    int PD_Random(Object&);
     ///////////////////////////////
     int PD_Sin(Object&);
     int PD_Cos(Object&);

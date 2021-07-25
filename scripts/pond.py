@@ -42,9 +42,16 @@ def help_info():
     logout
           清除登录信息
 
-    check 
+    check|list
           检验当前登录信息
           如果已经登录, 列举已经创建的模块
+
+    -----------------------------------------------
+    list_packages 
+          列举可安装软件包名(python, mpi 等等)
+    install [软件包名]
+          安装软件包
+    -----------------------------------------------
 
     version|-v
           显示当前的pond版本
@@ -71,9 +78,16 @@ def help_info():
     logout
           clear pond login info
 
-    check 
+    check|list
           check current login information 
           if login, list modules created
+
+    -----------------------------------------------
+    list_packages
+          list packages can be installed(python, mpi 等等)
+    install [软件包名]
+          install package
+    -----------------------------------------------
 
     version|-v
           show current pond version.
@@ -150,10 +164,11 @@ try:
     pass
 
   if operation == 'clear': operation = 'logout'
+  if operation == 'list': operation = 'check'
 
   if operation in [
       'say_hello','login','check','logout','pull', 'push',
-      'save'
+      'save', 'list_packages', 'install',
   ]:
     #print("processing ",operation )
     mod = importlib.import_module("operations."+operation)

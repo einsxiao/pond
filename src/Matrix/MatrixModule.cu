@@ -104,10 +104,10 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       CheckArgsShouldBeString(operobj,1);
       string filename = operobj[1].Key();
       if ( not FileExistQ( filename ) )
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       Matrix* matptr = GetOrNewMatrix( matname );
       if ( matptr->ReadFile(filename)<0 ){
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       }
       // ARGV.SetTo(1);
       ARGV = ARGV[1];
@@ -120,10 +120,10 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       CheckArgsShouldBeString(operobj,1);
       string filename = operobj[1].Key();
       if ( not FileExistQ( filename ) )
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       Matrix* matptr = GetOrNewMatrix( matname );
       if ( matptr->BinaryReadFile(filename)<0 ){
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       }
       // ARGV.SetTo(1);
       ARGV = ARGV[1];
@@ -136,10 +136,10 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       CheckArgsShouldBeString(operobj,1);
       string filename = operobj[1].Key();
       if ( not FileExistQ( filename ) )
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       Matrix* matptr = GetOrNewMatrix( matname );
       if ( matptr->ReadVTKFile(filename)<0 ){
-        ThrowError(ARGV.Key(),"data file "+filename+" deos not exist.");
+        ThrowError(ARGV.Key(),"data file "+filename+" does not exist.");
       }
       // ARGV.SetTo(1);
       ARGV = ARGV[1];

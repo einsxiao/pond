@@ -98,6 +98,8 @@ def request(argv,options):
         cmd = pond_git_cmd+ " push origin master"
         os.system( cmd )
         pass
+    if os.path.exists( "Makefile" ):
+        os.system("make release")
     
     return 
 

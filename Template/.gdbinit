@@ -32,6 +32,19 @@ class IndexPrinter(object):
     def display_hint(self):
         return "pond::Index"
 
+class ComplexNumberPrinter(object):
+    "Print pond::complex"
+    def __init__(self, val):
+        self.val = val
+        pass
+    def to_string(self):
+        return "("+str(self.val['re'])+","+str(self.val['im'])+")"
+        pass
+    def display_hint(self):
+        return "pond::complex"
+        pass
+    pass
+
 def object2string(obj):
     if obj:
         #print( 'objid = ',obj['objid']['row'], obj['objid']['row'] )
@@ -116,14 +129,14 @@ class MatrixPrinter(object):
             d[1] = int( self.val["D1"] )
             size = d[1]
             dim += ", D1 = " + str(d[1])
-            for i in range(2, d[0]+1 ):
+            for i in range(2, min(9,d[0]+1) ):
                 d[i] = int( self.val["D"+str(i)] )
                 size *= d[i]
                 dim += ", D"+str(i)+" = "+str( d[i] )
                 pass
             mat_vals = dim + ", \n"
             mat_vals += "  DataDevice = {0},\n".format(str(self.val['DataDevice']) )
-            mat_vals += "  Data = {0},\n".format(str(self.val['Data']) )
+            mat_vals += "  Data = {0}\n".format(str(self.val['Data']) )
             mat_vals += "}"
             data = self.val['Data']
             mat = "\nData = [\n"
@@ -226,6 +239,8 @@ import gdb.printing
 def build_pretty_printers():
     pp = gdb.printing.RegexpCollectionPrettyPrinter("pond")
     pp.add_printer('Index',"^pond::Index$",IndexPrinter)
+    pp.add_printer('complex',"^pond::complex$",ComplexNumberPrinter)
+    pp.add_printer('floatcomplex',"^pond::floatcomplex$",ComplexNumberPrinter)
     pp.add_printer('Object',"^pond::Object$",ObjectPrinter)
     pp.add_printer('Object',"^pond::Matrix",MatrixPrinter)
     #pp.add_printer('Object',"^pond::Matrix_T$",MatrixPrinter)

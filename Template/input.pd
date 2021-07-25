@@ -1,5 +1,6 @@
 #!/usr/bin/env pond
 SetRunningMode("cpu") # two mode is cpu/gpu
+SetCpuThreadsNumber(1)
 import Template
 hello();
 mat = [[1,2,3,4,-7],[3,34,3,9,878]]

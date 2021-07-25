@@ -42,6 +42,7 @@ int TemplateModule::PD_matX2(Object&argv){
   }
   mat.DeviceToHost();
   MatrixModule::Matrix2Object( mat, argv );
+  complex x(3,4);
   return 0;
 }
 

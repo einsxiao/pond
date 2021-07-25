@@ -23,6 +23,7 @@ cp -rf $POND_ROOT/Template/TemplateModule.cpp  ./${module_name}Module.cpp
 cp -rf $POND_ROOT/Template/TemplateModule.pd   ./${module_name}Module.pd
 cp -rf $POND_ROOT/Template/input.pd            ./
 cp -rf $POND_ROOT/Template/.gitignore          ./
+cp -rf $POND_ROOT/Template/.vscode             ./
 
 change_from_to ./ Template ${module_name} 2>&1 >/dev/null
 change_from_to ./ DATE "`date`" 2>&1>/dev/null

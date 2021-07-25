@@ -28,7 +28,7 @@ DNVFLAGS     := $(FLAGS) -G -g --compiler-options -g3  --compiler-options -Wall 
 NVFLAGS      := $(FLAGS) -O2 --compiler-options -fopenmp  -Wno-deprecated-gpu-targets
 
 OUT           = pond
-DOUT          = pond
+DOUT          = pond-dev
 
 debug: all-prepare debug-prepare DALL
 debug-prepare:
@@ -49,7 +49,7 @@ dir:$(BUILDDIRS)
 	@if [ $(POND_ENABLE_PYTHON) == "yes" ]; then cd Python; make $(MODE); cd ..; fi
 
 pond: main.o
-	$(NVCC) $(NVFLAGS) -o pond main.o $(INCLUDE) $(LIB)
+	$(NVCC) $(NVFLAGS) -o $(OUT) main.o $(INCLUDE) $(LIB)
 
 pypond.so: pypond.o
 	pcc $(NVFLAGS) -shared -o pypond.so pypond.o $(INCLUDE) $(LIB)
@@ -60,11 +60,11 @@ pypond.o: pypond.cu
 %.o: %.cu
 	$(NVCC) $(NVFLAGS) -c -Xcompiler -fPIC $< -o $@ $(INCLUDE)
 
-DALL: pond-dev #pypond-dev.so
-	cp -f $(OUT) ../bin/
+DALL: dir pond-dev 
+	#cp -f $(OUT) ../bin/
 
 pond-dev: main.dev.o
-	$(NVCC) $(DNVFLAGS)  -o pond main.dev.o $(INCLUDE) $(LIB)
+	$(NVCC) $(DNVFLAGS)  -o $(DOUT) main.dev.o $(INCLUDE) $(LIB)
 
 pypond-dev.so: pypond-dev.o
 	pcc $(DNVFLAGS) -shared -o pypond.so pypond-dev.o $(INCLUDE) $(LIB)

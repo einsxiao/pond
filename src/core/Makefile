@@ -3,8 +3,8 @@ PPCC = g++
 DIRS = 
 LIBS = -ldl
 ##################################################################################
-DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment
-FLAGS := -std=c++11 -O2 
+DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp
+FLAGS := -std=c++11 -O2 -fopenmp
 
 ##################################################################################
 

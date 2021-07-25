@@ -154,8 +154,8 @@ namespace pond{
   inline double  Rand(){ return (double)rand()/RAND_MAX; }
   double         GaussRand(double mean = 0.0, double variance = 1.0);
   ////////////////
+  int            specialCharReplace(std::string&str, const std::string ori, const std::string rep);
   int            PondInnerStringRestoreNormal(std::string &str);
-  
 };
 
 #endif

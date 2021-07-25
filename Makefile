@@ -7,4 +7,5 @@ prepare:
 
 makerelease:
 	make -C src release
+	make -C src debug
 

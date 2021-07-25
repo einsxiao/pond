@@ -202,6 +202,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
   char ch;
   bool expressionEnd;
   bool listEnd = false;
+  bool string_item_exist  = false;
   string currentWord;
   while ( 1 ){
     if ( !getChar(ch) ){ //
@@ -311,25 +312,14 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           }
             ///////////////////////// 
             ///////////////////////// " and ' can both enclose a String
-          case '`':{
-            while ( getChar(ch) and
-                    (ch != '`' or
-                     (ch == '`' and currentWord.size()>0 and *currentWord.rbegin() == '\\') ) )
-              currentWord.append(1,ch);
-            if ( ch != '`' ) {
-              zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
-                Erroring("Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
-              return -1;
-            }
-            listStack.PushBackString( currentWord.c_str() );
-            break;
-          }
-          case '\"':{
+          case '\'': case '\"':{
+            char qch = ch;
+            bool chT = false;
             char ch1,ch2;
             bool e1 = getChar(ch1,1);
             bool e2 = getChar(ch2,2);
-            if ( e1 and ch1=='"' and e2  and ch2 == '"' ){ // triple quote string
-              //dout<<"dealing long string"<<endl;
+            if ( e1 and ch1== qch and e2  and ch2 == qch ){ // triple quote string
+              //cout<<"dealing long string"<<endl;
               rollBack(-2);
               for (;;){
                 bool e0 = getChar(ch); e1 = getChar(ch1,1), e2 = getChar(ch2,2);
@@ -340,66 +330,65 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                   return -8;
                 }
                 //met string end
-                if ( (ch == '\"'&&currentWord.size()>0&& *currentWord.rbegin() != '\\') and
-                     (ch1 == '\"' ) and
-                     (ch2 == '\"' ) ){ 
+                if ( (ch  == qch ) and
+                     (ch1 == qch ) and
+                     (ch2 == qch ) ){
                   rollBack(-2);
                   break;
                 }
-                currentWord.append(1,ch);
+                if ( ch == '\\' ){
+                  rollBack(-1);
+                  switch ( ch1 ){
+                  case 'n': case 'r': case '\\': case 't': {
+                    currentWord.append(1,ch);
+                    currentWord.append(1,ch1);
+                    break;
+                  }
+                  default:{
+                    currentWord.append(1,ch1);
+                    break;
+                  }
+                  }
+                } else {
+                  currentWord.append(1,ch);
+                }
               }
-              //dout<<"long string:"<<currentWord<<endl;
+              //cout<<"long string:"<<currentWord<<endl;
 
               listStack.PushBackString( currentWord.c_str() );
+              string_item_exist = true;
+
               break;
             }
             // single quote string
-            while ( getChar(ch) && (ch != '\"'|| (ch == '\"'&&currentWord.size()>0&& *currentWord.rbegin() == '\\') ) )
-              currentWord.append(1,ch);
-            if ( ch != '\"' ) {
-              zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
-                Erroring("Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
-              return -1;
-            }
-            listStack.PushBackString( currentWord.c_str() );
-            break;
-          }
-          case '\'':{
-            char ch1,ch2;
-            bool e1 = getChar(ch1,1);
-            bool e2 = getChar(ch2,2);
-            if ( e1 and ch1=='\'' and e2  and ch2 == '\'' ){ // triple quote string
-              rollBack(-2);
-              for (;;){
-                bool e0 = getChar(ch); e1 = getChar(ch1,1), e2 = getChar(ch2,2);
-                //met buffer end but not string end
-                if ( not e0 or not e1 or not e2 ) {
-                  zhErroring("语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行" ) ||
-                    Erroring("语法","String uncomplete at line "+pond::ToString(lineNumber) );
-                  return -1;
-                }
-                //met string end
-                if ( (ch == '\''&&currentWord.size()>0&& *currentWord.rbegin() != '\\') and
-                     (ch1 == '\'' ) and
-                     (ch2 == '\'' ) ){ 
-                  rollBack(-2);
+            for (;;){
+              bool e0 = getChar(ch), e1 = getChar(ch1,1); 
+              if ( not e0 ){
+                zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
+                  Erroring("Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
+                return -1;
+              }
+              if ( ch == qch ) break;
+              if ( ch == '\\' ){
+                rollBack(-1);
+                switch ( ch1 ){
+                case 'n': case 'r': case '\\': case 't': {
+                  currentWord.append(1,ch);
+                  currentWord.append(1,ch1);
                   break;
                 }
+                default:{
+                  currentWord.append(1,ch1);
+                  break;
+                }
+                }
+
+              } else {
                 currentWord.append(1,ch);
               }
-
-              listStack.PushBackString( currentWord.c_str() );
-              break;
             }
-            //single quote string
-            while ( getChar(ch) && (ch != '\''|| (ch == '\''&&currentWord.size()>0&& *currentWord.rbegin() == '\\') ) )
-              currentWord.append(1,ch);
-            if ( ch != '\'' ) {
-              zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
-                Erroring( "Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
-              return -1;
-            }
-            listStack.PushBackString(currentWord.c_str() );
+            listStack.PushBackString( currentWord.c_str() );
+            string_item_exist = true;
             break;
           }
             ///////////////////////// numbers
@@ -459,7 +448,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               Object listList;
               listList.SetList( SYMID_OF_List );
               if ( GetList( listList , depth +1)<0 ) return -1;
-              //dout<<"get list after [  "<<listList<<endl;
+              //cout<<"get list after [  "<<listList<<endl;
               if ( listList.Size() == 1 and listList[1].SimpleListQ(SYMID_OF_Sequence ) ){
                 listList = listList[1];
                 listList[0].SetSymbol( SYMID_OF_List );
@@ -467,7 +456,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               listStack.PushBackRef( listList );
               break;
             }
-            //dout<<" [ as part oper "<<endl;
+            //cout<<" [ as part oper "<<endl;
             // rollBack(-1);
             OPERATOR_PUSH( SYMID_OF_PartArgsFollow,RConnect );
             Object argsList; argsList.SetList( SYMID_OF_Part );
@@ -952,6 +941,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               if ( ch1 == '>' ){
                 char ch2; bool e2 = getChar(ch2,2);
                 if ( e2 && ch2 == '>' ){
+                  //>>>jfkdlsaj<<<
                   rollBack(-2);
                   while (  getChar(ch) ){
                     currentWord.append(1,ch);
@@ -965,6 +955,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                   }
                   if ( listStack.Size() == 0 or not listStack.Back().SymbolQ() ){
                     listStack.PushBackString( currentWord );
+                    string_item_exist = true;
                     break;
                   }
                   Object argsList;
@@ -1127,8 +1118,9 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
     // RLeft :
     //////////////////////////// reduce the expression if can and need
     if ( expressionEnd || listEnd || End() ){
-      //dout<<"liststack>"<<listStack<<endl;
-      //dout<<"parentlist>"<<parentList<<endl;
+      //cout<<"list end"<<endl;
+      //cout<<"liststack>"<<listStack<<endl;
+      //cout<<"parentlist>"<<parentList<<endl;
       if ( listStack.Empty() ){
         if ( !parentList.Empty() ){
           //dout<<"get result Null"<<endl;
@@ -1474,7 +1466,6 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           }// end of reduce at the position
         } //end of reduce,end of while size()>1
 
-        //dout<<"reduce done>"<<listStack<<endl;
         /////////////////////////////////////////////// get final result
         if ( listStack.Size()>1 ){
           zhErroring("语法","表达式分析失败. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
@@ -1490,10 +1481,15 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
         //        parentList.SimpleListQ( SYMID_OF_List )  or
         //        )
         parentList.PushBackRef( listStack(1) );// 0 is its head, 1st is its first child list
+        //cout<<"reduce done>"<<listStack<<endl;
+        if ( listStack(1).ListQ( SYMID_OF_Plus ) and string_item_exist ){
+          INIT_SYMID_OF( ToString );
+          listStack(1)[0].SetSymbol( SYMID_OF_ToString );
+        }
         listStack.Delete(1);
       }
       if ( listEnd || End() ){
-        //dout<< "meet final end parent = "<<parentList<< " listStack = "<<listStack<<endl;
+        //cout<< "meet final end parent = "<<parentList<< " listStack = "<<listStack<<endl;
         return 0;
       }
     }//end of if *End
