@@ -664,7 +664,7 @@ namespace pond{
     }
     Malloc();
 #if defined(__CUDACC__)
-    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::GetRunningMode() == RunningModeGpu ){
+    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and pond::GetParallelMode() == ParallelModeGpu ){
       MallocDevice();
     }
 #endif
@@ -687,7 +687,7 @@ namespace pond{
 #undef CP
     Malloc();
 #if defined(__CUDACC__)
-    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and EvaSettings::GetRunningMode() == RunningModeGpu ){
+    if ( ( dataPosition == MatrixDevice or dataPosition == MatrixHostDevice ) and pond::GetParallelMode() == ParallelModeGpu ){
       MallocDevice();
     }
 #endif
@@ -752,7 +752,7 @@ namespace pond{
 
   template<class type> int Matrix_T<type>::MallocDevice(){
 #if defined(__CUDACC__)
-    if ( DataDevice == NULL and EvaSettings::GetRunningMode() == pond::RunningModeGpu ){
+    if ( DataDevice == NULL and pond::GetParallelMode() == pond::ParallelModeGpu ){
       cudaMalloc((void**)&DataDevice,sizeof(type)*Size() );
       CUDA_LAST_ERROR();
     }
@@ -763,7 +763,7 @@ namespace pond{
   template<class type> int Matrix_T<type>::HostToDevice()
   {
 #if defined(__CUDACC__)
-    if (Data == NULL or (EvaSettings::GetRunningMode() == RunningModeCpu) ) return -1;
+    if (Data == NULL or (pond::GetParallelMode() == ParallelModeCpu) ) return -1;
     MallocDevice();
     cudaMemcpy((void*)DataDevice,(void*)Data,sizeof(type)*Size(),cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
@@ -776,7 +776,7 @@ namespace pond{
   int Matrix_T<type>::DeviceToHost()
   {
 #if defined(__CUDACC__)
-    if (DataDevice == NULL or (EvaSettings::GetRunningMode() == RunningModeCpu) )  return -1;
+    if (DataDevice == NULL or (pond::GetParallelMode() == ParallelModeCpu) )  return -1;
     Malloc();
     cudaMemcpy((void*)Data, (void*)DataDevice, sizeof(type)*Size(),cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
@@ -881,7 +881,7 @@ namespace pond{
       return -1;
     }
     std::ofstream os(filename.c_str());
-    os.precision(EvaSettings::precision);
+    os.precision(EvaSettings.precision);
     os.setf( std::ios::uppercase);
     for (int i=0; i<= DimN(); i++)
       os<<Dim(i)<<" ";
@@ -908,7 +908,7 @@ namespace pond{
       ReShape(3,Size()/ Dim(ND)/Dim(ND-1), Dim(ND-1), Dim(ND));
     }
     std::ofstream os(filename.c_str());
-    os.precision(EvaSettings::precision);
+    os.precision(EvaSettings.precision);
     os.setf( std::ios::uppercase);
     os<<"# vtk DataFile Version 2.0\n";
     os<<"Volume example\n";
@@ -956,7 +956,7 @@ namespace pond{
       return -1;
     }
     std::ofstream os(filename.c_str(),std::ios::binary);
-    os.precision(EvaSettings::precision);
+    os.precision(EvaSettings.precision);
     os.setf( std::ios::uppercase);
     os.write( (char*)&ND, 23 );
     os.write( (char*)&Data[0], Size()*sizeof(type) );
@@ -1041,9 +1041,9 @@ namespace pond{
       Erroring("Matrix::Set","Right Matrix is Empty."); return (*this); 
     }
     if ( not SameDimensionQ(other) )
-      Init(other,EvaSettings::GetMatrixPosition() ); 
+      Init(other,pond::GetDataPosition() ); 
 #ifdef __CUDACC__
-    if ( EvaSettings::IsOnHost() ){
+    if ( pond::IsDataOnHost() ){
       if ( other.Data != NULL and Data != NULL ){
         if ( typeid(type) == typeid(otype) ){
           memcpy(Data,other.Data,sizeof(type)*Size());
@@ -1052,7 +1052,7 @@ namespace pond{
         }
       }
     }
-    if ( EvaSettings::IsOnDevice()){
+    if ( pond::IsDataOnDevice()){
       if ( other.DataDevice != NULL and DataDevice != NULL ){
         if ( typeid(type) == typeid(otype) ){
           cudaMemcpy(DataDevice,other.DataDevice,sizeof(type)*Size(),cudaMemcpyDeviceToDevice);
@@ -1092,11 +1092,11 @@ namespace pond{
       return *this;
     }
 #if defined(__CUDACC__)
-    if (EvaSettings::IsOnHost()){ 
+    if ( pond::IsDataOnHost() ){ 
       Malloc();
       set_host(Data, value , Size());
     }
-    if (EvaSettings::IsOnDevice()){
+    if ( pond::IsDataOnDevice() ){
       MallocDevice();
       set_device(DataDevice,value,Size() );
     }
@@ -1118,11 +1118,11 @@ namespace pond{
       Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
       return (*this);                                                   \
     }                                                                   \
-    if ( EvaSettings::IsOnHost() ){                                     \
+    if ( pond::IsDataOnHost() ){                                        \
       if ( other.Data != NULL and Data != NULL )                        \
         func##_host(Data,Data,other.Data,Size());                       \
     }else                                                               \
-    if ( EvaSettings::IsOnDevice()){                                    \
+      if ( pond::IsDataOnDevice()){                                     \
       if ( other.DataDevice != NULL and DataDevice != NULL )            \
         func##_device(DataDevice,DataDevice,other.DataDevice,Size());   \
     }                                                                   \
@@ -1138,10 +1138,10 @@ namespace pond{
       Erroring("Matrix::"#name,"Matrix is Empty.");                     \
       return *this;                                                     \
     }                                                                   \
-    if ( EvaSettings::IsOnHost() ){                                     \
+    if ( pond::IsDataOnHost() ){                                        \
       func##_host(Data,Data,value,Size() );                             \
     }else                                                               \
-    if ( EvaSettings::IsOnDevice()){                                    \
+      if ( pond::IsDataOnDevice()){                                     \
       func##_device(DataDevice,DataDevice,value,Size() );               \
     }                                                                   \
     if ( state==MatrixStateTempFree ) state = MatrixStateTempOccupied;  \
@@ -1198,12 +1198,13 @@ namespace pond{
     if ( Size() <= 0 ) 
       { Erroring("Matrix::PowerBy","Matrix is Empty.");  return *this; }
 #ifdef __CUDACC__
-    if ( EvaSettings::IsOnHost() ){ 
+    if ( pond::IsDataOnHost() ){ 
       power_host(Data,Data,value,Size() );        
-    }else 
-    if ( EvaSettings::IsOnDevice()){ 
-      power_device(DataDevice,DataDevice,value,Size() );  
-    } 
+    } else {
+      if ( pond::IsDataOnDevice()){ 
+        power_device(DataDevice,DataDevice,value,Size() );  
+      } 
+    }
 #else
     power_host(Data,Data,value,Size() );        
 #endif
@@ -1258,7 +1259,7 @@ namespace pond{
   {
     int n_in=Size();
 #ifdef __CUDACC__ 
-    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+    if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
@@ -1295,7 +1296,7 @@ namespace pond{
     type value;
     int n_in=Size();
 #ifdef __CUDACC__ 
-    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+    if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
@@ -1331,7 +1332,7 @@ namespace pond{
     type sum;
     int n_in=Size();
 #ifdef __CUDACC__ 
-    if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+    if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
@@ -1391,10 +1392,10 @@ namespace pond{
     if (not (data1.SameDimensionQ(data2) ))                             \
       { Erroring("Matrix::"#name,"Try to "#func" two Matrixs of different size."); return arrout; } \
     if ( !(arrout.SameDimensionQ(data1)) )                              \
-      arrout.Init(data1,EvaSettings::GetMatrixPosition() ) ;               \
-    if (EvaSettings::IsOnHost()  )                                      \
+      arrout.Init(data1, pond::GetDataPosition() ) ;                     \
+    if ( pond::IsDataOnHost()  )                                        \
       func##_host( arrout.Data, 		data1.Data, 	data2.Data, 	data1.Size() ); \
-    else if (EvaSettings::IsOnDevice())                                 \
+    else if ( pond::IsDataOnDevice())                                   \
       func##_device(arrout.DataDevice,	data1.DataDevice,	data2.DataDevice,	data1.Size() ); \
     if ( data1.state == MatrixStateTempOccupied )                       \
       data1.state = MatrixStateTempFree;                                \
@@ -1408,10 +1409,10 @@ namespace pond{
   template<class type,class type1,class type2>                          \
   Matrix_T<type> &name(Matrix_T<type> &arrout,Matrix_T<type1> &data1,type2 num){ \
     if ( not (arrout.SameDimensionQ(data1) ))                           \
-      arrout.Init(data1,EvaSettings::GetMatrixPosition() ) ;            \
-    if (EvaSettings::IsOnHost()  )                                      \
+      arrout.Init(data1, pond::GetDataPosition() ) ;                    \
+    if ( pond::IsDataOnHost()  )                                        \
       func##_host( arrout.Data, 		data1.Data, 	num, 	data1.Size() ); \
-    else if (EvaSettings::IsOnDevice())                                 \
+    else if ( pond::IsDataOnDevice())                                   \
       func##_device(arrout.DataDevice,	data1.DataDevice,	num,	data1.Size() ); \
     if ( data1.state == MatrixStateTempOccupied )                       \
       data1.state = MatrixStateTempFree;                                \

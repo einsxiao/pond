@@ -313,10 +313,10 @@ int MatrixModule::PD_Matrix(Object &ARGV){
 
 
 int MatrixModule::PD_GetMatrixPosition(Object &ARGV){
-  CheckArgsShouldEqual(ARGV,0)
-  if ( EvaSettings::GetMatrixPosition() == MatrixDevice )
+  CheckArgsShouldEqual(ARGV,0);
+  if ( pond::GetDataPosition() == DataDevice )
     ARGV.SetString("Device");
-  else if ( EvaSettings::GetMatrixPosition() == MatrixHostDevice )
+  else if ( pond::GetDataPosition() == DataHostDevice )
     ARGV.SetString("HostDevice");
   else ARGV.SetString("Host");
   ReturnNormal;
@@ -326,11 +326,11 @@ int MatrixModule::PD_SetMatrixPosition(Object &ARGV){
   CheckArgsShouldEqual(ARGV,1);
   CheckShouldBeString(1);
   if ( ARGV[1].StringQ( "Host" ) )
-    EvaSettings::SetMatrixPosition(MatrixHost);
+    pond::SetDataPosition(DataHost);
   else if ( ARGV[1].StringQ("Device") )
-    EvaSettings::SetMatrixPosition(MatrixDevice);
+    pond::SetDataPosition(DataDevice);
   else if ( ARGV[1].StringQ("HostDevice") )
-    EvaSettings::SetMatrixPosition( MatrixHostDevice);
+    pond::SetDataPosition( MatrixHostDevice);
   else{
     ThrowError(ARGV.Key(),"position specification should be one of {\"Host\",\"Device\",\"HostDevice\"}.");
   }

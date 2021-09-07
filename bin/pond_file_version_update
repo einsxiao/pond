@@ -1,0 +1,9 @@
+if ! [ $# == 2 ]; then
+  echo "Usage:
+	${0} [module_dir]
+  Change content of non-ELF files with substring '[from_name]' to '[to_name]'. 
+  Change files with filename substring '[from_name]' to '[to_name]'.
+"
+  exit 0;
+fi
+modulename=`basename $1`

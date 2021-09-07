@@ -282,7 +282,7 @@ string launch_kernel::define_cpu(char part)
   int size = iters.size();
   string out;
   if ( part == 'f' ){
-    out = declare_cpu() + " {\n#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )";
+    out = declare_cpu() + " {\n#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )";
     return out;
   }
   out = string(declare_cpu().size(),' ') + "  ";

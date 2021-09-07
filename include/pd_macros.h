@@ -462,7 +462,7 @@ inline void HandleError( cudaError_t cu_err,const char *file,int line ) {
 #define _threadIdx2(ii,jj) const int ii = threadIdx.x, jj = threadIdx.y;
 #define _threadIdx1(ii) const int ii = threadIdx.x
 
-#define __CudaThreadNumberPerBlock pond::EvaSettings::threadNumberPerBlock
+#define __CudaThreadNumberPerBlock EvaSettings.threadNumberPerBlock
 #define _cuDim(N) dim3(__CudaBlockNumber(N)),dim3(__CudaThreadNumberPerBlock)
 
 

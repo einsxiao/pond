@@ -7,4 +7,5 @@ exe
 *.swp
 */build/
 /packages/
+/include/*
 */__pycache__/

@@ -27,7 +27,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2> void set_host( T1 *arr1, T2 *arr2, int n ){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int i=0;i<n;i++){
       arr1[i]=T1(arr2[i]);
     }
@@ -49,7 +49,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2> void set_host( T1 *arr, T2 num, int n ){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int i=0;i<n;i++){
       arr[i]=T1(num);
     }
@@ -77,13 +77,13 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 num,T3 *arrin,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int i=0;i<n;i++){
       arrout[i]= T1(num + arrin[i]);
     }
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 *arrin,T3 num,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int i=0;i<n;i++){
       arrout[i]= T1(num + arrin[i]);
     }
@@ -105,7 +105,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void add_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid =0;tid<n;tid++) {
       arrout[tid]= T1( arrin1[tid] + arrin2[tid]);
     }
@@ -128,7 +128,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 *arrin,T3 num,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int i=0;i<n;i++){
       arrout[i] = T1( arrin[i] - num);
     }
@@ -152,7 +152,7 @@ namespace pond{
   }
 
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 num,T3 *arrin,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0;tid<n;tid++)  {
       arrout[tid] = T1( num-arrin[tid] );  
     }
@@ -174,7 +174,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void minus_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0;tid<n;tid++){
       arrout[tid] = T1( arrin1[tid]-arrin2[tid] );
     }
@@ -202,13 +202,13 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 num,T3 *arrin,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( arrin[tid]*num ); 
     }
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 *arrin,T3 num,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( arrin[tid] * num ); 
     }
@@ -229,7 +229,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void multi_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( arrin1[tid]* arrin2[tid] );
     }
@@ -251,7 +251,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 *arrin,T3 num,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( arrin[tid] / num );
     }
@@ -273,7 +273,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 num,T3 *arrin,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( num / arrin[tid]  );
     }
@@ -294,7 +294,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2, class T3> void divi_host(T1 *arrout, T2 *arrin1,T3 *arrin2,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){
       arrout[tid] = T1( arrin1[tid] / arrin2[tid]  );
     }
@@ -316,7 +316,7 @@ namespace pond{
 #endif
   }
   template<class T1, class T2,class T3> void power_host(T1 *arrout, T2 *arrin,T3 num,int n){
-#pragma omp parallel for num_threads( pond::EvaSettings::threadNumberPerKernel )
+#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )
     for (int tid=0; tid<n; tid++){ 
       arrout[tid] = T1( pow(arrin[tid],(double)num) );
     }

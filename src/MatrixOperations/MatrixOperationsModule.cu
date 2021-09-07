@@ -94,18 +94,18 @@ public:
       fcpu_plan_backward = fftwf_mpi_plan_many_dft(rank, nn, batch, dist, dist, (fftwf_complex*)fmat.Data, (fftwf_complex*)fmat.Data, MPI_COMM_WORLD, FFTW_BACKWARD, FFTW_ESTIMATE );
     }else if ( type == PlanType_gpu_cpu ){// gpu cpu
       mat.Init(1,batch*dist,MatrixHostDevice);
-      if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+      if ( pond::GetParallelMode() == ParallelModeGpu ){
         cufftPlanMany(&gpu_plan,rank,n,n,stride,dist,n,stride,dist,CUFFT_Z2Z,batch);
         CUDA_LAST_ERROR();
       }
-      if ( EvaSettings::GetRunningMode() == RunningModeCpu ){
-        fftw_plan_with_nthreads( EvaSettings::threadNumberPerKernel );
+      if ( pond::GetParallelMode() == ParallelModeCpu ){
+        fftw_plan_with_nthreads( EvaSettings.threadNumberPerKernel );
       }
       cpu_plan_forward = fftw_plan_many_dft( rank, inn, batch, (fftw_complex*)mat.Data, n, stride, dist, (fftw_complex*)mat.Data, n, stride, dist, FFTW_FORWARD, FFTW_ESTIMATE ); 
       cpu_plan_backward = fftw_plan_many_dft( rank, inn, batch, (fftw_complex*)mat.Data, n, stride, dist, (fftw_complex*)mat.Data, n, stride, dist, FFTW_BACKWARD, FFTW_ESTIMATE ); 
     }else{// float gpu cpu
       fmat.Init(1,batch*dist,MatrixHostDevice);
-      if ( EvaSettings::GetRunningMode() ==  RunningModeGpu ){
+      if ( pond::GetParallelMode() ==  ParallelModeGpu ){
         cufftPlanMany(&gpu_plan,rank,n,n,stride,dist,n,stride,dist,CUFFT_C2C,batch);
         CUDA_LAST_ERROR();
       }
@@ -125,7 +125,7 @@ public:
   }
   void execute(ComplexMatrix &in_mat,ComplexMatrix &out_mat,MatrixOperationsType dire)
   {
-    if ( type == PlanType_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       if ( dire == MatrixOperations_FFT_FORWARD )
         cufftExecZ2Z(gpu_plan, (cufftDoubleComplex*) in_mat.DataDevice, (cufftDoubleComplex*) out_mat.DataDevice, CUFFT_FORWARD );
       else 
@@ -143,7 +143,7 @@ public:
   }
   void execute(FloatComplexMatrix &in_mat,FloatComplexMatrix &out_mat,MatrixOperationsType dire)
   {
-    if ( type == PlanType_float_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_float_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       if ( dire == MatrixOperations_FFT_FORWARD ) 
         cufftExecC2C(gpu_plan, (cufftComplex*) in_mat.DataDevice, (cufftComplex*) out_mat.DataDevice, CUFFT_FORWARD );
       else
@@ -161,7 +161,7 @@ public:
   }
   void execute(Matrix &in_mat,ComplexMatrix &out_mat)
   {
-    if ( type == PlanType_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       out_mat = in_mat;
       cufftExecZ2Z(gpu_plan, (cufftDoubleComplex*) out_mat.DataDevice, (cufftDoubleComplex*) out_mat.DataDevice, CUFFT_FORWARD );
       CUDA_LAST_ERROR();
@@ -173,7 +173,7 @@ public:
   }
   void execute(FloatMatrix &in_mat,FloatComplexMatrix &out_mat)
   {
-    if ( type == PlanType_float_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_float_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       out_mat = in_mat;
       cufftExecC2C(gpu_plan, (cufftComplex*) out_mat.DataDevice, (cufftComplex*) out_mat.DataDevice, CUFFT_FORWARD );
       CUDA_LAST_ERROR();
@@ -185,7 +185,7 @@ public:
   }
   void execute(ComplexMatrix &in_mat,Matrix &out_mat)
   {
-    if ( type == PlanType_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       if ( not mat.SameDimensionQ( in_mat ) )
         mat.Init( in_mat );
       cufftExecZ2Z(gpu_plan, (cufftDoubleComplex*) in_mat.DataDevice, (cufftDoubleComplex*) mat.DataDevice, CUFFT_INVERSE);
@@ -199,7 +199,7 @@ public:
   }
   void execute(FloatComplexMatrix &in_mat,FloatMatrix &out_mat)
   {
-    if ( type == PlanType_gpu_cpu and EvaSettings::GetMatrixPosition() == MatrixDevice ){
+    if ( type == PlanType_gpu_cpu and pond::GetDataPosition() == MatrixDevice ){
       if ( not fmat.SameDimensionQ( in_mat ) )
         fmat.Init( in_mat );
       cufftExecC2C(gpu_plan, (cufftComplex*) in_mat.DataDevice, (cufftComplex*) fmat.DataDevice, CUFFT_INVERSE);
@@ -245,7 +245,7 @@ planRecord* getPlanReady(int rank, int n[],int type, int batch=1)
   // not find
   if ( not found ){
     static bool fftw_threads_initialized = false;
-    if ( not fftw_threads_initialized && EvaSettings::GetRunningMode() == RunningModeCpu ){
+    if ( not fftw_threads_initialized && pond::GetParallelMode() == ParallelModeCpu ){
       fftw_init_threads();
       fftw_threads_initialized = true;
     }
@@ -355,7 +355,7 @@ void MatrixOperationsModule::MPI_FFT3D(int n1, int n2, int n3, ComplexMatrix &in
   planRecord *plan;
   int n[3]={n1,n2,n3};
   plan = getPlanReady(3,n,PlanType_mpi,1);
-  if ( EvaSettings::GetMatrixPosition() == MatrixHost ){
+  if ( pond::GetDataPosition() == MatrixHost ){
     plan->execute( in_mat, out_mat , direction );
     out_mat.ReShape( 3, n1/mpiModule->rankSize, n2, n3 );
   }else{
@@ -405,7 +405,7 @@ int MatrixOperationsModule::PD_fftTest(Object &Argv)
   //MatrixOperationsModule::MPI_FFT3D_MatrixInit( data, n[0],n[1],n[2] );
   // data = in_data;
   // data.HostToDevice();
-  // EvaSettings::SetMatrixPosition(MatrixDevice);
+  // pond::SetDataPosition(MatrixDevice);
   // FFT3D( n[0], n[1], n[2], data, data, MatrixOperations_FFT_FORWARD );
   // data.DeviceToHost();
   // data.DumpFile("1.dat");
@@ -461,10 +461,10 @@ DefineFunction(fftTest)
   //MatrixOperationsModule::MPI_FFT3D_MatrixInit( data, n[0],n[1],n[2] );
   Eva->mpiModule->Distribute(in_data, data, 1);
   data.HostToDevice();
-  EvaSettings::SetMatrixPosition(MatrixDevice);
+  pond::SetDataPosition(MatrixDevice);
   FFT3D( n[0], n[1], n[2], data, data, MatrixOperations_FFT_FORWARD );
   //MPI_FFT3D( n[0], n[1], n[2], data, data, MatrixOperations_FFT_BACKWARD );
-  EvaSettings::SetMatrixPosition(MatrixHost);
+  pond::SetDataPosition(MatrixHost);
   data.DeviceToHost();
   Eva->mpiModule->Collect( data,out_data, 2);
   if ( Eva->mpiModule->IsRootRank() ){ 

@@ -8,7 +8,7 @@ namespace pond{
   typedef       unsigned long  u_long;
   typedef       unsigned char  u_char;
   typedef       unsigned short u_short;
-  class         EvaSettings;
+  //class         EvaSettings;
   ////////////////////////////////////////////
   struct        complex;
   struct        floatcomplex;

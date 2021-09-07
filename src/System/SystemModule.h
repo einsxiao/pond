@@ -78,8 +78,8 @@ namespace pond{
     static int Input(Object&);
     static int SystemArgv(Object&);
     ///////////////////////////////
-    int PD_SetRunningMode(Object&);
-    int PD_GetRunningMode(Object&);
+    int PD_SetParallelMode(Object&);
+    int PD_GetParallelMode(Object&);
     int PD_GPUDeviceQ(Object&);
     int PD_SetCudaThreadsNumberPerBlock(Object&);
     int PD_GetCudaThreadsNumberPerBlock(Object&);

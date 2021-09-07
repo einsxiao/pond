@@ -158,6 +158,17 @@ EvaMemoryPool::EvaMemoryPool(){
 
   srand( (int)time(0) );
   //dout<<"sym id of rule " << SYMID_OF_Rule << endl;
+
+  //EvaSettings.calculatePosition = CalculatePositionHost;
+  EvaSettings.DataPosition = DataHost;
+  EvaSettings.ParallelMode = ParallelModeGpu;
+  EvaSettings.threadNumberPerBlock = 256;
+  EvaSettings.threadNumberPerKernel = 1;
+
+  EvaSettings.precision = 8;
+  EvaSettings.scientificFormat = false;
+  EvaSettings.epsilon = 0.000000000000005;
+
 }
 
 EvaMemoryPool::~EvaMemoryPool(){

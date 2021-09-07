@@ -13,42 +13,6 @@ using namespace std;
 
 //namespace fs = std::__fs::filesystem;
 
-//////////////////////////////////////////////////////
-int pond::EvaSettings::matrixPosition = MatrixHost;
-int pond::EvaSettings::calculatePosition = CalculatePositionHost;
-int pond::EvaSettings::runningMode = RunningModeGpu;
-int pond::EvaSettings::threadNumberPerBlock = 256;
-int pond::EvaSettings::threadNumberPerKernel = 4;
-
-int pond::EvaSettings::precision = 16;
-bool pond::EvaSettings::scientificFormat = false;
-double pond::EvaSettings::epsilon = 0.000000000000005;
-
-void pond::EvaSettings::SetFormat(int ps,bool sci){
-  precision = ps;
-  if ( ps<=0 )  precision = 1;
-  if ( ps>=16 ) precision = 16;
-  scientificFormat = sci;
-}
-
-void   pond::EvaSettings::SetThreadNumberPerBlock(int num)
-{
-  if ( num <= 0 and num%32 != 0 and num > 1024 ) {
-    Erroring("SetThreadNumberPerBlock", "Thread number per block is suggested to be multiple of 32 and a number with 0 and 1024.");
-    return;
-  }
-  threadNumberPerBlock = num;
-}
-
-void   pond::EvaSettings::SetThreadNumberPerKernel(int num)
-{
-  if ( num <= 0 ) {
-    Erroring("SetThreadNumberPerKernel","Cpu threads number should be greater than one.");
-    return;
-  }
-  threadNumberPerKernel = num;
-}
-
 string pond::ToString(const int num){
   char chs[32];
   sprintf(chs,"%d",num);
@@ -104,9 +68,9 @@ string pond::ToString(double num){
   Index idx = ostringsPool.New();
   ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
-  ss.precision(EvaSettings::precision);
+  ss.precision(EvaSettings.precision);
   ss.setf( ios::uppercase);
-  if ( EvaSettings::scientificFormat ){
+  if ( EvaSettings.scientificFormat ){
     ss<<std::scientific<<num;
   }else{
     ss<<num;
@@ -119,8 +83,8 @@ string pond::ToString(complex num){
   Index idx = ostringsPool.New();
   ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
-  ss.precision(EvaSettings::precision);
-  if ( EvaSettings::scientificFormat ){
+  ss.precision(EvaSettings.precision);
+  if ( EvaSettings.scientificFormat ){
     ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
   }else{
     ss<<"("<<num.re<<","<<num.im<<")";
@@ -133,9 +97,9 @@ string pond::ToString(float num){
   Index idx = ostringsPool.New();
   ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
-  ss.precision(EvaSettings::precision);
+  ss.precision(EvaSettings.precision);
   ss.setf( ios::uppercase);
-  if ( EvaSettings::scientificFormat ){
+  if ( EvaSettings.scientificFormat ){
     ss<<std::scientific<<num;
   }else{
     ss<<num;
@@ -148,8 +112,8 @@ string pond::ToString(floatcomplex num){
   Index idx = ostringsPool.New();
   ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
-  ss.precision(EvaSettings::precision);
-  if ( EvaSettings::scientificFormat ){
+  ss.precision(EvaSettings.precision);
+  if ( EvaSettings.scientificFormat ){
     ss<<std::scientific<<"("<<num.re<<","<<num.im<<")";
   }else{
     ss<<"("<<num.re<<","<<num.im<<")";
@@ -191,7 +155,7 @@ bool definitelyLessThan(double a, double b, double epsilon) {
 }
 
 int pond::compare(double num1,double num2){
-  double cut =  ( (fabs(num1) < fabs(num2) ? fabs(num2) : fabs(num1)) * EvaSettings::epsilon);
+  double cut =  ( (fabs(num1) < fabs(num2) ? fabs(num2) : fabs(num1)) * EvaSettings.epsilon);
   double diff= num1-num2;
   if ( diff > cut ) return 1;
   if ( diff < -cut ) return -1;
@@ -617,8 +581,8 @@ bool pond::SpecialCharecterQ(char ch){
 }
 
 double pond::GaussRand(double mean,double variance){
-  static double gau_var1,gau_var2,gau_s;
-  static int gau_phase = 0;
+  static thread_local double gau_var1,gau_var2,gau_s;
+  static thread_local int gau_phase = 0;
   double x;
   if ( gau_phase == 0 ){
     do{

@@ -147,7 +147,7 @@ namespace pond{
     Matrix_T<type>     &NewNormalDevice()
     {
 #if defined(__CUDACC__)
-      if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+      if ( pond::GetParallelMode() == ParallelModeGpu ){
         if ( typeid(type) == typeid(double) ){
           curandGenerateNormalDouble(Gen_dev,
                                      (double*)Matrix_T<type>::DataDevice,
@@ -171,7 +171,7 @@ namespace pond{
 
     Matrix_T<type>     &NewNormal()
     {
-      if ( EvaSettings::GetMatrixPosition() == MatrixDevice ){
+      if ( pond::GetDataPosition() == MatrixDevice ){
         return NewNormalDevice();
       }else{
         for (int i=0; i < Matrix_T<type>::Size(); i++)

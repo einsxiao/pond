@@ -1521,9 +1521,9 @@ int SystemModule::SetOutputFormat(Object &ARGV){
   CheckShouldBeNumber(1);
   if ( ARGV.Size() == 2){
     CheckShouldBeNumber(2);
-    EvaSettings::SetFormat((double)ARGV[1],(double)ARGV[2]);
+    pond::SetPrintFormat((double)ARGV[1],(double)ARGV[2]);
   } else {
-    EvaSettings::SetFormat((double)ARGV[1]);
+    pond::SetPrintFormat((double)ARGV[1]);
   }
   ReturnNull;
 }
@@ -2448,24 +2448,24 @@ int SystemModule::PD_ArrowFunction(Object&ARGV){
   return 1;
 }
 
-int SystemModule::PD_SetRunningMode(Object&Argv)
+int SystemModule::PD_SetParallelMode(Object&Argv)
 {
   CheckShouldEqual(1);
   CheckShouldBeString(1);
   if ( strcasecmp( Argv[1].Key(), "gpu" ) == 0 ){
-    EvaSettings::SetRunningMode( RunningModeGpu );
+    pond::SetParallelMode( ParallelModeGpu );
   }else if ( strcasecmp( Argv[1].Key(), "cpu" ) == 0 ){
-    EvaSettings::SetRunningMode( RunningModeCpu );
+    pond::SetParallelMode( ParallelModeCpu );
   }else{
-    ThrowError("SetRunningMode","Running mode "+Argv[1].ToString()+" is not recongnized.");
+    ThrowError("SetParallelMode","Running mode "+Argv[1].ToString()+" is not recongnized.");
   }
   ReturnNull;
 }
 
-int SystemModule::PD_GetRunningMode(Object&Argv)
+int SystemModule::PD_GetParallelMode(Object&Argv)
 {
   CheckShouldEqual(0);
-  if ( EvaSettings::GetRunningMode() == RunningModeGpu ){
+  if ( pond::GetParallelMode() == ParallelModeGpu ){
     ReturnString("gpu");
   }
   ReturnString("cpu");
@@ -2492,7 +2492,7 @@ int SystemModule::PD_SetCudaThreadsNumberPerBlock(Object&Argv)
   int num = (int)Argv[1];
   if ( num <= 0 and num%32 != 0 and num > 1024 )
     ThrowError("SetCudaThreadsNumberPerBlock","Thread number per block is suggested to be multiple of 32 and a number with 0 and 1024.");
-  EvaSettings::SetThreadNumberPerBlock( num );
+  pond::SetThreadNumberPerBlock( num );
   ReturnNull;
 }
 
@@ -2503,18 +2503,18 @@ int SystemModule::PD_SetCpuThreadsNumber(Object&Argv)
   int num = (int)Argv[1];
   if ( num <= 0 )
     ThrowError("SetEvawizCpuKernelThreadsNumber","Thread number should be a positive number.");
-  EvaSettings::SetThreadNumberPerKernel( num );
+  pond::SetThreadNumberPerKernel( num );
   ReturnNull;
 }
 
 int SystemModule::PD_GetCudaThreadsNumberPerBlock(Object&Argv)
 {
   CheckShouldEqual(0);
-  ReturnNumber( EvaSettings::threadNumberPerBlock );
+  ReturnNumber( EvaSettings.threadNumberPerBlock );
 }
 
 int SystemModule::PD_GetCpuThreadsNumber(Object&Argv)
 {
   CheckShouldEqual(0);
-  ReturnNumber( EvaSettings::threadNumberPerKernel );
+  ReturnNumber( EvaSettings.threadNumberPerKernel );
 }

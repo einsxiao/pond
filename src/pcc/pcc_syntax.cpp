@@ -618,7 +618,7 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
                                lan_ker.call_gpu() +"\n}else" ));
     source.insert( source.begin() + source_insert_pos,
                    __line_info(true, pragma.self->start.row, 0, 0,
-                               "if ( pond::EvaSettings::GetMatrixPosition() == pond::MatrixDevice ){\n") );
+                               "if ( pond::GetDataPosition() == pond::DataDevice ){\n") );
   }
 
   //define
