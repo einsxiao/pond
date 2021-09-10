@@ -19,7 +19,7 @@ fi
 cd $POND_HOME/$module_name
 cp -rf $POND_ROOT/Template/Makefile            ./
 cp -rf $POND_ROOT/Template/TemplateModule.h    ./${module_name}Module.h
-cp -rf $POND_ROOT/Template/TemplateModule.cpp  ./${module_name}Module.cpp
+cp -rf $POND_ROOT/Template/TemplateModule.cu   ./${module_name}Module.cu
 cp -rf $POND_ROOT/Template/TemplateModule.pd   ./${module_name}Module.pd
 cp -rf $POND_ROOT/Template/input.pd            ./
 cp -rf $POND_ROOT/Template/.gitignore          ./

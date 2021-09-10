@@ -1,0 +1,47 @@
+#!/bin/bash
+if [ $# -lt 2 ]; then
+    echo "Usage:
+  ${0} new_module_name old_module_name [old_module_dir]
+
+  Init files of module by another module.
+"
+  exit 0;
+fi
+
+new_mod_name=$1
+new_mod_dir=$POND_HOME/$new_mod_name
+if ! [ -d $new_mod_dir ]; then
+    echo "Module $new_mod_name does not exist.
+Please create it before any operation"
+    exit 1
+fi
+
+old_mod_name=$2
+old_mod_dir=$3
+if ! [ -d $old_mod_dir ] && [ -d $POND_HOME/$old_mod_name ]; then
+    old_mod_dir=$POND_HOME/$old_mod_name
+fi
+
+if ! [ -d $old_mod_dir ]; then
+    echo "Old module dir $old_mod_dir does not exist.
+Please create it before any operation"
+    exit 1
+fi
+
+cd $new_mod_dir
+rm *.h *.cpp *.cu *.ev >/dev/null 2>&1
+cp $old_mod_dir/*.h       ./  >/dev/null 2>&1
+cp $old_mod_dir/*.cpp     ./  >/dev/null 2>&1
+cp $old_mod_dir/*.cu      ./  >/dev/null 2>&1
+cp $old_mod_dir/Makefile  ./  >/dev/null 2>&1
+cp $old_mod_dir/*.ev      ./  >/dev/null 2>&1
+cp $old_mod_dir/*.pd      ./  >/dev/null 2>&1
+cp $old_mod_dir/*.py      ./  >/dev/null 2>&1
+cp $old_mod_dir/*.m       ./  >/dev/null 2>&1
+cp $old_mod_dir/*.sh      ./  >/dev/null 2>&1
+cp $old_mod_dir/*.pbs     ./  >/dev/null 2>&1
+cp $old_mod_dir/*.bash    ./  >/dev/null 2>&1
+
+change_from_to ./ $old_mod_name $new_mod_name  >/dev/null 2>&1
+
+pond-update-module-files ./ $new_mod_name $old_mod_name

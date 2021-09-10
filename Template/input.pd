@@ -1,8 +1,12 @@
 #!/usr/bin/env pond
-SetRunningMode("cpu") # two mode is cpu/gpu
-SetCpuThreadsNumber(1)
+#SetCpuThreadsNumber(1)
+#SetParallelMode("gpu") # parallel pragma will run in nvidia device. When no device, error will be reported.
+SetParallelMode("cpu") # parallel pragma will run in openmp mode
 import Template
 hello();
-mat = [[1,2,3,4,-7],[3,34,3,9,878]]
+mat = [ 
+    [1,2,3,4,-7], 
+    [3,34,3,9,878] 
+]
 matX2(mat)
 

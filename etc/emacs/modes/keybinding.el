@@ -236,6 +236,12 @@
 			   )
 			 )
 
+(defun refresh-file ()
+  (interactive)
+  (revert-buffer t (not (buffer-modified-p)) t) )
+
+(global-set-key [(control f5)] 'refresh-file)
+
 (define-minor-mode pond-keys-minor-mode
   "A minor mode for pond env."
   :init-value t :lighter "")

@@ -19,7 +19,6 @@ TemplateModule::TemplateModule():Module(MODULE_NAME){
 }
 
 TemplateModule :: ~TemplateModule(){
-
 }
 
 /****************************/
@@ -27,7 +26,7 @@ int TemplateModule::PD_hello(Object&argv){
   /* comment lines following will be doc for this function */
   cout << "Welcome to PHPP!!!"  << endl;
   complex a(3,4);
-  cout << a<< endl;
+  cout << 2*a << endl;
   argv.SetNull();
   return 0;
 }
@@ -42,7 +41,6 @@ int TemplateModule::PD_matX2(Object&argv){
   }
   mat.DeviceToHost();
   MatrixModule::Matrix2Object( mat, argv );
-  complex x(3,4);
   return 0;
 }
 

@@ -4,5 +4,7 @@
 *.txt
 *.vtk
 *.tmp
+*.dat
+*.bak
 exe
 /build/

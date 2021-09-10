@@ -612,7 +612,6 @@ static int drop(Object&expr, Object&droplist,u_int p){
   }
   Erroring("Drop","Sequence specification "+iter.ToString()+" is not valid.");
   ReturnError;
-  return 0;
 }
 
 int ListModule::Drop(Object &ARGV){
@@ -1654,7 +1653,6 @@ int ListModule::SymbolQ(Object&ARGV){
       ReturnSymbol( SYMID_OF_True );
     ReturnSymbol( SYMID_OF_False );
   }
-  ReturnNormal;
 }
 // int ListModule::zh_SymbolQ(Object&ARGV){
 //   CheckShouldBeWithin(1,2);
@@ -1684,7 +1682,6 @@ int ListModule::ListQ(Object&ARGV){
     else
       ReturnSymbol( SYMID_OF_False );
   }
-  ReturnNormal;
 }
 // int ListModule::zh_ListQ(Object&ARGV){
 //   CheckShouldBeWithin(1,2);

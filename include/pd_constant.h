@@ -99,6 +99,8 @@ namespace pond{
   __attribute__((always_inline)) inline  void SetParallelMode(int mode){
     EvaSettings.ParallelMode = mode;
   }
+  const auto GetRunningMode = GetParallelMode;
+  const auto SetRunningMode = SetParallelMode;
 
   __attribute__((always_inline)) inline int GetDataPosition(){
 #ifdef __CUDACC__
@@ -114,6 +116,9 @@ namespace pond{
   __attribute__((always_inline)) inline void SetDataPosition(int pos){
     EvaSettings.DataPosition = pos;
   }
+  const auto GetMatrixPosition = GetDataPosition;
+  const auto SetMatrixPosition = SetDataPosition;
+
   __attribute__((always_inline)) inline bool IsDataOnHost(){
 #ifdef __CUDACC__
     if ( EvaSettings.ParallelMode == ParallelModeGpu ){

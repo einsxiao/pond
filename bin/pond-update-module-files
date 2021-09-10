@@ -1,0 +1,77 @@
+#!/bin/bash
+if [ $# -lt 2 ]; then
+    echo "Usage:
+  ${0} dir module_name [old_module_name]
+
+  Update files of module to latest version template.
+"
+  exit 0;
+fi
+
+mod_dir=$1
+mod_name=$2
+mod_old_name=$3
+
+if ! [ -d $mod_dir ]; then
+    echo "Module ${mod_name} does not exist
+"
+    exit 0;
+fi
+cd $mod_dir
+
+if [ -f Makefile ]; then
+    if ! [ "xx" == "xx`cat Makefile|grep 'evapath'`" ]; then
+        cp $POND_ROOT/Template/Makefile ./
+    fi
+fi
+for filename in `find ./ -type f`; do
+    fileinfo="`file -b $filename`"
+    fileinfo="${fileinfo:0:4}"
+    if [ "xx${filename:0:6}" == "xx./.git" ]; then continue; fi
+    if [ "xx${fileinfo}" == "xxELF " ]; then continue; fi
+    if [ "xx${fileinfo}" == "xxzlib" ]; then continue; fi
+    if [ "xx${fileinfo}" == "xxGit " ]; then continue; fi
+    if [ "xx${filename:0-4:4}" == "xx.log" ]; then continue; fi
+    if [ "xx${filename:0-4:4}" == "xx.vtk" ]; then continue; fi
+
+    echo "dealing file $filename"
+    sed -i "s/evawiz/pond/g" $filename
+    sed -i "s/EvaSettings::SetMatrixPosition/pond::SetDataPosition/g" $filename
+    sed -i "s/EvaSettings::GetMatrixPosition/pond::GetDataPosition/g" $filename
+    sed -i "s/EvaSettings::GetRunningMode/pond::GetParallelMode/g" $filename
+    sed -i "s/EvaSettings::SetRunningMode/pond::SetParallelMode/g" $filename
+    sed -i "s/EvaSettings::SetFormat/pond::SetPrintFormat/g" $filename
+    sed -i "s/EvaSettings::/EvaSettings./g" $filename
+    sed -i "s/MatrixHost/DataHost/g" $filename
+    sed -i "s/MatrixDevice/DataDevice/g" $filename
+    sed -i "s/MatrixHostDevice/DataHostDevice/g" $filename
+    sed -i "s/SetRunningMode/SetParallelMode/g" $filename
+    sed -i "s/GetRunningMode/GetParallelMode/g" $filename
+
+    sed -i "s/DeclareModule(\\(.*\\))/public: \1(); ~\1()/g" $filename
+    sed -i "s/DeclareFunction(\\(.*\\))/int PD_\1(Object\&)/g" $filename
+    sed -i "s/ModuleInitialize/${mod_name}::${mod_name}():Module(MODULE_NAME)/g" $filename
+    sed -i "s/ModuleFinalize/${mod_name}::~${mod_name}()/g" $filename
+
+    sed -i "s/DefineFunction(\s*\\(.*\\)\\(,.*\\))/int PD_\1(Object\& Argv)/g" $filename
+    sed -i "s/DefineFunction(\s*\\(\w.*\\))/int PD_\1(Object\& Argv)/g" $filename
+
+
+    if [ "xx${filename:0-3:3}" == "xx.ev" ] || [ "xx${filename:0-3:3}" == "xx.pd" ]; then
+        echo "deal script ${filename}"
+        sed -i "s/GetModule\[\s*['\"]\\(.*\\)['\"]\s*\]/import \1/g" $filename
+        sed -i "s/\\(\w\\)\[\\(.*\\)\]/\1(\2)/g" $filename
+    fi
+    continue
+
+done
+
+if [ -d .vscode ]; then
+    cp $POND_ROOT/Template/.vscode/* .vscode/
+else
+    cp -rf $POND_ROOT/Template/.vscode ./
+fi
+
+echo ""
+echo "version update done"
+echo ""
