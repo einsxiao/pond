@@ -291,7 +291,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
     }
     ReturnNormal;
   }
-  if ( ARGV[1].ListQ(SYMID_OF_List)  ){
+  if ( ARGV[1].ListQ()  ){
     if ( ARGV.Size() > 1 )
       ThrowError("Matrix","When Init Matrix with a List, only one argument is required.");
     for ( ;;){
@@ -338,7 +338,7 @@ int MatrixModule::PD_SetMatrixPosition(Object &ARGV){
 }
 
 int LocalMatrixQ(Object &ARGV,Object &dim){
-  if ( not ARGV.ListQ(SYMID_OF_List) ){
+  if ( not ARGV.ListQ() ){
     if ( !ARGV.NumberQ() ) return -1;
     return 1;
   }
@@ -489,19 +489,19 @@ void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
     ind++;
     return;
   }
-  ThrowError("Matrix2Object","Object is not all numbers.");
+  ThrowError("Object2Matrix","Object is not all numbers.");
 }
 
 #define OBJECT_2_MATRIX(type_basic)                                     \
   int MatrixModule::Object2Matrix(Object&ARGV,Matrix_T<type_basic>&matrix){ \
     if ( ARGV.NumberQ() ){                                              \
       if ( matrix.Size() == 0  )                                        \
-        ThrowError("Matrix2Object","Assign a number to an empty Matrix is not allowd."); \
+        ThrowError("Object2Matrix","Assign a number to an empty Matrix is not allowd."); \
       matrix = ARGV.Number();                                           \
     }                                                                   \
     Object dim; dim.SetList();                                          \
     if ( not MatrixQ( ARGV, dim ) )                                     \
-      ThrowError("Matrix2Object","Matrix assignment from list should be of Matrix form."); \
+      ThrowError("Object2Matrix","Matrix assignment from list should be of Matrix form."); \
     int n =dim.Size();                                                  \
     int *arr= new int[n+2];                                             \
     arr[0]=n;                                                           \

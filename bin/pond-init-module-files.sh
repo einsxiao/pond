@@ -26,11 +26,11 @@ cp -rf $POND_ROOT/Template/.gitignore          ./
 cp -rf $POND_ROOT/Template/.vscode             ./
 
 change_from_to ./ Template ${module_name} 2>&1 >/dev/null
-change_from_to ./ DATE "`date`" 2>&1>/dev/null
+change_from_to ./ MOD_DATE "`date`" 2>&1>/dev/null
 chmod +r ~/.pond.user.auth
-change_from_to ./ AUTHOR "`json-item ~/.pond.user.auth nickname`" 2>&1>/dev/null
+change_from_to ./ MOD_AUTHOR "`json-item ~/.pond.user.auth nickname`" 2>&1>/dev/null
 chmod -r ~/.pond.user.auth
-change_from_to ./ VERSION "0.1.0" 2>&1>/dev/null
+change_from_to ./ MOD_VERSION "0.1.0" 2>&1>/dev/null
 
 exit 0
 

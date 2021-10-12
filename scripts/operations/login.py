@@ -52,6 +52,10 @@ def request(argv,options):
             file.write( res.text )
             file.close()
             os.system("chmod 600 "+auth_file)
+            key_file = os.path.join(pond_home, '.git_private_key' )
+            if os.path.exists(key_file):
+                os.system("rm "+key_file)
+                pass
             print("  You have been login successfully with DocRun user:",jres.get('username'))
         except Exception as e:
             print("  Failed to write login information. Check your permission of file ~/.pond.user.auth")

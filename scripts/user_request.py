@@ -23,13 +23,14 @@ class UserRequest:
     # host_name = socket.gethostname()
     conn = None
     connection = None
-    server_addr = 'server.doc.run'
-    server_port = None
+    server_addr = os.getenv("POND_SERVER") or 'server.doc.run'
+    server_port = os.getenv("POND_SERVER_PORT") or "5555"
     proxy = None
     aes = None
     closed = False
 
     def __init__(self, host='server.doc.run', port=5555, proxy=None ):
+        print(host, port, this.server_addr, this.server_port)
         self.server_addr = host
         self.server_port = port
         self.proxy = proxy

@@ -19,7 +19,7 @@ pond_proxy=os.getenv("POND_PROXY");
 if not pond_server: pond_server = 'server.doc.run'
 if not pond_server_port: pond_server_port = '5555'
 
-#dprint( pond_server, pond_server_port)
+print( pond_server, pond_server_port)
 #user = user_request.UserRequest(pond_server,int(pond_server_port) ,pond_proxy)
 lang = os.getenv("POND_LANG")
 
@@ -30,7 +30,7 @@ def help_info():
     run|-r [脚本]
           在pond核中解释执行[脚本]
 
-    push [模块名]
+    save [模块名]
           上传模块内容, 将更改推送到服务端的代码仓库中
 
     pull [模块名] [选项]
@@ -66,7 +66,7 @@ def help_info():
     run|-r [script]
           run script in pond kernel
 
-    push [module_name]
+    save [module_name]
           upload module, push new code to server side
 
     pull [module_name] [options]

@@ -16,10 +16,14 @@ def request(argv,options):
         return
 
     try:
-        auth_file = os.path.join(user_home,'.pond.user.auth')
+        auth_file = os.path.join(user_home,'.pond.user.auth' )
         if os.path.exists(auth_file):
             os.system("chmod 600 "+auth_file)
             os.system("rm "+auth_file)
+            pass
+        key_file = os.path.join(pond_home, '.git_private_key' )
+        if os.path.exists(key_file):
+            os.system("rm "+key_file)
             pass
         print("\nSucceed to delete login information.\n")
     except Exception as e:

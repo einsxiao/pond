@@ -33,6 +33,8 @@ for filename in `find ./ -type f`; do
     if [ "xx${fileinfo}" == "xxGit " ]; then continue; fi
     if [ "xx${filename:0-4:4}" == "xx.log" ]; then continue; fi
     if [ "xx${filename:0-4:4}" == "xx.vtk" ]; then continue; fi
+    if [ "xx${filename:0-4:4}" == "xx.dat" ]; then continue; fi
+    if [ "xx${filename:0-4:4}" == "xx.txt" ]; then continue; fi
 
     echo "dealing file $filename"
     sed -i "s/evawiz/pond/g" $filename
@@ -50,8 +52,8 @@ for filename in `find ./ -type f`; do
 
     sed -i "s/DeclareModule(\\(.*\\))/public: \1(); ~\1()/g" $filename
     sed -i "s/DeclareFunction(\\(.*\\))/int PD_\1(Object\&)/g" $filename
-    sed -i "s/ModuleInitialize/${mod_name}::${mod_name}():Module(MODULE_NAME)/g" $filename
-    sed -i "s/ModuleFinalize/${mod_name}::~${mod_name}()/g" $filename
+    sed -i "s/ModuleInitialize/${mod_name}Module::${mod_name}Module():Module(MODULE_NAME)/g" $filename
+    sed -i "s/ModuleFinalize/${mod_name}Module::~${mod_name}Module()/g" $filename
 
     sed -i "s/DefineFunction(\s*\\(.*\\)\\(,.*\\))/int PD_\1(Object\& Argv)/g" $filename
     sed -i "s/DefineFunction(\s*\\(\w.*\\))/int PD_\1(Object\& Argv)/g" $filename
@@ -59,11 +61,11 @@ for filename in `find ./ -type f`; do
 
     if [ "xx${filename:0-3:3}" == "xx.ev" ] || [ "xx${filename:0-3:3}" == "xx.pd" ]; then
         echo "deal script ${filename}"
+        sed -i "s/#\!\/opt\/pond.*pond/#!\/usr\/bin\/env pond/g" $filename
         sed -i "s/GetModule\[\s*['\"]\\(.*\\)['\"]\s*\]/import \1/g" $filename
         sed -i "s/\\(\w\\)\[\\(.*\\)\]/\1(\2)/g" $filename
     fi
     continue
-
 done
 
 if [ -d .vscode ]; then

@@ -1,9 +1,10 @@
 #compile setting
 ##################################################################################
+# note that 
 #DIRS := system Algebraic System Arithmatics List Matrix OS Class MPI MatrixOperations Python String Guis Mathematica MatlabEngine
 #DIRS := core pcc Algebraic System Arithmatics List Matrix OS Class MPI MatrixOperations Python String Guis Mathematica MatlabEngine
 #DIRS := core pcc List System Arithmatics Matrix OS Class MPI MatrixOperations Python String
-DIRS := core pcc List System Arithmatics Matrix OS Class MPI MatrixOperations String
+DIRS := core pcc Matrix List System Arithmatics OS Class MPI MatrixOperations String
 ##################################################################################
 INCLUDE       = `pond-path nvcc` -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES
 LIB           = -lpd
