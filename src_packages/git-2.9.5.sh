@@ -8,8 +8,10 @@ fi
 if [ -d git-2.9.5.build ];then
     rm -r git-2.9.5.build
 fi
-mkdir git-2.9.5.build
-cd git-2.9.5.build
-../git-2.9.5/configure --prefix=$POND_ROOT/packages/git --with-openssl=$POND_ROOT/packages/openssl
-make -j 4
-make install
+#mkdir git-2.9.5.build
+cd git-2.9.5
+#../git-2.9.5/configure --prefix=$POND_ROOT/packages/git --with-openssl=$POND_ROOT/packages/openssl
+#make -j 4
+#make install
+make prefix=$POND_ROOT/packages/git all
+make prefix=$POND_ROOT/packages/git install

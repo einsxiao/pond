@@ -257,6 +257,38 @@ planRecord* getPlanReady(int rank, int n[],int type, int batch=1)
   }
 }
 
+void MatrixOperationsModule::FFT(int rank,int n[], ComplexMatrix &in_mat, ComplexMatrix &out_mat, MatrixOperationsType direction) {
+  if ( not in_mat.SameDimensionQ( out_mat ) ){
+    ThrowError("FFT3D","Input matrix and output matrix should have same dimension.");
+  }
+  planRecord *plan;
+  int batch, product=1;
+  for (int i=0; i<rank; i++) product *= n[i];
+  batch = in_mat.Size()/product;
+  if ( batch*product != in_mat.Size() ){
+    ThrowError("FFT3D","Input matrix is not consistent with transformation size.");
+  }
+  plan = getPlanReady(rank,n,PlanType_gpu_cpu,batch);
+  plan->execute( in_mat, out_mat , direction );
+  return;
+}
+
+void MatrixOperationsModule::FFT(int rank,int n[], FloatComplexMatrix &in_mat, FloatComplexMatrix &out_mat, MatrixOperationsType direction){
+  if ( not in_mat.SameDimensionQ( out_mat ) ){
+    ThrowError("FFT3D","Input matrix and output matrix should have same dimension.");
+  }
+  planRecord *plan;
+  int batch, product=1;
+  for (int i=0; i<rank; i++) product *= n[i];
+  batch = in_mat.Size()/product;
+  if ( batch*product != in_mat.Size() ){
+    ThrowError("FFT3D","Input matrix is not consistent with transformation size.");
+  }
+  plan = getPlanReady(rank,n,PlanType_float_gpu_cpu,batch);
+  plan->execute( in_mat, out_mat , direction );
+  return;
+}
+
 void MatrixOperationsModule::FFT3D(int n1, int n2, int n3, ComplexMatrix &in_mat, ComplexMatrix &out_mat, MatrixOperationsType direction)
 {
   if ( not in_mat.SameDimensionQ( out_mat ) ){
@@ -282,7 +314,7 @@ void MatrixOperationsModule::FFT3D(int n1, int n2, int n3, FloatComplexMatrix &i
   batch = in_mat.Size()/(n1*n2*n3);
   if ( batch*n1*n2*n3 != in_mat.Size() )
     ThrowError("FFT3D","Input matrix is not consistent with transformation size.");
-  plan = getPlanReady(3,n,PlanType_gpu_cpu,batch);
+  plan = getPlanReady(3,n,PlanType_float_gpu_cpu,batch);
   plan->execute( in_mat, out_mat , direction );
   return;
 }
@@ -310,7 +342,7 @@ void MatrixOperationsModule::FFT3D(int n1, int n2, int n3, FloatMatrix &in_mat, 
   batch = in_mat.Size()/(n1*n2*n3);
   if ( batch*n1*n2*n3 != in_mat.Size() )
     ThrowError("FFT3D","Input matrix is not consistent with transformation size.");
-  plan = getPlanReady(3,n,PlanType_gpu_cpu,batch);
+  plan = getPlanReady(3,n,PlanType_float_gpu_cpu,batch);
   plan->execute( in_mat, out_mat);
   return;
 }
@@ -338,7 +370,7 @@ void MatrixOperationsModule::FFT3D(int n1, int n2, int n3, FloatComplexMatrix &i
   batch = in_mat.Size()/(n1*n2*n3);
   if ( batch*n1*n2*n3 != in_mat.Size() )
     ThrowError("FFT3D","Input matrix is not consistent with transformation size.");
-  plan = getPlanReady(3,n,PlanType_gpu_cpu,batch);
+  plan = getPlanReady(3,n,PlanType_float_gpu_cpu,batch);
   plan->execute( in_mat, out_mat);
   return;
 }
@@ -383,23 +415,38 @@ void MatrixOperationsModule::MPI_FFT3D(int n1, int n2, int n3, Matrix &in_mat, C
 
 int MatrixOperationsModule::PD_fftTest(Object &Argv)
 {
+  SetDataPosition( MatrixHost );
   int nx,ny,nz;
-  InitVariablePrint(nx,10);
-  InitVariablePrint(ny,10);
-  InitVariablePrint(nz,10);
+  InitVariablePrint(nx,16);
+  InitVariablePrint(ny,16);
+  InitVariablePrint(nz,16);
   int n[3]={nx,ny,nz};
-  FloatComplexMatrix in_data,out_data,data,data_hat;
+  //FloatComplexMatrix in_data,out_data,data,data_hat;
+  ComplexMatrix in_data,out_data,data,data_hat;
   //debug data init
   if ( mpiModule->IsRootRank() ){
-    in_data.Init(4,2,nx,ny,nz);
-    for( int i=1;i<= nx; i++)
-      for ( int j=1; j<=ny; j++)
-        for ( int k=1; k<=nz; k++){
-          in_data(0,i-1,j-1,k-1) = sin(i+j+k);
-          in_data(1,i-1,j-1,k-1) = sin(i+j+k);
+    cout<<"init data"<<endl;
+    in_data.Init(3,nx,ny,nz,MatrixHostDevice);
+    out_data.Init(3,nx,ny,nz,MatrixHostDevice);
+    for( int i=0;i< nx; i++){
+      for ( int j=0; j<ny; j++){
+        for ( int k=0; k<nz; k++){
+          in_data(i,j,k) = sin(i+j+k);
         }
-    in_data.DumpFile("0.dat");
+      }
+    }
+    in_data.DumpFile("in.dat");
+    cout<<"init data done"<<endl;
   } 
+  cout<<"try fft transform "<<endl;
+  //MatrixOperationsModule::FFT3D(nx,ny,nz, in_data, out_data);
+  MatrixOperationsModule::FFT(3,n, in_data, out_data);
+  cout<<"FFT Transform done"<<endl;
+
+  if ( mpiModule->IsRootRank() ){
+    cout<<"print result"<<endl;
+    out_data.DumpFile("out.dat");
+  }
 
   ////////////////////////////////////
   //MatrixOperationsModule::MPI_FFT3D_MatrixInit( data, n[0],n[1],n[2] );

@@ -29,7 +29,7 @@ cd ..
 rm -r fftw-build
 mkdir fftw-build
 cd fftw-build
-../fftw-3.3.9/configure --prefix ${POND_ROOT}/packages/ \
+../fftw-3.3.9/configure --prefix ${POND_ROOT}/packages/fftw \
 		--enable-shared=yes \
 		--enable-static=yes \
 		--disable-fortran \

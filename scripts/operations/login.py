@@ -2,6 +2,8 @@ from pond_basic import *
 import requests
 import json
 
+pond_home = os.getenv('POND_HOME')
+
 # login
 def request(argv,options):
     #print('args =', args )
@@ -46,8 +48,12 @@ def request(argv,options):
                 os.system("mkdir "+pond_home)
                 pass
             auth_file = os.path.join(user_home,'.pond.user.auth')
-            if os.path.exists(auth_file): os.system("chmod 600 "+auth_file)
-            else: os.system("touch "+auth_file)
+            if os.path.exists(auth_file):
+                os.system("chmod 600 "+auth_file)
+                pass
+            else:
+                os.system("touch "+auth_file)
+                pass
             file = open(auth_file,'w')
             file.write( res.text )
             file.close()

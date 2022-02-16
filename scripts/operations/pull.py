@@ -66,14 +66,14 @@ def request(argv,options):
         # clone the repo
         #print("try clone")
         cmd = pond_git_cmd + " clone git@{0}:{1}.git".format(POND_SERVER, module_name)
-        print("do clone with cmd>", cmd)
+        #print("do clone with cmd>", cmd)
         os.system( cmd )
         pass
     else:
         #print("try pull")
         os.chdir( module_dir )
         cmd = pond_git_cmd+" pull"
-        print("do pull with cmd>", cmd)
+        #print("do pull with cmd>", cmd)
         os.system( cmd )
         pass
 

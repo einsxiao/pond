@@ -19,7 +19,7 @@ pond_proxy=os.getenv("POND_PROXY");
 if not pond_server: pond_server = 'server.doc.run'
 if not pond_server_port: pond_server_port = '5555'
 
-print( pond_server, pond_server_port)
+#print( pond_server, pond_server_port)
 #user = user_request.UserRequest(pond_server,int(pond_server_port) ,pond_proxy)
 lang = os.getenv("POND_LANG")
 
@@ -35,6 +35,9 @@ def help_info():
 
     pull [模块名] [选项]
           下载模块内容, 从服务端的代码仓库中拉取更改 
+
+    remake [模块名] 
+          重新编译模块
 
     login
           使用 https://doc.run 的帐号密码登录系统
@@ -71,6 +74,9 @@ def help_info():
 
     pull [module_name] [options]
           try to download a module, pull code from server side to local 
+
+    remake [module_name] 
+          recompile module
 
     login
           setup account bonded with https://doc.run 
@@ -152,7 +158,7 @@ try:
   if operation == 'version' or get_option(options,'version'):
     print("""
     Pond High Performance Platform.
-    Version: 11.05.2020.
+    Version: 2.3
     All rights reserved by OVO.LTD.
     """)
     exit(0)
@@ -168,7 +174,7 @@ try:
 
   if operation in [
       'say_hello','login','check','logout','pull', 'push',
-      'save', 'list_packages', 'install',
+      'save', 'list_packages', 'install', 'remake',
   ]:
     #print("processing ",operation )
     mod = importlib.import_module("operations."+operation)

@@ -1,0 +1,10 @@
+#!/usr/bin/env pond
+import MatrixOperations
+
+SetParallelMode("Cpu")
+print("Program is running in ",GetParallelMode()," Mode.")
+
+nx=ny=nz=16;
+
+print('start test')
+fftTest()

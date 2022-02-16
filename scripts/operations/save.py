@@ -2,6 +2,8 @@ from pond_basic import *
 import requests
 import json
 
+pond_home = os.getenv('POND_HOME')
+
 # login requried
 def request(argv,options):
 
