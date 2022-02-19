@@ -78,9 +78,11 @@ public:
     this->rank = rank;
     this->type = type;
     this->batch = batch;
-    for ( int i=0;i<rank;i++)
+    int stride = 1, dist = 1;
+    for ( int i=0;i<rank;i++){
       this->n[i] = inn[i];
-    int stride = 1, dist = n[0]*n[1]*n[2];
+      dist *=inn[i];
+    }
     //if mpi plan 
     if ( type == PlanType_mpi ){ //mpi
       MPI_FFT_MatrixInit(mat, rank, n,type, batch );
@@ -440,7 +442,7 @@ int MatrixOperationsModule::PD_fftTest(Object &Argv)
   } 
   cout<<"try fft transform "<<endl;
   //MatrixOperationsModule::FFT3D(nx,ny,nz, in_data, out_data);
-  MatrixOperationsModule::FFT(3,n, in_data, out_data);
+  MatrixOperationsModule::FFT(2,n, in_data, out_data);
   cout<<"FFT Transform done"<<endl;
 
   if ( mpiModule->IsRootRank() ){

@@ -124,6 +124,10 @@ namespace pond{
 /* #define ModuleDestruction ModuleType::~ModuleType() */
 ////////////////////////////////////////////////////////////////////////////////////////
 
+#define InterfaceArgumentsCheck(n, ...){
+    va_list args;
+    va_start(args, n);
+  }
 
 
 };

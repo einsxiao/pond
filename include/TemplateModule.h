@@ -1,7 +1,7 @@
 /**********************************
-Author          : AUTHOR
-Version         : Template.VERSION  
-R-Copyleft(r-ɔ) : DATE
+Author          : MOD_AUTHOR
+Version         : Template.MOD_VERSION  
+R-Copyleft(r-ɔ) : MOD_DATE
 **********************************/
 #ifndef TemplateModule_POND_H
 #define TemplateModule_POND_H

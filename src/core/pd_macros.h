@@ -198,6 +198,8 @@
 #define ReturnNull         ({ ARGV.SetNull(); return 1;})
 #define ReturnError        ({ return -1;})
 
+#define PD_ARGS_CHECK(...) 
+
 #define CheckArgsShouldNotEqual(ARGV,n)  {                              \
     if((ARGV).Size()==(n)){                                             \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数不能是 "+pond::ToString((ARGV).Size())+" 个" )|| \

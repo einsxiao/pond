@@ -1,11 +1,12 @@
 #ifndef Objectect_POND_H
 #define Objectect_POND_H
 namespace pond{
-  enum struct ObjectType:unsigned char{Symbol, Number, String, List}; //reference is v.idx not 0
+  enum struct ObjectType:unsigned char{Symbol, Number, String, List, Any}; //reference is v.idx not 0
   #define __Symbol__ ObjectType::Symbol
   #define __Number__ ObjectType::Number
   #define __String__ ObjectType::String
   #define __List__   ObjectType::List
+  #define __Any__    ObjectType::Any
   typedef int (*ObjectCompareFunction)(const Object&,const Object&);
   struct ObjectCompareFunctionLess;
 
