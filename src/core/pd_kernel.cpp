@@ -6,7 +6,7 @@ using namespace pond;
 #define __MODULE_NAME__ 
 
 Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[],
-               string rcfile,bool pmark){
+               string rcfile,bool pmark, bool pimport){
   //dout<<"try init kernel"<<endl;
   superList.SetList();
   inputList.SetList();
@@ -16,9 +16,9 @@ Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[],
   
   this->pmark = pmark;
 #ifdef DEBUG
-  evaluation = new Evaluation(true, pmark);
+  evaluation = new Evaluation(true, pmark, pimport);
 #else
-  evaluation = new Evaluation(false,pmark);
+  evaluation = new Evaluation(false,pmark, pimport);
 #endif
   //dout<<"nealy done"<<endl;
   // evaluation->superList = this->superList;

@@ -81,6 +81,7 @@ void Object::Free(){
     case ObjectType::String: GlobalPool.Strings.Free( idx() ); break;  
     case ObjectType::List:   GlobalPool.Lists.FreeList( idx() ); break;  
     }
+    //cout<<"Free Object on globalPool with flag = "<<GlobalPool.flag<<endl;
     GlobalPool.Objects.Free( objid );
   }else{
     cnt_decr();
@@ -1251,7 +1252,7 @@ string Object::ToFullFormString()const{
       str+= (*iter).ToFullFormString(); iter++;
     }
     while ( iter != _list.end() ){
-      str+=","+(*iter).ToFullFormString(); iter++;
+      str+=", "+(*iter).ToFullFormString(); iter++;
     }
     return str+")";
   }//end of case List
@@ -1327,13 +1328,13 @@ string Object::ToString(const bool is_print)const{
         res += _list[0].ToString()+"(" ;
       }
       if ( iter!=_list.end() ){ res+=(*iter).ToString(); iter++; }
-      while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;}
+      while (iter!=_list.end()){res+=", "+(*iter).ToString(); iter++;}
       return res+")";
     }
     //head is a symbol
     iterator iter;
     switch( SimpleHashCodeOfString( GlobalPool.Symbols.GetKey(_list[0].ids() ) ) ){
-      CT(List): { res += "["; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} return res+"]";}
+      CT(List): { res += "["; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=", "+(*iter).ToString(); iter++;} return res+"]";}
       CT(Dict): { res += "{"; iter=_list.begin()+1;
         if ( iter!=_list.end() ){
           while ( iter!= _list.end() and ( not (*iter).ListQ()  or (*iter).Size()< 2 ) ) iter++; 
@@ -1343,12 +1344,12 @@ string Object::ToString(const bool is_print)const{
         }
         while (iter!=_list.end()){
           if ( not (*iter).ListQ()  or (*iter).Size()< 2 ) continue;
-          res+=","+(*iter)[1].ToString()+":"+(*iter)[2].ToString();
+          res+=", "+(*iter)[1].ToString()+":"+(*iter)[2].ToString();
           iter++;
         }
         return res+"}";
       }
-      CT(Part):{ should_gt(1);  res += _list[1].ToString()+"["+_list[2].ToString(); iter=_list.begin()+3; while (iter!=_list.end()) {res+=","+(*iter).ToString(); iter++;} return res+"]";}//
+      CT(Part):{ should_gt(1);  res += _list[1].ToString()+"["+_list[2].ToString(); iter=_list.begin()+3; while (iter!=_list.end()) {res+=", "+(*iter).ToString(); iter++;} return res+"]";}//
       // CT(Complex):{ should_be(2); return pond::ToString( Complex() ); }
       //<-To_String_Define
       CT(AddTo): { should_be(2); return _list[1].ToString(*this)+"+="+_list[2].ToString(*this); } 
@@ -1372,10 +1373,10 @@ string Object::ToString(const bool is_print)const{
       CT(NoPrintExpression): {return "";} 
       CT(Not): {should_gt(1); return "!"+_list[1].ToString(*this);} 
       CT(Or): { should_be(2); return _list[1].ToString(*this)+"||"+_list[2].ToString(*this);} 
-      CT(Sequence): {if (this->ElementsSize() == 0 ) return ""; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} return res;}
-      CT(Parenthesis): {if (this->ElementsSize() == 0 ) return "()"; res += "("; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} return res+")";}
-      CT(Tuple): {if (this->ElementsSize() <= 1 ) return "()"; res += "("; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} if ( this->ElementsSize() == 1 ) res+=","; return res+")";}
-      CT(ExpressionList): {if (this->ElementsSize() == 0 ) return "{}"; res += "{"; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} return res+"}";}
+      CT(Sequence): {if (this->ElementsSize() == 0 ) return ""; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=", "+(*iter).ToString(); iter++;} return res;}
+      CT(Parenthesis): {if (this->ElementsSize() == 0 ) return "()"; res += "("; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=", "+(*iter).ToString(); iter++;} return res+")";}
+      CT(Tuple): {if (this->ElementsSize() <= 1 ) return "()"; res += "("; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=","+(*iter).ToString(); iter++;} if ( this->ElementsSize() == 1 ) res+=", "; return res+")";}
+      CT(ExpressionList): {if (this->ElementsSize() == 0 ) return "{}"; res += "{"; iter=_list.begin()+1; if ( iter!=_list.end() ){res+=(*iter).ToString(); iter++;} while (iter!=_list.end()){res+=", "+(*iter).ToString(); iter++;} return res+"}";}
       CT(Pattern): {should_gt(1);res += _list[1].ToString(); if ( not( _list[2].ListQ(SYMID_OF_Black)||_list[2].ListQ(SYMID_OF_BlackSequence)||_list[2].ListQ(SYMID_OF_BlackNullSequence) ) ) return res+=_list[2].ToString(*this); else return res+=_list[2].ToString(*this); } 
       CT(Query): {should_be(2);res += _list[1].ToString()+"?"+_list[2].ToString();return res;} 
       CT(Plus): {should_gt(1); res += _list[1].ToString(*this); for (iter = _list.begin()+2; iter!= _list.end(); iter++) res+="+"+(*iter).ToString(*this); return res;} 
@@ -1408,7 +1409,7 @@ string Object::ToString(const bool is_print)const{
           res +=(*iter).ToString(); iter++;
         }
         while (iter!=_list.end()){
-          res +=","+(*iter).ToString(); iter++;
+          res +=", "+(*iter).ToString(); iter++;
         }
         return res+")";
       }
@@ -1949,7 +1950,7 @@ string Object::DumpToJson(bool isLeft)const{
         continue;
       }
       // if (  i == Size() and _list[i].NullQ() ){
-      if ( not is_head ) str += ","; else is_head = false;
+      if ( not is_head ) str += ", "; else is_head = false;
       if ( _list[i].PairQ(SYMID_OF_KeyValuePair ) ) {
         str +=  _list[i](1).DumpToJson(true) + ":" + _list[i](2).DumpToJson();
         is_array = false;

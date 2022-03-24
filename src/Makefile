@@ -85,8 +85,8 @@ install:
 	rmcp $(OUT) ../bin/
 clean: $(CLEANDIRS)
 	rm *.o; rm $(OUT)
-#	rm ../lib/*
-#	rm ../include/*
+	rm ../lib/*
+	rm ../include/*
 $(CLEANDIRS): 
 	-$(MAKE) -C $(@:clean-%=%) clean
 #install: $(INSTALLDIRS) release

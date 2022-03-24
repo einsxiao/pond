@@ -1,5 +1,6 @@
-#!/usr/bin/evn pond
+#!/usr/bin/env pond
+SetRunningMode("cpu");
 import Matrix
 Matrix('a').Set({1,2,3,4})
 Matrix('a').ToList()
-test();
+test()

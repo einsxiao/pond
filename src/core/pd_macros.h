@@ -198,7 +198,89 @@
 #define ReturnNull         ({ ARGV.SetNull(); return 1;})
 #define ReturnError        ({ return -1;})
 
-#define PD_ARGS_CHECK(...) 
+//////////////////////////////////////////////////////////////////////////////
+
+#define POND_CONCAT_IMPL(A, B) A##B
+#define POND_CONCAT(A, B) POND_CONCAT_IMPL(A, B)
+#define POND_GET_N(N, ...) POND_CONCAT(POND_GET_N_, N)(__VA_ARGS__)
+#define POND_GET_N_0( _0, ...) _0
+#define POND_GET_N_1( _0, _1, ...) _1
+#define POND_GET_N_2( _0, _1, _2, ...) _2
+#define POND_GET_N_3( _0, _1, _2, _3, ...) _3
+#define POND_GET_N_4( _0, _1, _2, _3, _4, ...) _4
+#define POND_GET_N_5( _0, _1, _2, _3, _4, _5, ...) _5
+#define POND_GET_N_6( _0, _1, _2, _3, _4, _5, _6, ...) _6
+#define POND_GET_N_7( _0, _1, _2, _3, _4, _5, _6, _7, ...) _7
+#define POND_GET_N_8( _0, _1, _2, _3, _4, _5, _6, _7, _8, ...) _8
+#define POND_GET_N_9( _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, ...) _9
+#define POND_GET_N_10(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, ...) _10
+#define POND_GET_N_11(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, ...) _11
+#define POND_GET_N_12(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, ...) _12
+#define POND_GET_N_13(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, ...) _13
+#define POND_GET_N_14(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, ...) _14
+#define POND_GET_N_15(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, ...) _15
+#define POND_GET_N_16(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, ...) _16
+
+#define POND_IS_EMPTY(...)                                              \
+  POND_AND(POND_AND(POND_NOT(POND_HAS_COMMA(__VA_ARGS__)),              \
+                    POND_NOT(POND_HAS_COMMA(__VA_ARGS__()))),           \
+           POND_AND(POND_NOT(POND_HAS_COMMA(POND_COMMA_V __VA_ARGS__)), \
+                    POND_HAS_COMMA(POND_COMMA_V __VA_ARGS__())))
+#define POND_HAS_COMMA(...) POND_GET_N_16(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0)
+#define POND_COMMA_V(...) ,
+#define POND_VA_OPT_COMMA(...) POND_COMMA_IF(POND_NOT(POND_IS_EMPTY(__VA_ARGS__)))
+#define POND_NARG(...) POND_GET_N(16, __VA_ARGS__ POND_VA_OPT_COMMA(__VA_ARGS__) \
+                                  16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
+#define POND_INC_0 1
+#define POND_INC_1 2
+#define POND_INC_2 3
+#define POND_INC_3 4
+#define POND_INC_4 5
+#define POND_INC_5 6
+#define POND_INC_6 7
+#define POND_INC_7 8
+#define POND_INC_8 9
+#define POND_INC_9 10
+#define POND_INC_10 11
+#define POND_INC_11 12
+#define POND_INC_12 13
+#define POND_INC_13 14
+#define POND_INC_14 15
+#define POND_INC_15 16
+#define POND_INC_16 17
+#define POND_INC_17 18
+
+#define POND_CHECK_FOR_EACH(DO, ...)                                    \
+  POND_CONCAT(POND_CHECK_FOR_EACH_, POND_CONCAT(POND_INC_,POND_NARG(__VA_ARGS__)))(DO, 1, __VA_ARGS__)
+#define POND_CHECK_FOR_EACH_0(DO, IND, ...)
+#define POND_CHECK_FOR_EACH_1(DO, IND, VAR, ...) DO(VAR, IND)
+#define POND_CHECK_FOR_EACH_2(DO, IND, VAR, ...) DO(VAR, IND)         \
+  POND_CHECK_FOR_EACH_1(DO, POND_CONCAT(POND_INC_,IND), __VA_ARGS__)
+#define POND_CHECK_FOR_EACH_3(DO, IND, VAR, ...) DO(VAR, IND)         \
+  POND_CHECK_FOR_EACH_2(DO, POND_CONCAT(POND_INC_,IND), __VA_ARGS__)
+#define POND_CHECK_FOR_EACH_4(DO, IND, VAR, ...) DO(VAR, IND)         \
+  POND_CHECK_FOR_EACH_3(DO, POND_CONCAT(POND_INC_,IND), __VA_ARGS__)
+
+#define CHECK_POS(pos_type,i) {                                         \
+    if (  ((unsigned char)pos_type) != __Any__ && ((unsigned char)pos_type) != ((unsigned char)ARGV[i].type()) ) { \
+      zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第 " +pond::ToString(i)+" 个参数应该是 "+pond::ToString(pos_type)+".") || \
+        Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a "+pond::ToString(pos_type)+"."); \
+      ReturnError;                                                      \
+    }                                                                   \
+  }
+  
+#define PD_ARGS_CHECK(...) {                                            \
+    const int N_ARG = POND_NARG(__VA_ARGS__)+1;                         \
+    if ( N_ARG > ARGV.Size() ){                                         \
+      zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数应当是 "+pond::ToString(N_ARG)+" 个. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
+        Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments; while ":" argument; while ")+pond::ToString(N_ARG)+" argument"+((N_ARG)>1?"s are":" is")+" required."); \
+      ReturnError;                                                      \
+    }                                                                   \
+    POND_CHECK_FOR_EACH(CHECK_POS, __VA_ARGS__);                        \
+  }
+
+//////////////////////////////////////////////////////////////////////////////
 
 #define CheckArgsShouldNotEqual(ARGV,n)  {                              \
     if((ARGV).Size()==(n)){                                             \

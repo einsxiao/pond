@@ -1,0 +1,12 @@
+#!/usr/bin/env pond
+#SetParallelMode("gpu") # parallel pragma will run in nvidia device. When no device, error will be reported.
+SetParallelMode("cpu") # parallel pragma will run in openmp mode
+SetCpuThreadsNumber(1)
+import fortran_C_interface_example
+
+#fort_plus(a,b)
+fort_plus(3,4)
+#fort_mat_multi([[1,2],[3,5],[7,8],[3,4]],8)
+#fort_mat_multi([1,2,3,4,5],8)
+fort_mat_multi([1,2],8)
+

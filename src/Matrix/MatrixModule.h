@@ -37,6 +37,7 @@ namespace pond{
     static int       Matrix2Object(FloatMatrix&,         Object&);
     static int       Matrix2Object(FloatComplexMatrix&,  Object&);
     static int       Matrix2Object(IntMatrix&,           Object&);
+
     //get matrix from mat table
     int              Matrix2Object(std::string,          Object&); 
     ///////////////////////////////
@@ -50,6 +51,7 @@ namespace pond{
     int              PD_GetMatrixPosition(Object&);
     int              PD_SetMatrixPosition(Object&);
     ///////////////////////////////
+    int              PD_test(Object&);
   };
   
   inline int operator>>(Object Argv,Matrix &matrix)

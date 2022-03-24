@@ -239,7 +239,6 @@ int MatrixModule::PD_Matrix(Object &ARGV){
     CheckArgsShouldBeString(ARGV[1],1);
     EvaKernel->Evaluate( ARGV[2] );
     Matrix2Object( ARGV[1][1].Key(), ARGV[2] );
-    // ARGV.SetTo(2);
     ARGV = ARGV[2];
     ReturnNormal;
   }
@@ -395,29 +394,23 @@ int MatrixModule::PD_MatrixExist(Object &ARGV){
 
 ///////////////////////////////////////////////////////////////
 // array2list && matrix2object parts
-#define LOCAL_ARRAY_2_LIST(type,to_type)                                \
-  static int LocalArray2List(Object &ARGV,type*arr,int *dim,int pdim, int parr){ \
-    if ( pdim>dim[0] ){                                                 \
-      ARGV.SetNumber( (to_type) arr[parr] );                            \
-      return parr+1;                                                    \
-    }                                                                   \
-    ARGV.SetList();                                                     \
-    for (int i=0; i<dim[pdim]; i++){                                    \
-      ARGV.PushBackNull();                                              \
-      parr=LocalArray2List( ARGV[i+1],arr,dim,pdim+1,parr);             \
-    }                                                                   \
-    return parr;                                                        \
-  }
+template<class type, class to_type>
+static int LocalArray2List(Object &ARGV,type*arr,int *dim,int pdim, int parr){ 
+  if ( pdim>dim[0] ){                                                 
+    ARGV.SetNumber( (to_type) arr[parr] );                            
+    return parr+1;                                                    
+  }                                                                   
+  ARGV.SetList();                                                     
+  for (int i=0; i<dim[pdim]; i++){                                    
+    ARGV.PushBackNull();                                              
+    parr=LocalArray2List<type,to_type>( ARGV[i+1],arr,dim,pdim+1,parr);             
+  }                                                                   
+  return parr;                                                        
+}
 
-LOCAL_ARRAY_2_LIST(int,int)
-LOCAL_ARRAY_2_LIST(long long,double)
-LOCAL_ARRAY_2_LIST(float,double)
-LOCAL_ARRAY_2_LIST(double,double)
-LOCAL_ARRAY_2_LIST(complex,complex)
-#undef LOCAL_ARRAY_2_LIST
 #define ARRAY_2_LIST(type)                                      \
   int MatrixModule::Array2List(Object &ARGV,type*arr,int *dim){ \
-    LocalArray2List( ARGV,arr,dim,1,0);                         \
+    LocalArray2List<type,type>( ARGV,arr,dim,1,0);              \
     return 0;                                                   \
   }
 ARRAY_2_LIST(int)
@@ -426,12 +419,13 @@ ARRAY_2_LIST(float)
 ARRAY_2_LIST(double)
 ARRAY_2_LIST(complex)
 #undef ARRAY_2_LIST
+
 #define MATRIX_2_OBJECT(b_type)                                         \
   int MatrixModule::Matrix2Object(Matrix_T<b_type> &matrix, Object &ARGV){ \
     ARGV.SetList();                                                     \
     if ( not matrix.Size() == 0 ){                                      \
       int *dim = matrix.NewDimArray();                                  \
-      Array2List(ARGV,matrix.Data,dim);                                 \
+      Array2List(ARGV, matrix.Data, dim);                               \
       delete []dim;                                                     \
     }else{                                                              \
       return -1;                                                        \
@@ -439,7 +433,6 @@ ARRAY_2_LIST(complex)
     return 1;                                                           \
   }
 MATRIX_2_OBJECT(int)
-// MATRIX_2_OBJECT(long long)
 MATRIX_2_OBJECT(float)
 MATRIX_2_OBJECT(double)
 MATRIX_2_OBJECT(complex)
@@ -455,27 +448,6 @@ int MatrixModule::Matrix2Object(string name,Object &ARGV){//mat of Object form
     return 1;
   }
 }
-
-
-///////////////////////////////////////////////////////////////////////
-// template<type>
-// static int LocalList2Array(Object &ARGV,type*arr, int parr){
-//   if ( ARGV.AtomQ() ){
-//     if ( ARGV.NumberQ() ){
-//       arr[parr] = type(ARGV);
-//       return parr+1;
-//     }else{
-//       Warning("List2Array","Non-number encontered in operation of ARGV to array.");
-//       return -1;
-//     }
-//   }
-//   for (u_int i=0; i<ARGV.Size(); i++){
-//     parr=LocalList2Array( ARGV[i+1], arr, parr);
-//     if ( parr<0 ) return -1;
-//   }
-//   return parr;
-// }
-
 
 template<class type1>
 void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
@@ -527,3 +499,15 @@ int MatrixModule::Object2Matrix(Object&ARGV,string name){
 } 
 
 
+int MatrixModule::PD_test(Object&argv){
+  // test function for Matrix Module
+  cout<<argv<<endl;
+  Matrix mat(1,5,MatrixHost);
+  mat = 2;
+  Object res;
+  MatrixModule::Matrix2Object( mat, res );
+  cout<<"res = "<<res<<endl;
+  argv = res;
+  cout<<"argv = "<<argv<<endl;
+  return 0;
+}

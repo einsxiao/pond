@@ -13,8 +13,11 @@ OSModule::OSModule():Module(MODULE_NAME){
 
 OSModule::~OSModule(){
   for(auto iter = fileTable.begin(); iter != fileTable.end(); iter ++ ){
-    if ( iter->second  != NULL )
+    if ( iter->second  != NULL ){
       iter->second->close();
+      iter->second = NULL;
+    }
+    
   }
 
 };

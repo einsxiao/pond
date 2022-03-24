@@ -169,12 +169,13 @@ EvaMemoryPool::EvaMemoryPool(){
   EvaSettings.scientificFormat = false;
   EvaSettings.epsilon = 0.000000000000005;
 
+  flag = 0;
 }
 
 EvaMemoryPool::~EvaMemoryPool(){
-  // is_finalizing = true;
   //dout<<endl;
   //dout<<"Finalilze EvaMemoryPool"<<endl;
+  flag = 1;
 }
 
 
@@ -185,48 +186,49 @@ __EvaSymbolTable::__EvaSymbolTable(){
 
 __EvaSymbolTable::~__EvaSymbolTable(){
   //dout<<"   finalize SymbolTable"<<endl;
-  for ( auto iter = records.begin(); iter != records.end(); iter++)
-    delete (*iter).key;
+  // for ( auto iter = records.begin(); iter != records.end(); iter++){
+  //   delete (*iter).key;
+  // }
   //dout<<"   finalize SymbolTable finished"<<endl;
 }
 
 u_int __EvaSymbolTable::GetOrNew(const char*key,u_char priLeft,u_char priRight,u_char operType,u_char operNum){
   //if ( mt.try_lock_for( std::chrono::milliseconds( __EvaMaxWaitTime ) ) ){
-    // std::lock_guard<std::mutex> lock(mt);
-    int first=0,final = positions.size()-1, result=-999;
-    u_int pos= final+1;
-    while ( first <= final ){
-      pos = first+(final-first)/2;
-      result = compare( key, positions[pos].key );
-      if ( result == 0 ){
-        if ( priLeft != 0 or priRight != 0 ){
-          records[ positions[pos].pos ].pL    = priLeft;
-          records[ positions[pos].pos ].pR    = priRight;
-          records[ positions[pos].pos ].oType = operType;
-          records[ positions[pos].pos ].oNum  = operNum;
-        }
-        //unLock();
-        return positions[pos].pos;
-      }else if ( result < 0 ){
-        final = pos-1;
-      }else{// result > 0
-        first = pos+1;
+  // std::lock_guard<std::mutex> lock(mt);
+  int first=0,final = positions.size()-1, result=-999;
+  u_int pos= final+1;
+  while ( first <= final ){
+    pos = first+(final-first)/2;
+    result = compare( key, positions[pos].key );
+    if ( result == 0 ){
+      if ( priLeft != 0 or priRight != 0 ){
+        records[ positions[pos].pos ].pL    = priLeft;
+        records[ positions[pos].pos ].pR    = priRight;
+        records[ positions[pos].pos ].oType = operType;
+        records[ positions[pos].pos ].oNum  = operNum;
       }
+      //unLock();
+      return positions[pos].pos;
+    }else if ( result < 0 ){
+      final = pos-1;
+    }else{// result > 0
+      first = pos+1;
     }
-    auto iter_pos = positions.begin() + pos;
-    if ( pos < positions.size() and result > 0 ){
-      iter_pos ++;
-      pos ++;
-    }
-    recordType rec( strdup( key), pos, priLeft, priRight, operType, operNum );
-    iter_pos = positions.insert( iter_pos, positionType( rec.key, ptr) );
-    records.push_back(rec);
-    //update weight
-    iter_pos++;
-    while ( iter_pos != positions.end() ){
-      records[ (*iter_pos).pos ].weight++;
-      iter_pos ++;
-    }
+  }
+  auto iter_pos = positions.begin() + pos;
+  if ( pos < positions.size() and result > 0 ){
+    iter_pos ++;
+    pos ++;
+  }
+  recordType rec( strdup( key), pos, priLeft, priRight, operType, operNum );
+  iter_pos = positions.insert( iter_pos, positionType( rec.key, ptr) );
+  records.push_back(rec);
+  //update weight
+  iter_pos++;
+  while ( iter_pos != positions.end() ){
+    records[ (*iter_pos).pos ].weight++;
+    iter_pos ++;
+  }
   // }else{
   //   ThrowError("Pool","SymbolTable","Cannot unlock time_mutex within "+ToString(__EvaMaxWaitTime)+"ms");
   // }
@@ -234,6 +236,7 @@ u_int __EvaSymbolTable::GetOrNew(const char*key,u_char priLeft,u_char priRight,u
 }
 
 #define declare_ref(obj,id) auto &obj= objs[id.row ][id.col ]
+//#define declare_ref(obj,id) auto &obj= (objs.at(id.row ))[id.col ]
 
 Index __EvaStringTable::NewString(const char*str){
   Index id;
@@ -261,14 +264,16 @@ Index __EvaListTable::NewList(Index id){
 }
 
 void __EvaListTable::FreeList(Index id){
+  //cout<<"Free Object of List type: "<<id<<endl;
   declare_ref(obj,id);
   // for (auto iter=obj.begin(); iter != obj.end(); iter++){
   //   (*iter).SetVoid();
   // }
   //dout<<"    free list "<<id<<" size = "<<obj.size()<<" before buffer="<<freeObjs.size()<<endl;
   obj.clear();
-  if ( obj.capacity() > 128 )
+  if ( obj.capacity() > 128 ){
     obj.shrink_to_fit();
+  }
 
   freeObjs.push_back(id);
   //dout<<"     afterr buffer size="<<freeObjs.size() <<endl;
@@ -294,8 +299,8 @@ void __EvaMatchTable::FreePairs(Index id){
   if ( obj.capacity() > 64 ) obj.resize(16);
   //waitAndLock(); //should check 
   //if ( mt.try_lock_for( std::chrono::milliseconds( __EvaMaxWaitTime ) ) ){
-    // std::lock_guard<std::mutex> lock(mt);
-    freeObjs.push_back(id);
+  // std::lock_guard<std::mutex> lock(mt);
+  freeObjs.push_back(id);
   // }else{
   //   ThrowError("MatchTable","FreePairs","Cannot unlock time_mutex within "+ToString(__EvaMaxWaitTime)+"ms");
   // }

@@ -57,18 +57,6 @@ namespace pond{
 #define RegisterFunctionsType(module,func) _RegisterFunctionsType(module,func)
 ////////////////////////////////////////////////////////////////////////////////////////
 
-/* #define DeclareModule(module) class module##Module:public Module */
-/* #define Constructors(module) public: module##Module(std::string); ~module##Module(); private: unsigned int __MODULE_DECLARE_MARK */
-/* #define DeclareFunction(func) int PD_##func(Object&Argv) */
-////////////////////////////////////////////////////////////////////////////////////////
-/* #define DefinePDFunction(func,Argv,description...)                      \ */
-/*   int func##_Eva_init_int(__register_function(#func));                  \ */
-/*   extern "C" int RegisterFunctionsType(__MODULE_NAME__,func)(Module*module){ \ */
-/*     return Module::RegisterFunction(#func,(MemberFunction)(&ModuleType::PD_##func),module,##description); \ */
-/*   };                                                                    \ */
-/*   int ModuleType::PD_##func(Object&Argv) */
-/* #define DefineFunction(func,description...) DefinePDFunction(func,Argv,##description) */
-
 #define __REGISTER_POND_FUNCTION__(func,description...)                 \
   int func##_Eva_init_int(__register_function(#func));                  \
   extern "C" int RegisterFunctionsType(__MODULE_NAME__,func)(Module*module){ \
@@ -82,11 +70,11 @@ namespace pond{
   ////////////////////////////////////////////////////////////////////////////////////////
 #define __DEBUG_MAIN__(file)                                            \
   int main(int argc,char*argv[]){                                       \
-    pond::Object tmp;                                                   \
     pond::dout<<">>>debug main to run '"<<file<<"'<<<"<<std::endl;      \
     pond::Evaluation eva(true);                                         \
     eva.argc = argc; eva.argv = argv;                                   \
     try{                                                                \
+      pond::Object tmp;                                                 \
       eva.EvaluateFile(file,tmp);                                       \
     }catch ( const pond::ExceptionQuit&err ){                           \
       return err.code;                                                  \
@@ -103,12 +91,12 @@ namespace pond{
   }                                                                 
   ////////////////////////////////////////////////////////////////////////////////////////
 
-/* #define ModuleConstruction                                              \ */
 #define __REGISTER_POND_MODULE__                                        \
   static pond::Object __module_function_list;                           \
   static int __register_function(std::string func){                     \
-    if ( __module_function_list.NullQ() )                               \
+    if ( __module_function_list.NullQ() ){                              \
       __module_function_list.SetList();                                 \
+    }                                                                   \
     __module_function_list.PushBackSymbol( func.c_str() );              \
     return 0;                                                           \
   }                                                                     \
@@ -118,15 +106,8 @@ namespace pond{
   extern "C" pond::Module *CreateModuleType(){                          \
     return new ModuleType();                                            \
   }                                                                     \
-  extern "C" void DestroyModuleType(pond::Module*p){ delete (ModuleType*)p; }
-  /* ModuleType::ModuleType():Module(MODULE_NAME) */
-////////////////////////////////////////////////////////////////////////////////////////
-/* #define ModuleDestruction ModuleType::~ModuleType() */
-////////////////////////////////////////////////////////////////////////////////////////
-
-#define InterfaceArgumentsCheck(n, ...){
-    va_list args;
-    va_start(args, n);
+  extern "C" void DestroyModuleType(pond::Module*p){                    \
+    delete (ModuleType*)p;                                              \
   }
 
 

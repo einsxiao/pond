@@ -39,6 +39,7 @@ int main(int argc,char* argv[])
   int    res         = 0;
   bool   noprint     = false;
   bool   pmark       = false;
+  bool   pimport     = false;
   try{
     vector<pair<string,string> > options;
     vector<string> args;
@@ -63,6 +64,7 @@ int main(int argc,char* argv[])
           cout<<"    --noprint            : 不打印求值得到结果的行(脚本模式)"<<endl;
           cout<<"    --rcfile=rcfile      : 指定启动脚本"<<endl;
           cout<<"    --pmark              : 在交互模式中，打印模式标记"<<endl;
+          cout<<"    --pimport            : 打印导入模块的详细信息"<<endl;
           cout<<"    --help       / -h    : 显示帮助信息"<<endl;
           cout<<""<<endl;
         } else {
@@ -74,6 +76,7 @@ int main(int argc,char* argv[])
           cout<<"    --noprint            : do not print lines with result(script mode)"<<endl;
           cout<<"    --rcfile=rcfile      : set rc file for initializing"<<endl;
           cout<<"    --pmark              : print mode mark information in interactive mode"<<endl;
+          cout<<"    --pimport            : print import information"<<endl;
           cout<<"    --help       / -h    : show help info"<<endl;
           cout<<""<<endl;
         }
@@ -91,16 +94,19 @@ int main(int argc,char* argv[])
         pmark = true;
         continue;
       }
+      if ( options[i].first == "pimport" ){
+        pimport = true;
+        continue;
+      }
 
     }
     if ( args.size() == 1 ){
       if ( isatty( 0 ) ){
         cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
-        Kernel kernel(&cin, true, argc, argv, rcfile);
-        kernel.pmark = pmark;
+        Kernel kernel(&cin, true, argc, argv, rcfile, pmark, pimport);
         res = kernel.Phrasing();
       }else{
-        Kernel kernel(&cin, false, argc, argv, rcfile);
+        Kernel kernel(&cin, false, argc, argv, rcfile,pmark, pimport);
         kernel.noprint = noprint ;
         res = kernel.Phrasing();
       }
@@ -110,7 +116,7 @@ int main(int argc,char* argv[])
         string filename = args[1];
         ifstream fcin(filename.c_str());
         if ( fcin ){
-          Kernel kernel(&fcin, false, argc, argv, rcfile);
+          Kernel kernel(&fcin, false, argc, argv, rcfile, pmark, pimport);
           kernel.noprint = noprint;
           res = kernel.Phrasing();
         }else{

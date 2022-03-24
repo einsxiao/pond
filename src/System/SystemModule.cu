@@ -764,8 +764,8 @@ int SystemModule::ReplaceAll(Object & ARGV){
     ARGV = ARGV[1];
     ReturnNormal;
   }
-  Erroring("ReplaceAll","Second parameter should be a Rule or a ARGV of rules.");
-  ReturnError; 
+  // Erroring("ReplaceAll","Second parameter should be a Rule or a ARGV of rules.");
+  // ReturnError; 
 }
 
 int SystemModule::ReplaceAllRepeated(Object & ARGV){

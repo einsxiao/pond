@@ -72,7 +72,7 @@ namespace pond{
 
   ////////////////////////////////////////////
 #ifndef __MEMORY_POOL_ROW_SIZE
-#  define __MEMORY_POOL_ROW_SIZE 65530
+#  define __MEMORY_POOL_ROW_SIZE 65535
 #endif
   template<class type>
     class __EvaTable{
@@ -94,16 +94,19 @@ namespace pond{
       idx.zero();
     };
     virtual  ~__EvaTable(){
-      for ( auto iter = objs.begin(); iter!=objs.end(); iter++){
+      for ( auto iter = objs.begin(); iter != objs.end(); iter++){
         delete [](*iter);
+        (*iter) = NULL;
       }
-      objs.clear();
+      //objs.clear();
+      //freeObjs.clear();
     };
     type &Get(const Index v){
       /* if ( idx < v ){ */
       /*   Erroring("Pool","Try get elements out of range."); */
       /*   return objs[0][0]; */
       /* } */
+      //std::cout<<"get get "<<v<<" from '"<<this->tableName<<"'"<<std::endl;
       return objs[ v.row ][ v.col ];
     }
     Index New(){
@@ -133,6 +136,7 @@ namespace pond{
 
     };
     inline void Free(Index id){
+      //std::cout<<"free element of id ="<< id <<" in table '"<<tableName<<"' with this = "<<this<<std::endl;
       /* std::lock_guard<std::mutex> lock(mt); */
       //dout<<tableName<<"Table ele "<<id<<" is freed"<<std::endl;
       if ( id.nonzeroQ() ){
@@ -230,8 +234,9 @@ namespace pond{
     Matrix_T<type>   *GetOrNewMatrix(std::string name)
     {
       Matrix_T<type> **matPP = &matrixTable[name];
-      if ( *matPP == NULL )
+      if ( *matPP == NULL ){
         *matPP = new Matrix_T<type>();
+      }
       return *matPP;
     };
     int RemoveMatrix(std::string name)
@@ -240,6 +245,7 @@ namespace pond{
       iter = matrixTable.find(name);
       if ( iter != matrixTable.end() ){
         delete iter->second;
+        iter->second = NULL;
         matrixTable.erase(iter);
         return 1;
       }

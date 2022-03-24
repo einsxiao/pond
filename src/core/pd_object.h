@@ -1,12 +1,12 @@
 #ifndef Objectect_POND_H
 #define Objectect_POND_H
 namespace pond{
-  enum struct ObjectType:unsigned char{Symbol, Number, String, List, Any}; //reference is v.idx not 0
+  enum struct ObjectType:unsigned char{Symbol, Number, String, List }; //reference is v.idx not 0
   #define __Symbol__ ObjectType::Symbol
   #define __Number__ ObjectType::Number
   #define __String__ ObjectType::String
   #define __List__   ObjectType::List
-  #define __Any__    ObjectType::Any
+  #define __Any__    'x'
   typedef int (*ObjectCompareFunction)(const Object&,const Object&);
   struct ObjectCompareFunctionLess;
 
@@ -54,7 +54,7 @@ namespace pond{
 #define _obj_at_objid GlobalPool.Objects.objs[objid.row][objid.col ]
 namespace pond{
   /*
-    pond::Object is the core class for pond, every expression in pond has
+    pond::Object is the core class for pond. every expression in pond has
     a responding object of type pond::Object.
    */
   class Object{

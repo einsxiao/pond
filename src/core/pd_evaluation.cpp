@@ -90,7 +90,7 @@ bool EvaRecord::isCallable(){
 
 static vector<Index> symidToPairIndex;
 
-Evaluation::Evaluation(bool debug, bool pmark){
+Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   // EvaKernel
   //dout<<"try initialize evaluation"<<endl;
   // exit(0);
@@ -107,8 +107,13 @@ Evaluation::Evaluation(bool debug, bool pmark){
   evaRecordTable.push_back(NULL);
   evaRecordTable.push_back(NULL); //Get Value will return a value ( > 2) when is a eva record
   EvaluationDepth = 0;
+  __Status_ImportInfoPrint = pimport;
+  ///*
   ///////////////////////////////
   //dout<<"basic info ready, try register core functions"<<endl;
+  if ( __Status_ImportInfoPrint ){
+    cout<<"Import core with functions:\n    ";
+  }
   {
     // Module::RegisterFunction("GetModule",Evaluation::PGetModule_Eva,NULL,"Get Module into Pond System");
     Module::RegisterFunction("Import",Evaluation::PD_Import,NULL,"Import Module into Pond Kernel");
@@ -163,22 +168,28 @@ Evaluation::Evaluation(bool debug, bool pmark){
     Module::RegisterFunction("Exit",Evaluation::PD_exit,NULL,"zh:退出程序|||exit current kernel"); 
 
     Module::RegisterFunction("help",Evaluation::PD_help,NULL,"zh:help([obj])\n  获得[obj]的帮助信息.|||help([obj])\n  get help info for [obj]."); 
-    Module::RegisterFunction("Help",Evaluation::PD_help,NULL,""); 
+    Module::RegisterFunction("Help",Evaluation::PD_help,NULL,"zh:help([obj])\n  获得[obj]的帮助信息.|||help([obj])\n  get help info for [obj]."); 
     Module::AddAttribute("help",AttributeType::HoldAll);
     Module::AddAttribute("Help",AttributeType::HoldAll);
 
+    Module::RegisterFunction("SetImportInfoPrint", Evaluation::PD_SetImportInfoPrint, NULL,
+                             "zh:设置模块导入信息打印开关.|||switch import information printing.");
   }
-  
+  if ( __Status_ImportInfoPrint ){
+    cout<<endl;
+  }
+  //*/
 
   //dout<<"try load some preloaded modules"<<endl;
+
   GetModule("List");
-  GetModule("Arithmatics");
   GetModule("System");
+  GetModule("Arithmatics");
   GetModule("Class");
   GetModule("String");
   GetModule("OS");
-  //dout<<"modules loaded"<<endl;
 
+  /*
   if ( GetEnv("POND_ENABLE_PYTHON")   == "yes" ){
     GetModule("Python"); 
   }
@@ -189,6 +200,8 @@ Evaluation::Evaluation(bool debug, bool pmark){
     GetModule("Matrix");
     GetModule("MatrixOperations");
   }
+  //*/
+
   // ///////////////////////////
   // string matlab_root = GetEnv("MATLAB_ROOT");
   // if (  matlab_root != "" ){ 
@@ -221,6 +234,7 @@ Evaluation::Evaluation(bool debug, bool pmark){
 
   //dout<<"new a context to evaluate in a level 1 context"<<endl;
   newContext();
+  //*/
 
   //dout<<"evaluation done"<<endl;
 
@@ -245,6 +259,7 @@ Evaluation::~Evaluation(){
       delete *valueTables.begin() ;
     valueTables.erase( valueTables.begin() );
   }
+  //cout<<"Evaluation free done"<<endl;
 }
 
 int Evaluation::InsertModule(string moduleName,Module*module){
@@ -265,6 +280,35 @@ Module *Evaluation::ModulePtr(string moduleName){
       return NULL;
   }
   return iter->second;
+}
+
+int try_load_so_in_dir(string _module_dir, string libname,
+                       void *&lib_Handler, bool&module_find, string &module_dir,
+                       bool DebugMode, string temp_dir, bool silent,
+                       string moduleName
+){
+  if ( not lib_Handler and CheckFileType(_module_dir,"DIR") ){        
+    module_find = true;                                               
+    string so_file =  _module_dir+"/"+libname;                               
+    string temp_so_file = temp_dir+"/"+libname;                              
+    if ( FileExistQ(so_file) ){
+      if ( !FileExistQ(temp_so_file) ||
+           GetFileMD5(so_file) != GetFileMD5(temp_so_file) )
+        System("rmcp "+so_file+" "+temp_dir );
+      lib_Handler=dlopen(temp_so_file.c_str(),RTLD_NOW|RTLD_GLOBAL );
+      if ( !lib_Handler ) {
+        if ( !DebugMode && silent ) return 1;
+        zhErroring("GetModule", "未能成功载入模块 '"+moduleName+"' 的二进制包")|| 
+          Erroring("GetModule","Fail to get binary '" + moduleName+"' in."); 
+        const char* dlsym_error=dlerror();                            
+        Warning("dlsym",((string)"dlsym_error::"+dlsym_error).c_str() ); 
+        return -1;                                                    
+      }                                                               
+      module_dir = _module_dir;                                       
+      return 9;
+    }                                                                 
+  }
+  return 0;
 }
 
 int Evaluation::GetModuleLib(string moduleName,bool silent){
@@ -297,80 +341,73 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
     }
     if ( pond_home == "" || pond_root == "" )
       ThrowError("Pond Environment variables are not properly set");
-    string libname="lib"+moduleName+"Module.so", devlibname="lib"+moduleName+"Module-dev.so",so_file,temp_so_file;
+    string libname="lib"+moduleName+"Module.so", devlibname="lib"+moduleName+"Module-dev.so";
+    string so_file,temp_so_file;
     string culibname="lib"+moduleName+"Module_cuda.so",cudevlibname="lib"+moduleName+"Module_cuda-dev.so";
     bool nvcc_status = pond::CommandExist("nvcc");
 
-#define TRY_LOAD_SO_IN(_module_dir,libname)                             \
-    if ( not lib_Handler and CheckFileType(_module_dir,"DIR") ){        \
-      module_find = true;                                               \
-      so_file =  _module_dir+"/"+libname;                               \
-      temp_so_file = temp_dir+"/"+libname;                              \
-      if ( FileExistQ(so_file) ){                                       \
-        if ( !FileExistQ(temp_so_file) ||                               \
-             GetFileMD5(so_file) != GetFileMD5(temp_so_file) )          \
-          System("rmcp "+so_file+" "+temp_dir );                        \
-        lib_Handler=dlopen(temp_so_file.c_str(),RTLD_NOW|RTLD_GLOBAL ); \
-        if ( !lib_Handler ) {                                           \
-          if ( !this->DebugMode && silent ) return 1;                   \
-          zhErroring("GetModule", "未能成功载入模块 '"+moduleName+"' 的二进制包")|| \
-            Erroring("GetModule","Fail to get binary '" + moduleName+"' in."); \
-          const char* dlsym_error=dlerror();                            \
-          Warning("dlsym",((string)"dlsym_error::"+dlsym_error).c_str() ); \
-          return -1;                                                    \
-        }                                                               \
-        module_dir = _module_dir;                                       \
-        break;                                                          \
-      }                                                                 \
+#define _DEAL_(dir, libname) {                  \
+      int x = try_load_so_in_dir(               \
+        dir, libname,                           \
+        lib_Handler, module_find, module_dir,   \
+        this->DebugMode, temp_dir, silent,      \
+        moduleName );                           \
+      if ( (x)<0) {                             \
+        return (x);                             \
+      } else if ( (x) == 1){                    \
+        return 1;                               \
+      } else if ( (x) == 9 ){                   \
+        break;                                  \
+      }                                         \
     }
     for(;;){
       if ( DebugMode ){
         if ( nvcc_status ){
-          TRY_LOAD_SO_IN(current_dir+"/",cudevlibname);
-          TRY_LOAD_SO_IN(pond_home+"/"+moduleName,cudevlibname);
-          TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,cudevlibname);
-          TRY_LOAD_SO_IN(pond_root+"/lib",cudevlibname);
+          _DEAL_( current_dir+"/",cudevlibname );
+          _DEAL_(pond_home+"/"+moduleName,cudevlibname);
+          _DEAL_(pond_root+"/modules/"+moduleName,cudevlibname);
+          _DEAL_(pond_root+"/lib",cudevlibname);
 
-          TRY_LOAD_SO_IN(current_dir+"/",culibname);
-          TRY_LOAD_SO_IN(pond_home+"/"+moduleName,culibname);
-          TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,culibname);
-          TRY_LOAD_SO_IN(pond_root+"/lib",culibname);
+          _DEAL_(current_dir+"/",culibname);
+          _DEAL_(pond_home+"/"+moduleName,culibname);
+          _DEAL_(pond_root+"/modules/"+moduleName,culibname);
+          _DEAL_(pond_root+"/lib",culibname);
         }
-        TRY_LOAD_SO_IN(current_dir+"/",devlibname);
-        TRY_LOAD_SO_IN(pond_home+"/"+moduleName,devlibname);
-        TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,devlibname);
-        TRY_LOAD_SO_IN(pond_root+"/lib",devlibname);
+        _DEAL_(current_dir+"/",devlibname);
+        _DEAL_(pond_home+"/"+moduleName,devlibname);
+        _DEAL_(pond_root+"/modules/"+moduleName,devlibname);
+        _DEAL_(pond_root+"/lib",devlibname);
 
-        TRY_LOAD_SO_IN(current_dir+"/",libname);
-        TRY_LOAD_SO_IN(pond_home+"/"+moduleName,libname);
-        TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,libname);
-        TRY_LOAD_SO_IN(pond_root+"/lib",libname);
+        _DEAL_(current_dir+"/",libname);
+        _DEAL_(pond_home+"/"+moduleName,libname);
+        _DEAL_(pond_root+"/modules/"+moduleName,libname);
+        _DEAL_(pond_root+"/lib",libname);
       }else{
         if ( nvcc_status ){
-          TRY_LOAD_SO_IN(current_dir+"/",culibname);
-          TRY_LOAD_SO_IN(pond_home+"/"+moduleName,culibname);
-          TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,culibname);
-          TRY_LOAD_SO_IN(pond_root+"/lib",culibname);
+          _DEAL_(current_dir+"/",culibname);
+          _DEAL_(pond_home+"/"+moduleName,culibname);
+          _DEAL_(pond_root+"/modules/"+moduleName,culibname);
+          _DEAL_(pond_root+"/lib",culibname);
 
-          TRY_LOAD_SO_IN(current_dir+"/",cudevlibname);
-          TRY_LOAD_SO_IN(pond_home+"/"+moduleName,cudevlibname);
-          TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,cudevlibname);
-          TRY_LOAD_SO_IN(pond_root+"/lib",cudevlibname);
+          _DEAL_(current_dir+"/",cudevlibname);
+          _DEAL_(pond_home+"/"+moduleName,cudevlibname);
+          _DEAL_(pond_root+"/modules/"+moduleName,cudevlibname);
+          _DEAL_(pond_root+"/lib",cudevlibname);
         }
-        TRY_LOAD_SO_IN(current_dir+"/",libname);
-        TRY_LOAD_SO_IN(pond_home+"/"+moduleName,libname);
-        TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,libname);
-        TRY_LOAD_SO_IN(pond_root+"/lib",libname);
+        _DEAL_(current_dir+"/",libname);
+        _DEAL_(pond_home+"/"+moduleName,libname);
+        _DEAL_(pond_root+"/modules/"+moduleName,libname);
+        _DEAL_(pond_root+"/lib",libname);
 
         
-        TRY_LOAD_SO_IN(current_dir+"/",devlibname);
-        TRY_LOAD_SO_IN(pond_home+"/"+moduleName,devlibname);
-        TRY_LOAD_SO_IN(pond_root+"/modules/"+moduleName,devlibname);
-        TRY_LOAD_SO_IN(pond_root+"/lib",devlibname);
+        _DEAL_(current_dir+"/",devlibname);
+        _DEAL_(pond_home+"/"+moduleName,devlibname);
+        _DEAL_(pond_root+"/modules/"+moduleName,devlibname);
+        _DEAL_(pond_root+"/lib",devlibname);
       }
       break;
     }
-#undef TRY_LOAD_SO_IN
+#undef _DEAL_
     // module not find
     if (not lib_Handler) {
       if ( not module_find ){
@@ -406,6 +443,9 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
   /////////////////////////////////////////////////////////////////////
   ///// Create module
   // registering to eva will happen once the new module being constructed.
+  if ( __Status_ImportInfoPrint ){
+    cout<<"Import module '"<<moduleName<<"' with functions:\n    ";
+  }
   Module * new_module = __create();
   if ( new_module == NULL ){
     zhErroring("GetModule"," 创建模块时遇到错误.") ||
@@ -424,7 +464,6 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
     Object  funclist( objid )  ;
     //dout<<"return functions for "<<moduleName<<"= "<<funclist<<endl;
     if ( funclist.ListQ() ){
-      //dout<<" dealing functions for module "<<moduleName <<endl;
       for (u_int i=1;i<=funclist.Size();i++){
         string func = funclist[i].Key();
         //dout<<"dealing func "<<func<<endl;
@@ -449,6 +488,9 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
   if ( dlsym_error ){
     zhWarning("dlsym",((string)"GeModule的最后出现dl错误:"+dlsym_error).c_str() ) ||
       Warning("dlsym",((string)"error at end of GetLib:"+dlsym_error).c_str() );
+  }
+  if ( __Status_ImportInfoPrint ){
+    cout<<endl;
   }
   return 1;
 }
@@ -1398,7 +1440,7 @@ pair<int,EvaRecord*> Evaluation::NewEvaRecord(){
   int id = 0;
   EvaRecord *rec;
   if ( freeEvaRecord.size() > 0 ){
-    id = *freeEvaRecord.rbegin();
+    id = *(freeEvaRecord.rbegin());
     if ( evaRecordTable[ id ] != NULL ){
       rec = evaRecordTable[ id ];
       rec->ClearAll();
@@ -1422,9 +1464,10 @@ bool Evaluation::ClearEvaRecord(int id){
       Erroring("ClearEvaRecord","Try to clear EvaRecord out of range.");
     return false;
   }
-  if ( evaRecordTable[id] == NULL ) return false;
-  delete evaRecordTable[id];
-  evaRecordTable[id] = NULL;
+  if ( evaRecordTable[id] != NULL ){
+    delete evaRecordTable[id];
+    evaRecordTable[id] = NULL;
+  }
   freeEvaRecord.push_back(id);
   return true;
 }
@@ -1834,4 +1877,18 @@ int Evaluation::PD_help(Object&ARGV){
   }
   ReturnNull;
   //ReturnNormal;
+}
+
+int Evaluation::PD_SetImportInfoPrint(Object&ARGV){
+  CheckShouldBe(1);
+  bool to_state = ARGV[1].Boolean();
+  EvaKernel->__Status_ImportInfoPrint = to_state;
+  if ( to_state ){
+    zhMessage("Start printing import information.")||
+      Message("开始输出模块导入详细信息");
+  } else {
+    zhMessage("Close import information printing.")||
+      Message("关闭模块导入信息输出功能");
+  }
+  ReturnNull;
 }

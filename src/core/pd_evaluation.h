@@ -38,6 +38,7 @@ namespace pond{
     /* int                                         statusEnv     = 0; */
     int                                         statusCode        = 0;
     Object                                      statusObject;
+    bool                                        __Status_ImportInfoPrint= false;
   private:
     int                                         maxRecursionDepth = 256;
     int                                         EvaluationDepth;
@@ -77,7 +78,7 @@ namespace pond{
     std::map<std::string,std::string>           messages; // main thread message
     bool                                        pmark    = false;
   public:
-    Evaluation(bool debug = false, bool pmark=false);  ~Evaluation();
+    Evaluation(bool debug = false, bool pmark=false, bool pimport=false);  ~Evaluation();
     //////////////////////////////////////////////////////////////
     ///// Evaluate something
     //  ofDelay if the calling form of delay function, all delayfunction attribute is apply to this form
@@ -242,6 +243,7 @@ namespace pond{
     /* static int       FetchCurrentVariablesToJson_Eva(  Object&Argv); */
     static int       PD_exit(                    Object&);
     static int       PD_help(                    Object&);
+    static int       PD_SetImportInfoPrint(      Object&);
   };
 #define INIT_VALUETABLEPAIR_ID_OF(sym) Index VALUETABLEPAIR_ID_OF_##sym = EvaKernel->GetOrNewValuePairRefAtTop(#sym).objid
 

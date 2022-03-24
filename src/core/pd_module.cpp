@@ -10,18 +10,17 @@ Module::Module(string name){
 };
 
 Module::~Module(){
+  //dout<<"module deconstruction"<<endl;
 };
 
 string Module::GetModuleName(){return moduleName;}
 
-//string Module::GetModuleDirectory(){return moduleDirectory;}
-
-//int Module::SetModuleDirectory(string dir){ moduleDirectory = dir; return 0; }
-
 #include<string.h>
 int Module::RegisterFunction(const char* funcName, MemberFunction func,const Module*mod,const char*descri){
+  if ( EvaKernel->__Status_ImportInfoPrint ){
+    cout<<funcName<<" ";
+  }
   Object temp; temp.SetSymbol( funcName );
-  //dout<<"register member function "<< temp << " : "<<descri<< endl;
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord(temp);
   SetAttribute(rec->attributes,AttributeType::Protected);
   rec->staticFunction = NULL;
@@ -32,7 +31,9 @@ int Module::RegisterFunction(const char* funcName, MemberFunction func,const Mod
 }
 
 int Module::RegisterFunction(const char*funcName, StaticFunction func,const Module*mod,const char*descri){
-  //dout<<"register static function "<< func<< " : "<<descri<< endl;
+  if ( EvaKernel->__Status_ImportInfoPrint ){
+    cout<<funcName<<" ";
+  }
   Object temp; temp.SetSymbol( funcName );
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord(temp);
   SetAttribute(rec->attributes,AttributeType::Protected);

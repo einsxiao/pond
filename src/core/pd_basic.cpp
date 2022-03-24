@@ -44,29 +44,45 @@ string pond::ToString(const void*num){
 }
 
 string pond::ToString(const ObjectType type){
-  switch ( type ){
-  case ObjectType::Number: return "Number"; break;
-  case ObjectType::Symbol: return "Symbol"; break;
-  case ObjectType::String: return "String"; break;
-  case ObjectType::List:   return "List"; break;
+  if ( EvaKernel->lang == "zh" ){
+    switch ( type ){
+    case ObjectType::Number: return "数字"; break;
+    case ObjectType::Symbol: return "符号"; break;
+    case ObjectType::String: return "字符串"; break;
+    case ObjectType::List:   return "列表"; break;
+    }
+    return "Unknown ObjectType";
+  } else {
+    switch ( type ){
+    case ObjectType::Number: return "Number"; break;
+    case ObjectType::Symbol: return "Symbol"; break;
+    case ObjectType::String: return "String"; break;
+    case ObjectType::List:   return "List"; break;
+    }
+    return "Unknown ObjectType";
   }
-  return "Unknown ObjectType";
 }
 
 class OstringStreamTable:public __EvaTable< ostringstream >{
 public:
-  OstringStreamTable():__EvaTable( 5 ){};
+  OstringStreamTable():__EvaTable( 5 ){
+    tableName = "OstringStream";
+  };
+  ~OstringStreamTable(){
+    std::cout<<"OstringStream deconstruction"<<std::endl;
+  }
 };
 
-OstringStreamTable ostringsPool;
+//OstringStreamTable ostringsPool;
 
 
 string pond::ToString(const char *val){
   return string(val);
 }
 string pond::ToString(double num){
-  Index idx = ostringsPool.New();
-  ostringstream&ss = ostringsPool.Get(idx);
+  static ostringstream ss;
+  // Index idx = ostringsPool.New();
+  // ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
   ss.precision(EvaSettings.precision);
   ss.setf( ios::uppercase);
@@ -75,13 +91,14 @@ string pond::ToString(double num){
   }else{
     ss<<num;
   }
-  ostringsPool.Free(idx);
+  // ostringsPool.Free(idx);
   return ss.str();
 }
 
 string pond::ToString(complex num){
-  Index idx = ostringsPool.New();
-  ostringstream&ss = ostringsPool.Get(idx);
+  static ostringstream ss;
+  // Index idx = ostringsPool.New();
+  // ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
   ss.precision(EvaSettings.precision);
   if ( EvaSettings.scientificFormat ){
@@ -89,13 +106,14 @@ string pond::ToString(complex num){
   }else{
     ss<<"("<<num.re<<","<<num.im<<")";
   }
-  ostringsPool.Free(idx);
+  // ostringsPool.Free(idx);
   return ss.str();
 }
 
 string pond::ToString(float num){
-  Index idx = ostringsPool.New();
-  ostringstream&ss = ostringsPool.Get(idx);
+  static ostringstream ss;
+  // Index idx = ostringsPool.New();
+  // ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
   ss.precision(EvaSettings.precision);
   ss.setf( ios::uppercase);
@@ -104,13 +122,14 @@ string pond::ToString(float num){
   }else{
     ss<<num;
   }
-  ostringsPool.Free(idx);
+  // ostringsPool.Free(idx);
   return ss.str();
 }
 
 string pond::ToString(floatcomplex num){
-  Index idx = ostringsPool.New();
-  ostringstream&ss = ostringsPool.Get(idx);
+  static ostringstream ss;
+  // Index idx = ostringsPool.New();
+  // ostringstream&ss = ostringsPool.Get(idx);
   ss.str("");
   ss.precision(EvaSettings.precision);
   if ( EvaSettings.scientificFormat ){
@@ -118,7 +137,7 @@ string pond::ToString(floatcomplex num){
   }else{
     ss<<"("<<num.re<<","<<num.im<<")";
   }
-  ostringsPool.Free(idx);
+  // ostringsPool.Free(idx);
   return ss.str();
 }
 

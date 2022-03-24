@@ -13,7 +13,7 @@ namespace pond{
     bool         noprint       = false;
     bool         pmark         = false;
     ///////////////////////////////
-    Kernel(std::istream *istr_in,bool interactively,int argc,char*argv[],std::string rcfile, bool pmark=false);
+    Kernel(std::istream *istr_in,bool interactively,int argc,char*argv[],std::string rcfile, bool pmark=false, bool pimport=false);
     ~Kernel();
     //////////////////////////////////////////////
     int   Phrasing();
