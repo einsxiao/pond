@@ -7,9 +7,9 @@ namespace pond{
   class Matrix_T{
   public:
     // state info means 0: normal 1: copied  2: temp_unuse 3: temp_in_use
-    unsigned char              state=0, ND=0;
-    unsigned short             D4=0,    D5=0,    D6=0,    D7=0,    D8=0;
-    unsigned int               D1=0,    D2=0,    D3=0;
+    uint8_t                    state=0, ND=0;
+    uint16_t                   D4=0,    D5=0,    D6=0,    D7=0,    D8=0;
+    uint32_t                   D1=0,    D2=0,    D3=0;
     type                      *Data = NULL;
     type                      *DataDevice = NULL;
     // size of matrix 1+1+5*2+3*4+2*8 = 40 B
