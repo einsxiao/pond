@@ -10,33 +10,33 @@ using namespace std;
 #define _list GlobalPool.Lists.Get( idx() )
 
 #define __check(t,ret) if ( voidQ()  ) {                                \
-    Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to none Null Object."); \
+    _Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to none Null Object."); \
     return ret;                                                         \
   }                                                                     \
   if ( type() != ObjectType::t ) {                                      \
-    Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only appled to Object with type "+ \
+    _Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only appled to Object with type "+ \
              Type2String(ObjectType::t)+", while current object is a "+TypeString()+"."); \
     return ret;                                                         \
   }
 #define __check_not(t,ret)                                              \
   if ( voidQ() ) {                                                      \
-    Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to a none Null Object."); \
+    _Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to a none Null Object."); \
     return ret;                                                         \
   }                                                                     \
   if ( type() == ObjectType::t ){                                       \
-    Erroring("Object",(string)"Function '"+__FUNCTION__+"' can not be appled to Object with type "+ \
+    _Erroring("Object",(string)"Function '"+__FUNCTION__+"' can not be appled to Object with type "+ \
              Type2String(ObjectType::t)+".");                           \
     return ret;                                                         \
   }
 #define __check_not_null(ret)                                           \
   if ( voidQ() ) {                                              \
-    Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to a none Null Object."); \
+    _Erroring("Object",(string)"Function '"+__FUNCTION__+"' is only applied to a none Null Object."); \
     return ret;                                                         \
   }
 
 // #define __check_state_uncomplete(ret)                                   \
 //   if ( _list.size() == 0 ) {                                            \
-//     Erroring("Object","Uncomplete List.");                              \
+//     _Erroring("Object","Uncomplete List.");                              \
 //     return ret;                                                         \
 // }
 
@@ -260,7 +260,7 @@ Object& Object::SetString(const string &str){
 
 Object& Object::SetSymbol(const u_int id){
   if ( id >= GlobalPool.Symbols.TableSize() ) {
-    Erroring("Object","Try to SetSymbol with Symbol Id "+pond::ToString(id)+" that does not exist."); 
+    _Erroring("Object","Try to SetSymbol with Symbol Id "+pond::ToString(id)+" that does not exist."); 
     return *this; 
   }
   if ( voidQ() ){
@@ -396,7 +396,7 @@ string Object::TypeString()const{
   case ObjectType::String: return "String";
   case ObjectType::List:   return "List"; 
   }
-  Erroring("Object::TypeString","switch");
+  _Erroring("Object::TypeString","switch");
   return "";
 }
 ///////////////////////////////////////////////
@@ -692,12 +692,12 @@ const char *Object::Head()const{
   case ObjectType::String: return "String";
   case ObjectType::List:
     //dout<< _ElementAt(0).ToString() <<endl;
-    if ( _list.size() == 0 ) { Erroring("Object","Uncomplete List."); return ""; }
+    if ( _list.size() == 0 ) { _Erroring("Object","Uncomplete List."); return ""; }
     if ( _list[0].type() == ObjectType::Symbol ){
       return GlobalPool.Symbols.GetKey( _list[0].ids() );
     }
     return "$ComplicateList$";
-  }{ Erroring("Object::Head","Switch error"); return ""; }
+  }{ _Erroring("Object::Head","Switch error"); return ""; }
 }
 
 const char* Object::Key()const{
@@ -705,9 +705,9 @@ const char* Object::Key()const{
   switch (type()){
   case ObjectType::Symbol: return _sym;
   case ObjectType::String: return _str.c_str();
-  case ObjectType::Number: { Erroring("Object","Try to get Key from Number"); return ""; }
+  case ObjectType::Number: { _Erroring("Object","Try to get Key from Number"); return ""; }
   case ObjectType::List: return _list[0].Key();
-  }{ Erroring("Object::Key","Switch error"); return ""; }
+  }{ _Erroring("Object::Key","Switch error"); return ""; }
 }
 
 u_int Object::SymbolId()const{//return 0 if cannot get the id
@@ -757,7 +757,7 @@ char Object::Boolean()const{
     }
     return -1;
   }
-  { Erroring("Object::Boolean","Switch Error"); return 0; }
+  { _Erroring("Object::Boolean","Switch Error"); return 0; }
 }
 
 double Object::Number()const{
@@ -767,7 +767,7 @@ double Object::Number()const{
   case ObjectType::String: case ObjectType::Symbol: break;
   case ObjectType::List: break;
   }
-  Erroring("Object","Try to transfer a Non-Number Object to number.");
+  _Erroring("Object","Try to transfer a Non-Number Object to number.");
   return 0;
 }
 
@@ -782,7 +782,7 @@ complex Object::Complex()const{
     }
     break;
   }
-  { Erroring("Object","Try to transfer a Non-Number Object to complex number."); return 0; }
+  { _Erroring("Object","Try to transfer a Non-Number Object to complex number."); return 0; }
 }
 
 const char* Object::String()const{
@@ -827,7 +827,7 @@ int Object::Size()const{
 
 Object &Object::First(){
   if ( _list.size() < 2 ) {
-    Erroring("Object","Try to get First element form empty list.");
+    _Erroring("Object","Try to get First element form empty list.");
     return const_cast<Object&>(NullObject);
   }
   return _list[1];
@@ -835,7 +835,7 @@ Object &Object::First(){
 
 Object &Object::Last(){
   if ( _list.size() < 2 ) {
-    Erroring("Object","Try to get Last element form an empty list.");
+    _Erroring("Object","Try to get Last element form an empty list.");
     return const_cast<Object&>(NullObject);
   }
   return _list.back();
@@ -843,7 +843,7 @@ Object &Object::Last(){
 
 Object &Object::Back(){
   if ( _list.size() < 2 ) {
-    Erroring("Object","Try to get Last element form an empty list.");
+    _Erroring("Object","Try to get Last element form an empty list.");
     return const_cast<Object&>(NullObject);
   }
   return _list.back();
@@ -851,11 +851,11 @@ Object &Object::Back(){
 
 Object Object::RefObject(){
   if ( type() != ObjectType::Symbol ) {
-    Erroring("Object","Try to get RefObject for none Symbol Object.");
+    _Erroring("Object","Try to get RefObject for none Symbol Object.");
     return NullObject;
   }
   if ( idx().zeroQ() ) {
-    Erroring("Object","Try to get RefObject for Symbol without Ref Value.");
+    _Erroring("Object","Try to get RefObject for Symbol without Ref Value.");
     return NullObject;
   }
   return Object( idx() ) ;
@@ -923,7 +923,7 @@ Object &Object::FlattenSequence(){
             (*this).DictInsertOrUpdatePairRef( obj[j] );
           }else{
             zhErroring("字典","试图将非键值对插入字典结构中, 该操作将被忽略" ) ||
-              Erroring("Dict","Try insert non key value pair into a dict. Operation will be ignored.");
+              _Erroring("Dict","Try insert non key value pair into a dict. Operation will be ignored.");
           }
         }
         
@@ -968,7 +968,7 @@ Object &Object::ForceDeepen(){
 
 Object &Object::Deepen(){
   if ( type() == ObjectType::Number or type() == ObjectType::String )
-    { Erroring("Object","Try to Deepen an Object of type "+TypeString()+"."); return *this; }
+    { _Erroring("Object","Try to Deepen an Object of type "+TypeString()+"."); return *this; }
   ForceDeepen();
   return (*this);
 }
@@ -994,7 +994,7 @@ Object &Object::ToList(){
   }
   if ( type() == ObjectType::Number or type() == ObjectType::String ) {
     zhErroring("Pond对象","试图将类型为 "+TypeString()+" 的Pond对象转化为列表.") ||
-      Erroring("Object","Try to make Object of type "+TypeString()+" to List.");
+      _Erroring("Object","Try to make Object of type "+TypeString()+" to List.");
     return (*this);
   }
   if ( type() == ObjectType::List ) return *this;
@@ -1097,7 +1097,7 @@ Object &Object::PushBackNull(){
 
 Object &Object::InsertCopy(u_int pos, const Object&obj){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
   Object temp; temp.CopyObject( obj );
   _list.insert(_list.begin()+pos,temp);
   return (*this);
@@ -1112,7 +1112,7 @@ Object &Object::InsertCopy(iterator pos, const Object&obj){
 
 Object &Object::InsertRef(u_int pos, const Object&obj){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return *this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return *this; }
   _list.insert(_list.begin()+pos, obj);
   return *this;
 }
@@ -1137,7 +1137,7 @@ Object &Object::InsertRef(u_int pos, iterator spos, iterator epos){
 
 Object &Object::InsertNumber(u_int pos,double val){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
   Object obj; obj.SetNumber( val );
   _list.insert(_list.begin()+pos, obj);
   return *this;
@@ -1145,7 +1145,7 @@ Object &Object::InsertNumber(u_int pos,double val){
 
 // Object &Object::InsertComplex(u_int pos,complex val){
 //   __check(List,*this);
-//   if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+//   if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
 //   Object obj; obj.SetComplex( val );
 //   _list.insert(_list.begin()+pos, obj);
 //   return *this;
@@ -1153,7 +1153,7 @@ Object &Object::InsertNumber(u_int pos,double val){
 
 // Object &Object::InsertNumber(u_int pos,complex val){
 //   __check(List,*this);
-//   if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+//   if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
 //   Object obj; obj.SetNumber( val );
 //   _list.insert(_list.begin()+pos, obj);
 //   return *this;
@@ -1161,7 +1161,7 @@ Object &Object::InsertNumber(u_int pos,double val){
 
 Object &Object::InsertSymbol(u_int pos, char*key){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
   Object obj; obj.SetSymbol( key );
   _list.insert(_list.begin()+pos, obj);
   return *this;
@@ -1169,7 +1169,7 @@ Object &Object::InsertSymbol(u_int pos, char*key){
 
 Object &Object::InsertSymbol(u_int pos, u_int key_id){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
   Object obj; obj.SetSymbol( key_id );
   _list.insert(_list.begin()+pos, obj);
   return *this;
@@ -1178,7 +1178,7 @@ Object &Object::InsertSymbol(u_int pos, u_int key_id){
 Object &Object::InsertString(u_int pos,char *key){
   __check(List,*this);
   if ( pos > ElementsSize() ) {
-    Erroring("Object","Try to Insert at position out of list range.");
+    _Erroring("Object","Try to Insert at position out of list range.");
     return*this;
   }
   Object obj; obj.SetString(key);
@@ -1188,7 +1188,7 @@ Object &Object::InsertString(u_int pos,char *key){
 
 Object &Object::InsertNull(u_int pos){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Insert at position out of list range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
   Object obj;
   _list.insert(_list.begin()+pos,obj);
   return *this;
@@ -1196,14 +1196,14 @@ Object &Object::InsertNull(u_int pos){
 
 Object &Object::PopBack(){
   __check(List,*this);
-  if ( ElementsSize() ==  1 ) { Erroring("Object","Try to PopBack a empty List Object."); return*this; }
+  if ( ElementsSize() ==  1 ) { _Erroring("Object","Try to PopBack a empty List Object."); return*this; }
   _list.pop_back();
   return *this;
 }
 
 Object &Object::Delete(u_int pos){
   __check(List,*this);
-  if ( pos > ElementsSize() ) { Erroring("Object","Try to Delete element out of range."); return*this; }
+  if ( pos > ElementsSize() ) { _Erroring("Object","Try to Delete element out of range."); return*this; }
   _list.erase(_list.begin()+pos);
   return *this;
 }
@@ -1257,7 +1257,7 @@ string Object::ToFullFormString()const{
     return str+")";
   }//end of case List
   }//end of switch
-  { Erroring("Object::Switch","ToFullFormString"); return ""; }
+  { _Erroring("Object::Switch","ToFullFormString"); return ""; }
 }
 
 string Object::ToString(const Object&parentList)const{
@@ -1316,7 +1316,7 @@ string Object::ToString(const bool is_print)const{
   }
   case ObjectType::List:{
     if ( _list.size() == 0 )
-      { Erroring("Object","Try to transform a List Object to string without head."); return ""; }
+      { _Erroring("Object","Try to transform a List Object to string without head."); return ""; }
     //dout<<"Try Print List with head '"<<_list[0]<<"'"<<endl;
     //head is not a symbol or is null
     if ( not  _list[0].SymbolQ() or _list[0].NullQ() ){
@@ -1416,7 +1416,7 @@ string Object::ToString(const bool is_print)const{
     }
   }//end of case List
   }//end of switch
-  { Erroring("Object::ToString","Switch Error"); return ""; }
+  { _Erroring("Object::ToString","Switch Error"); return ""; }
 };
 
 int Object::SimpleCompare(const Object&l1,const Object&l2){
@@ -1480,7 +1480,7 @@ int Object::SimpleCompare(const Object&l1,const Object&l2){
     }
   }//end of Symbol
   }//end of switch
-  { Erroring("Object::SimpleCompare","switch error"); return 0; }
+  { _Erroring("Object::SimpleCompare","switch error"); return 0; }
 }
 
 #define exp_return(res) ({dprintf("%d, %s ?<> %s: %d",__LINE__,l1.ToString().c_str(),l2.ToString().c_str(), res); return res;})
@@ -1681,7 +1681,7 @@ int Object::ExpressionCompare(const Object&l1,const Object&l2){
     }
   }//end of Symbol
   }//end of switch
-  { Erroring("Object::ExpressionCompare","switch error"); return 0; }
+  { _Erroring("Object::ExpressionCompare","switch error"); return 0; }
 }
 
 #undef exp_return
@@ -1799,7 +1799,7 @@ bool  Object::DictInsertPairRef(Object&pair){
   //if ( not pair.PairQ( SYMID_OF_KeyValuePair ) ){
   if ( not pair.PairQ() ){
     zhErroring("字典","只有键值对才能被插入字典中.") ||
-      Erroring("Dict","Only key value pair can be inserted into a dict.") ;
+      _Erroring("Dict","Only key value pair can be inserted into a dict.") ;
     return false;
   }
   iterator iter;
@@ -1856,7 +1856,7 @@ Object::Object(const ObjectType type, const u_int val){
   case ObjectType::List:  SetList(val);   return;
   default: break;
   }
-  Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const u_int)"); 
+  _Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const u_int)"); 
   return; 
 }
 
@@ -1868,7 +1868,7 @@ Object::Object(const ObjectType type, const int val){
   case ObjectType::List:  SetList(val==0?SYMID_OF_List:val);   return;
   default: break;
   }
-  { Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const int)"); return; }
+  { _Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const int)"); return; }
 }
 
 Object::Object(const ObjectType type, const double val){
@@ -1877,7 +1877,7 @@ Object::Object(const ObjectType type, const double val){
   case ObjectType::Number:SetNumber(val); return;
   default: break;
   }
-  { Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const double)"); return; }
+  { _Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const double)"); return; }
 }
 
 Object::Object(const ObjectType type, const char* val){
@@ -1888,7 +1888,7 @@ Object::Object(const ObjectType type, const char* val){
   case ObjectType::List:  SetList(val);   return;
   default: break;
   }
-  { Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const char*)"); return; }
+  { _Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",const char*)"); return; }
 }
 
 Object::Object(const ObjectType type, const string&val){
@@ -1899,7 +1899,7 @@ Object::Object(const ObjectType type, const string&val){
   case ObjectType::List:  SetList(val.c_str() );   return;
   default: break;
   }
-  { Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",string&)"); return; }
+  { _Erroring("Object::Object","No constructor for Object("+pond::ToString(type)+",string&)"); return; }
 }
 
 Object Object::Copy()const{
@@ -1978,7 +1978,7 @@ string Object::DumpToJson(bool isLeft)const{
     
   }//end of case List
   }//end of switch
-  Erroring("Object::Switch","DumpToJson");
+  _Erroring("Object::Switch","DumpToJson");
   return "";
 
 }

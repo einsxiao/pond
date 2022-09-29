@@ -282,12 +282,17 @@ string launch_kernel::define_cpu(char part)
   int size = iters.size();
   string out;
   if ( part == 'f' ){
-    out = declare_cpu() + " {\n#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )";
+    out = declare_cpu() + " {\n";
+    out += "#line "+ToString(this->pragma->self->start.row+1);
+    out += "\n#pragma omp parallel for num_threads( EvaSettings.threadNumberPerKernel )";
     return out;
   }
   out = string(declare_cpu().size(),' ') + "  ";
   for ( int i=0;i<size; i++ ){
     out += "for (int " + iter_i(i) + " = 0; "+ iter_i(i) + " < "+ iter_Ni(i) + "; "+ iter_i(i) + "++ )";
+  }
+  for (int i=0; i< pragma->self->end.row - pragma->self->start.row -1; i++){
+    out += "\n";
   }
   out += "\n"+(*content).substr( pragma->self->end.pos, content_start_pos.pos - pragma->self->end.pos );
   out += (*content).substr( content_start_pos.pos, content_end_pos.pos - content_start_pos.pos )+"}";
@@ -322,6 +327,9 @@ string launch_kernel::define_gpu(){
     out += iter_i( iters.size() -1 )+" = ("+temp_var+"-"+ iter_i(iters.size()-2)+"*_N"+N_strs[iters.size()-1] +");"; 
   }
   //append content
+  for (int i=0; i< pragma->self->end.row - pragma->self->start.row-1; i++){
+    out += "\n";
+  }
   out += "\n"+(*content).substr( pragma->self->end.pos, content_start_pos.pos - pragma->self->end.pos );
   out += (*content).substr( content_start_pos.pos, content_end_pos.pos - content_start_pos.pos );
   out += " _tid += blockDim.x* gridDim.x;}}";

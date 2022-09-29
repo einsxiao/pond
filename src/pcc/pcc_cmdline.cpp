@@ -49,7 +49,7 @@ CmdLine::CmdLine(int _argc,char*_argv[])
   if ( isCompile and files.size() < 1 )
     ThrowError("pcc","input file is not given.");
   if ( not isCompile and (files.size()>0)   )
-    Warning("pcc","pcc can not do compiling and linking at the same time.");
+    _Warning("pcc","pcc can not do compiling and linking at the same time.");
 }
 
 CmdLine::~CmdLine()

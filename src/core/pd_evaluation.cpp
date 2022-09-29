@@ -58,7 +58,7 @@ void EvaRecord::ClearAll(){
 int EvaRecord::Call(Object&ARGV){
   // if ( not isCallable() ){
   //   zhErroring("计算单元",ARGV.ToString()+" 不是可以执行的注册函数.");
-  //   Erroring("EvaKernel",ARGV.ToString()+" is not a callable function.");
+  //   _Erroring("EvaKernel",ARGV.ToString()+" is not a callable function.");
   //   return -1;
   // }
   if ( staticFunction )
@@ -189,7 +189,6 @@ Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   GetModule("String");
   GetModule("OS");
 
-  /*
   if ( GetEnv("POND_ENABLE_PYTHON")   == "yes" ){
     GetModule("Python"); 
   }
@@ -299,9 +298,9 @@ int try_load_so_in_dir(string _module_dir, string libname,
       if ( !lib_Handler ) {
         if ( !DebugMode && silent ) return 1;
         zhErroring("GetModule", "未能成功载入模块 '"+moduleName+"' 的二进制包")|| 
-          Erroring("GetModule","Fail to get binary '" + moduleName+"' in."); 
+          _Erroring("GetModule","Fail to get binary '" + moduleName+"' in."); 
         const char* dlsym_error=dlerror();                            
-        Warning("dlsym",((string)"dlsym_error::"+dlsym_error).c_str() ); 
+        _Warning("dlsym",((string)"dlsym_error::"+dlsym_error).c_str() ); 
         return -1;                                                    
       }                                                               
       module_dir = _module_dir;                                       
@@ -311,7 +310,7 @@ int try_load_so_in_dir(string _module_dir, string libname,
   return 0;
 }
 
-int Evaluation::GetModuleLib(string moduleName,bool silent){
+int Evaluation::GetModuleLib(string moduleName,bool silent, bool not_pull){
   //dout<< "try get lib of "<<moduleName<<" in "<<endl;
   //dout<<"start import "<< moduleName <<" symidToPairIndex size = "<< symidToPairIndex.size()<<endl;
   //checking moduleName spell
@@ -363,25 +362,25 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
     for(;;){
       if ( DebugMode ){
         if ( nvcc_status ){
-          _DEAL_( current_dir+"/",cudevlibname );
+          _DEAL_(current_dir+"/",cudevlibname );
           _DEAL_(pond_home+"/"+moduleName,cudevlibname);
           _DEAL_(pond_root+"/modules/"+moduleName,cudevlibname);
-          _DEAL_(pond_root+"/lib",cudevlibname);
+          _DEAL_(pond_root+"/lib/",cudevlibname);
 
           _DEAL_(current_dir+"/",culibname);
           _DEAL_(pond_home+"/"+moduleName,culibname);
           _DEAL_(pond_root+"/modules/"+moduleName,culibname);
-          _DEAL_(pond_root+"/lib",culibname);
+          _DEAL_(pond_root+"/lib/",culibname);
         }
         _DEAL_(current_dir+"/",devlibname);
         _DEAL_(pond_home+"/"+moduleName,devlibname);
         _DEAL_(pond_root+"/modules/"+moduleName,devlibname);
-        _DEAL_(pond_root+"/lib",devlibname);
+        _DEAL_(pond_root+"/lib/",devlibname);
 
         _DEAL_(current_dir+"/",libname);
         _DEAL_(pond_home+"/"+moduleName,libname);
         _DEAL_(pond_root+"/modules/"+moduleName,libname);
-        _DEAL_(pond_root+"/lib",libname);
+        _DEAL_(pond_root+"/lib/",libname);
       }else{
         if ( nvcc_status ){
           _DEAL_(current_dir+"/",culibname);
@@ -409,9 +408,15 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
     }
 #undef _DEAL_
     // module not find
-    if (not lib_Handler) {
-      if ( not module_find ){
-        Warning("GetModule","'"+moduleName+"' located in '"+module_dir+"' may not not load correctly.");
+    //cout<<"get module lib "<< lib_Handler<< " "<< module_find <<endl;
+    if ( not lib_Handler ) {
+      if ( not_pull ){
+        _Warning("GetModule","'"+moduleName+"' located in '"+module_dir+"' may not not load correctly.");
+      } else {
+      // try pull
+        cout<<"Try pull '"<<moduleName<<"' from repo server."<<endl;
+        System("pd pull " + moduleName );
+        return GetModuleLib( moduleName, true, true);
       }
       return -1;
     }
@@ -428,14 +433,14 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
   const char* dlsym_error=dlerror();
   if ( __create == NULL || dlsym_error ){
     zhErroring("GetModule", "模块 '"+moduleName+"' 的初始化宏未找到. 请确保代码使用了正确的接口范式.") ||
-      Erroring("GetModule", "Macro to init module '"+moduleName+"' not found. Please make sure you are following the standard template.");
+      _Erroring("GetModule", "Macro to init module '"+moduleName+"' not found. Please make sure you are following the standard template.");
     return -1;
   }
   type_destroy*__destroy = (type_destroy*)dlsym(lib_Handler,("__destroy_"+moduleName+"Module").c_str() );
   dlsym_error=dlerror();
   if ( __destroy == NULL || dlsym_error ){
     zhErroring("GetModule", "模块 '"+moduleName+"' 的卸载宏未找到. 请确保代码使用了正确的接口范式.") ||
-      Erroring("GetModule", "Macro to delete '"+moduleName+"' not found. Please make sure you are following the standard tempalte.");
+      _Erroring("GetModule", "Macro to delete '"+moduleName+"' not found. Please make sure you are following the standard tempalte.");
     return -1;
   }
   moduleCreateHandleTable[moduleName]=__create;
@@ -449,7 +454,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
   Module * new_module = __create();
   if ( new_module == NULL ){
     zhErroring("GetModule"," 创建模块时遇到错误.") ||
-      Erroring("GetModule"," Error while new module.");
+      _Erroring("GetModule"," Error while new module.");
     return -1;
   }
   // register functions created by DefineFunction(func)
@@ -472,7 +477,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
         dlsym_error=dlerror();
         if ( regfunc == NULL || dlsym_error ){
           zhWarning("GetModule","未能成功注册函数 '"+ func+ "'. 请检查代码是否符合标准范式.")||
-            Warning("GetModule","Failed to register function "+ func+ ". Please check if your code follows the standard template.");
+            _Warning("GetModule","Failed to register function "+ func+ ". Please check if your code follows the standard template.");
         } else {
           // register function by handler defined by mactor in pd_module.h
           // it should be noted that sysIdToPairIndex should be updated properly
@@ -487,7 +492,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent){
   dlsym_error=dlerror();
   if ( dlsym_error ){
     zhWarning("dlsym",((string)"GeModule的最后出现dl错误:"+dlsym_error).c_str() ) ||
-      Warning("dlsym",((string)"error at end of GetLib:"+dlsym_error).c_str() );
+      _Warning("dlsym",((string)"error at end of GetLib:"+dlsym_error).c_str() );
   }
   if ( __Status_ImportInfoPrint ){
     cout<<endl;
@@ -634,13 +639,12 @@ int Evaluation::GetModulePondScript(string moduleName){
   string sysdir,filename;
   Object tmp;
 #define __GET_PATH(dir) {                                   \
-    filename=dir+"/"+moduleName+".pd";                      \
+    filename=dir+"/"+moduleName+"Module.pd";                \
     if ( FileExistQ(filename) ) {                           \
       EvaluateString(GetFileContent(filename),tmp );        \
       return 0;                                             \
     }                                                       \
   }
-  __GET_PATH( GetCwd() );
   __GET_PATH( GetEnv("POND_HOME")+"/"+moduleName );
   __GET_PATH( GetEnv("POND_ROOT")+"/modules/"+moduleName );
   __GET_PATH( GetEnv("POND_ROOT")+"/lib/"+moduleName );
@@ -673,17 +677,17 @@ int Evaluation::GetModule(string moduleName,bool silent){ //fetch resources from
     success  = (GetModuleLib(moduleName, silent)>=0) || success;
     if ( not success && not silent ){
       zhWarning("GetModule","模块'"+moduleName+"' 未找到") ||
-        Warning("GetModule","Module '"+moduleName+"' not found.") ;
+        _Warning("GetModule","Module '"+moduleName+"' not found.") ;
       return -1;
     }
   }catch ( const Error&err ){
     cerr<<err.swhat()<<endl;
   }catch ( const exception &err){
     zhErroring("源代码",err.what() )||
-      Erroring("Sourcecode",err.what() );
+      _Erroring("Sourcecode",err.what() );
   }catch ( ... ){
     zhErroring("系统","出现未预料到的错误." )||
-      Erroring("System","Unexpected error occured." );
+      _Erroring("System","Unexpected error occured." );
   }
   return 0;
 }
@@ -696,7 +700,7 @@ int Evaluation::RemoveModule(string moduleName){
   // already initialized
   if ( itermodule == moduleTable.end() ){
     // do nothing if the module is not imported
-    // Warning("RemoveModule","Module "+moduleName+" has not been imported yet.");
+    // _Warning("RemoveModule","Module "+moduleName+" has not been imported yet.");
     return -1;
   }
   //moduleDestroyHandleTable
@@ -753,7 +757,7 @@ int Evaluation::deleteContext(){
     valueTables.pop_back();
     currentValueTable = (*valueTables.rbegin());
   }else{
-    Erroring("Evaluation","Top Grammar Unit reaches, fail to deleteGrammerModule");
+    _Erroring("Evaluation","Top Grammar Unit reaches, fail to deleteGrammerModule");
     return -1;
   }
   return 0;
@@ -761,7 +765,7 @@ int Evaluation::deleteContext(){
 
 int Evaluation::ClearValueTablesTo(u_int N){
   //cerr<<"clear tabke to "<<N<<" current depth:"<< valueTables.size()  <<endl;
-  if ( N < 1 ) { Erroring("ClearValueTableTo","Argument N is smaller than 1."); return -1; }
+  if ( N < 1 ) { _Erroring("ClearValueTableTo","Argument N is smaller than 1."); return -1; }
   while ( valueTables.size() > N ){
     if ( (*valueTables.rbegin()) != NULL ){
       delete (*valueTables.rbegin());
@@ -828,7 +832,7 @@ int Evaluation::ListableEvaluate(Object &ARGV,bool isHold){
       }
       else{
         if ( iter->Size() != size ) {
-          Erroring( string( ARGV.Key() )+"::shape","Try to apply listable attribute, but the shape does not match.");
+          _Erroring( string( ARGV.Key() )+"::shape","Try to apply listable attribute, but the shape does not match.");
           return 0;
         }
       }
@@ -915,10 +919,12 @@ int Evaluation::AttributeProcessing(Object&ARGV,bool *attri,bool isHold,bool ofD
   }
 
 int Evaluation::Evaluate(Object&ARGV){
-  return this->Evaluate(ARGV, false, false);
+  //return this->Evaluate(ARGV, false, false);
+  return this->Evaluate(ARGV, false, true);
 }
 int Evaluation::Evaluate(Object&ARGV, bool isHold){
-  return this->Evaluate(ARGV, isHold, false);
+  //return this->Evaluate(ARGV, isHold, false);
+  return this->Evaluate(ARGV, isHold, true);
 }
 int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
   //dout<<"try evaluate "<<ARGV<<" depth ="<<EvaluationDepth<<endl;
@@ -928,7 +934,7 @@ int Evaluation::Evaluate(Object&ARGV, bool isHold , bool isRef){
   //dout<<"evaluate "<<ARGV << " in depth "<< EvaluationDepth<<endl;
   if( EvaluationDepth > EvaKernel->maxRecursionDepth ) {
     zhErroring("求值", "递归深度超过了最大允许值 "+ToString( (int)maxRecursionDepth )+".")||
-      Erroring("Evaluate", "Recursion depth exceeds "+ToString( (int)maxRecursionDepth )+".");
+      _Erroring("Evaluate", "Recursion depth exceeds "+ToString( (int)maxRecursionDepth )+".");
     EvaReturn(0);
   }
   if ( isHold ){
@@ -1127,7 +1133,7 @@ int Evaluation::EvaluateString(const string&cont, Object&result, const int depth
           sprec = GetEvaRecord( "SimpleSimplify" );
           if ( sprec == NULL ) {
             zhErroring("Kernel","未能成功从'System'模块中载入'SimpleSimplify'函数.")||
-              Erroring("Kernel","'SimpleSimplify' from 'System' is not loaded properly."); 
+              _Erroring("Kernel","'SimpleSimplify' from 'System' is not loaded properly."); 
             EvaKernel->Println( list.ToString() );
             break; 
           }
@@ -1154,7 +1160,7 @@ int Evaluation::EvaluateFile(const std::string filename, Object&result){
 int Evaluation::EvaluateFile(const std::string filename, Object&result, int depth, bool noprint){
   ifstream ifs( filename.c_str() , ios::in );
   if ( !ifs ){
-    Warning("Get","file "+filename+" cannot be opened.");
+    _Warning("Get","file "+filename+" cannot be opened.");
     return -1;
   }
   istreambuf_iterator<char> beg(ifs),end;
@@ -1186,7 +1192,7 @@ int Evaluation::GetValueRef(const Object &obj,Object&ref){
       if ( func_part == NULL ){
         EvaRecord *rec = GetEvaRecord( "Part" ); 
         if ( rec == NULL ) {
-          Erroring("EvaKernel","Function 'Part' is not loaded properly.");
+          _Erroring("EvaKernel","Function 'Part' is not loaded properly.");
           return 0;
         }
         func_part  =  rec->staticFunction;
@@ -1202,7 +1208,7 @@ int Evaluation::GetValueRef(const Object &obj,Object&ref){
     ref.SetVoid();
     return 0;
   }
-  Erroring("GetValueRef","Switch error.");
+  _Erroring("GetValueRef","Switch error.");
   return 0;
 }
 
@@ -1217,7 +1223,7 @@ int Evaluation::GetValue(const Object &list,Object &value,bool onlyCheckPatternT
     }
     return 0;
   }
-  { Erroring("GetValue","swtich error"); return 0; }
+  { _Erroring("GetValue","swtich error"); return 0; }
 };
 
 // int Evaluation::GetValue(Object &list){
@@ -1394,20 +1400,20 @@ bool* Evaluation::SetAttribute(const char*key,AttributeType attriType,bool val){
 bool* Evaluation::SetAttribute(const unsigned int id,AttributeType attriType,bool val){
   if ( id > 0 and id < evaRecordTable.size() ){
     EvaRecord*rec = evaRecordTable[id];
-    if ( rec == NULL ) { Erroring("SetAttributes","Try to set attributes record which is deleted."); return NULL; }
+    if ( rec == NULL ) { _Erroring("SetAttributes","Try to set attributes record which is deleted."); return NULL; }
     rec->attributes[(u_char)attriType] = val;
     return rec->attributes;
   }
-  { Erroring("SetAttributes","Try to set attributes record out of range."); return NULL; }
+  { _Erroring("SetAttributes","Try to set attributes record out of range."); return NULL; }
 }
 
 bool *Evaluation::GetAttributes(const unsigned int id){
   if ( id > 0 and id < evaRecordTable.size() ){
     EvaRecord*rec = evaRecordTable[id];
-    if ( rec == NULL ) { Erroring("GetAttributes","Try to get attributes record which is deleted."); return NULL; }
+    if ( rec == NULL ) { _Erroring("GetAttributes","Try to get attributes record which is deleted."); return NULL; }
     return rec->attributes;
   }
-  { Erroring("GetAttributes","Try to get attributes record out of range."); return NULL; }
+  { _Erroring("GetAttributes","Try to get attributes record out of range."); return NULL; }
 }
 bool *Evaluation::GetAttributes(Object &list){
   EvaRecord*rec = GetOrNewEvaRecord(list);
@@ -1461,7 +1467,7 @@ bool Evaluation::ClearEvaRecord(int id){
   if ( id <= 0 ) return true;
   if ( id >= (int)evaRecordTable.size() ) {
     zhErroring("ClearEvaRecord","清除记录超界.") ||
-      Erroring("ClearEvaRecord","Try to clear EvaRecord out of range.");
+      _Erroring("ClearEvaRecord","Try to clear EvaRecord out of range.");
     return false;
   }
   if ( evaRecordTable[id] != NULL ){
@@ -1487,28 +1493,28 @@ int Evaluation::Call( const char *funcName, Object &ARGV)
 {
   EvaRecord*rec = GetEvaRecord(funcName);
   if ( rec == NULL ) {
-    Erroring("EvaKernel",(string)"'"+funcName+"' is not available in yet.");
+    _Erroring("EvaKernel",(string)"'"+funcName+"' is not available in yet.");
     return -1;
   }
   if ( rec->staticFunction )
     return (*rec->staticFunction)(ARGV);
   if ( rec->module and rec->memberFunction )
     return ((rec->module)->*(rec->memberFunction))(ARGV);
-  Erroring("EvaKernel",(string)"'"+funcName+"' is not callable.");
+  _Erroring("EvaKernel",(string)"'"+funcName+"' is not callable.");
   return -1;
 }
 
 int Evaluation::Call(const EvaRecord*rec,Object&ARGV)
 {
   if ( rec == NULL ) {
-    Erroring("EvaKernel",ARGV.ToString()+" '"+ToString((void*)rec)+"' is NULL.");
+    _Erroring("EvaKernel",ARGV.ToString()+" '"+ToString((void*)rec)+"' is NULL.");
     return -1;
   }
   if ( rec->staticFunction )
     return (*rec->staticFunction)(ARGV);
   if ( rec->module and rec->memberFunction )
     return ((rec->module)->*(rec->memberFunction))(ARGV);
-  Erroring("EvaKernel",ARGV.ToString()+" '"+ToString((void*)rec)+"' is not callable.");
+  _Erroring("EvaKernel",ARGV.ToString()+" '"+ToString((void*)rec)+"' is not callable.");
   return -1;
 }
 
@@ -1593,25 +1599,31 @@ int Evaluation::PD_Print(Object & ARGV){
   static INIT_SYMID_OF(end);
   // static INIT_SYMID_OF(END);
   static INIT_SYMID_OF(sep);
+  static INIT_SYMID_OF(flush);
   // static INIT_SYMID_OF(SEP);
   string end = "\n";
   string sep = " ";
+  bool isFlush = true;
   int i = 1; 
   while ( i <= ARGV.Size() ){
     if ( ARGV[i].PairQ(SYMID_OF_Set) ){
       if ( ARGV[i][1].SymbolQ(SYMID_OF_end) ){
         EvaKernel->Evaluate( ARGV[i][2] );
-        end = ARGV[i][2].ToString();
+        end = ARGV[i][2].ToString(true);
         ARGV.Delete(i);
         continue;
       }else if ( ARGV[i][1].SymbolQ(SYMID_OF_sep ) ){
         EvaKernel->Evaluate( ARGV[i][2] );
-        sep = ARGV[i][2].ToString();
+        sep = ARGV[i][2].ToString(true);
         ARGV.Delete(i);
         continue;
+      }else if ( ARGV[i][1].SymbolQ(SYMID_OF_flush ) ){
+        EvaKernel->Evaluate( ARGV[i][2] );
+        isFlush = ARGV[i][2].Boolean();
+        ARGV.Delete(i);
       }else{
         zhErroring("打印","未知参数 "+ARGV[i].ToString() ) ||
-          Erroring("print","Unknown argument "+ARGV[i].ToString() );
+          _Erroring("print","Unknown argument "+ARGV[i].ToString() );
         ReturnError;
       }
     }else{
@@ -1630,6 +1642,7 @@ int Evaluation::PD_Print(Object & ARGV){
   PondInnerStringRestoreNormal(str);
   // pond::PostMessage( str+"print" );
   printf("%s",str.c_str() );
+  if ( isFlush ) cout<<std::flush;
   ReturnNull;
 }
 
@@ -1868,12 +1881,12 @@ int Evaluation::PD_help(Object&ARGV){
     } else {
       cout<<endl;
       zhMessage("没有找到 '"+(string)ARGV[1].Key()+"' 的帮助信息.") ||
-        Message("Help info for '"+(string)ARGV[1].Key()+"' is not found.");
+        _Message("Help info for '"+(string)ARGV[1].Key()+"' is not found.");
     }
   } else {
     cout<<endl;
     zhMessage("'"+(string)ARGV[1].Key()+"' 是一个尚未注册的符号变量.") ||
-      Message("'"+(string)ARGV[1].Key()+"' is an unregistered symbol.");
+      _Message("'"+(string)ARGV[1].Key()+"' is an unregistered symbol.");
   }
   ReturnNull;
   //ReturnNormal;
@@ -1885,10 +1898,10 @@ int Evaluation::PD_SetImportInfoPrint(Object&ARGV){
   EvaKernel->__Status_ImportInfoPrint = to_state;
   if ( to_state ){
     zhMessage("Start printing import information.")||
-      Message("开始输出模块导入详细信息");
+      _Message("开始输出模块导入详细信息");
   } else {
     zhMessage("Close import information printing.")||
-      Message("关闭模块导入信息输出功能");
+      _Message("关闭模块导入信息输出功能");
   }
   ReturnNull;
 }

@@ -1,2 +1,296 @@
 pcc -G --compiler-options -g3 -c -std=c++11 --compiler-options -fopenmp test.cu `pond-path pcc` 
+nvcc -G --compiler-options -g3 -c -std=c++11 --compiler-options -fopenmp /tmp/pcc_tmp00076106120_test.cu -L./ -Xlinker -rpath=$ORIGIN/./ -I./ -L/opt/ovoweb/.pond/lib -Xlinker -rpath=$ORIGIN//opt/ovoweb/.pond/lib -I/opt/ovoweb/.pond/include -Wno-deprecated-gpu-targets -D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES -DOS_OF_LINUX --compiler-options -fopenmp --compiler-options -pthread  -I/opt/ovoweb/.pond/packages/include  -I/opt/ovoweb/.pond/packages/include  -I/opt/ovoweb/.pond/include  -I/opt/ovoweb/.pond/packages/include  -I/opt/ovoweb/.pond/packages/include  -I/opt/ovoweb/.pond/include  -L/opt/ovoweb/.pond/packages/lib   -Xlinker -rpath=/opt/ovoweb/.pond/packages/lib  -L/opt/ovoweb/.pond/packages/lib   -Xlinker -rpath=/opt/ovoweb/.pond/packages/lib  -L/opt/ovoweb/.pond/lib   -Xlinker -rpath=/opt/ovoweb/.pond/lib  -L/opt/ovoweb/.pond/packages/lib   -Xlinker -rpath=/opt/ovoweb/.pond/packages/lib  -L/opt/ovoweb/.pond/packages/lib   -Xlinker -rpath=/opt/ovoweb/.pond/packages/lib  -L/opt/ovoweb/.pond/lib   -Xlinker -rpath=/opt/ovoweb/.pond/lib  -L.   -Xlinker -rpath=$ORIGIN/. -I.  -o test.cu.o 2>&1
+met flash
+met flash
+source content processing done. 
+parsed content is:
+
+[:
+  [pragma:
+    include
+    [@ <]
+    pond
+    [@ .]
+    h
+    [@ >]
+  ]
+  [newline]
+  [pragma:
+    include
+    [@ <]
+    iostream
+    [@ >]
+  ]
+  [newline]
+  using
+  namespace
+  std
+  [semicolon: ;]
+  [newline]
+  using
+  namespace
+  pond
+  [semicolon: ;]
+  [newline]
+  [pragma:
+    define
+    x
+    [bracket:
+      name
+    ]
+    [bracket:
+      [block:
+        [sharp: #]
+        name
+      ]
+    ]
+  ]
+  [newline]
+  int
+  main
+  [bracket: ()]
+  [block:
+    GlobalPool
+    [@ .]
+    Eva
+    [@ =]
+    NULL
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    GlobalPool
+    [@ .]
+    Eva
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    [string: "Hello POND."]
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    pond
+    [colon: :]
+    [colon: :]
+    SetParallelMode
+    [bracket:
+      pond
+      [colon: :]
+      [colon: :]
+      ParallelModeCpu
+    ]
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    [string: "DataPosition:"]
+    [@ <]
+    [@ <]
+    pond
+    [colon: :]
+    [colon: :]
+    GetDataPosition
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    [string: "threads number:"]
+    [@ <]
+    [@ <]
+    EvaSettings
+    [@ .]
+    threadNumberPerKernel
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    pond
+    [colon: :]
+    [colon: :]
+    GPUDeviceQ
+    [bracket: ()]
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    Matrix
+    arr
+    [semicolon: ;]
+    [newline]
+    int
+    Ni
+    [@ =]
+    [number: 3]
+    [comma: ,]
+    Nj
+    [@ =]
+    [number: 2]
+    [comma: ,]
+    Nk
+    [@ =]
+    [number: 1]
+    [comma: ,]
+    Nl
+    [@ =]
+    [number: 2]
+    [semicolon: ;]
+    [newline]
+    arr
+    [@ .]
+    Init
+    [bracket:
+      [number: 4]
+      [comma: ,]
+      Ni
+      [comma: ,]
+      Nj
+      [comma: ,]
+      Nk
+      [comma: ,]
+      Nl
+      [comma: ,]
+      MatrixHostDevice
+    ]
+    [semicolon: ;]
+    [newline]
+    arr
+    [@ =]
+    arr
+    [@ .]
+    Size
+    [bracket: ()]
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    [string: "original arr = "]
+    [@ <]
+    [@ <]
+    arr
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    arr
+    [@ .]
+    HostToDevice
+    [bracket: ()]
+    [semicolon: ;]
+    [newline]
+    [comment: // #pragma launch_kernel<<<i:Ni,j:Nj,k:Nk,l:Nl>>>(Matrix arr:arr,int a:6)]
+    [newline]
+    [comment: //   {]
+    [newline]
+    [comment: //     printf("%d %d %d %d\n",i,j,k,l);]
+    [newline]
+    [comment: //     arr(i,j,k,l)=(i+j+k+l)*a;]
+    [newline]
+    [comment: //   }]
+    [newline]
+    arr
+    [@ .]
+    DeviceToHost
+    [bracket: ()]
+    [semicolon: ;]
+    [newline]
+    cout
+    [@ <]
+    [@ <]
+    [string: "arr altered = "]
+    [@ <]
+    [@ <]
+    arr
+    [@ <]
+    [@ <]
+    endl
+    [semicolon: ;]
+    [newline]
+    [comment: //   cout<<"test for omp things"<<endl;]
+    [newline]
+    [pragma:
+      pragma
+      launch_kernel
+      [<<<>>>:
+        i
+        [colon: :]
+        [number: 1333]
+      ]
+      [bracket:
+        int
+        a
+        [colon: :]
+        [number: 344]
+        [comma: ,]
+        [newline]
+        int
+        b
+        [colon: :]
+        [number: 444]
+        [comma: ,]
+        [newline]
+      ]
+    ]
+    [newline]
+    [block:
+      a
+      [@ =]
+      a
+      [@ *]
+      [number: 3]
+      [semicolon: ;]
+      [newline]
+    ]
+    [newline]
+    arr
+    [@ .]
+    DumpFile
+    [bracket:
+      [string: "arr.dat"]
+    ]
+    [semicolon: ;]
+    [newline]
+    return
+    [number: 0]
+    [semicolon: ;]
+    [newline]
+  ]
+  [newline]
+]
+try rewrite
+try deal kernel pragma
+find the launch kernel pragma source postion
+deal 0
+try init lan_ker
+try init lank
+check self
+length check done
+check args list
+args check done
+args block
+try declare insert position
+try get content position
+174,161
+ deal iter profile
+test.cu:32:51: error: arguments and variable list of form 'type arg: var' is expected here.
 make.test:2: recipe for target 'all' failed
+make: *** [all] Error 1

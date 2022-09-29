@@ -194,7 +194,7 @@ int Syntax::processing(Node&parent,int level,bool endReturn = false,bool colonRe
       continue;
     }
     case '\r': case '\n':{
-      if ( getStr(1) == "\n" )
+      if ( getCharAt(1) == '\n' )
         rollForward(1);
       if ( endReturn ){ //such as #include #pragma
         //dout<<"end return met, quit current level"<<endl;
@@ -338,6 +338,7 @@ int Syntax::processing(Node&parent,int level,bool endReturn = false,bool colonRe
     }
     case '\\':{
       if ( getCharAt(1) == '\n' ){
+        rollForward(1);
         continue;
       }else{
         throwCCError("An lonely '\\' was not supposed to be here. Revise and try again please.");
@@ -470,6 +471,9 @@ int Syntax::processing(Node&parent,int level,bool endReturn = false,bool colonRe
   return 0;
 }
 
+/*
+  remove source code from start_pos to end_pos
+ */
 int Syntax::erase_source(NodeIndex&start_pos,NodeIndex&end_pos){
   if ( start_pos.row == end_pos.row ){ // if only one row
     for ( auto iter = old_2_new[start_pos.row].begin(); iter != old_2_new[start_pos.row].end(); iter ++ ){
@@ -595,7 +599,7 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
   else
     source_insert_pos = prepare_insert( lan_ker.declare_insert_pos, 1 );
 
-  dout<<"do insert pos with insert parts "<< source_insert_pos<<endl;
+  dout<<"do insert launch kernel pos with insert parts "<< source_insert_pos<< " row:"<<pragma.self->start.row<<endl;
   if ( fileType == "cu" )
     source.insert( source.begin() + source_insert_pos,
                    __line_info(true, pragma.self->start.row, 0, 0, lan_ker.declare_gpu()+";" ) );
@@ -604,11 +608,12 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
 
   //calling
   dout<<"calling parts"<<endl;
-  if ( fileType == "cu" )
+  if ( fileType == "cu" ){
     source_insert_pos = prepare_insert( lan_ker.pragma->self->end, 3 );
-  else
+  }else{
     source_insert_pos = prepare_insert( lan_ker.pragma->self->end, 1 );
-  source[source_insert_pos-1].deleted = true; // delete the origin line
+  }
+  // source[source_insert_pos-1].deleted = true; // delete the origin line
   source.insert( source.begin() + source_insert_pos,
                  __line_info(true, pragma.self->start.row, 0, 0,
                              lan_ker.call_cpu() ));
@@ -637,6 +642,9 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
   source.insert( source.begin() + source_insert_pos,
                  __line_info(true, pragma.self->start.row, 0, 0,
                              lan_ker.define_cpu('f') ));
+
+  // erase original lines
+  erase_source( lan_ker.pragma->self->start, lan_ker.pragma->self->end);
   erase_source( lan_ker.content_start_pos, lan_ker.content_end_pos );
   
 }

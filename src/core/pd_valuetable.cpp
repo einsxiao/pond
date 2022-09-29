@@ -76,7 +76,7 @@ bool isBlackPattern(const Object&pat){
 //  +1 >
 int compareNonBlackPattern(const Object&pat1,const Object&pat2){
   if ( pat1.AtomQ() or pat2.AtomQ() )
-    { Erroring("ValueTable","Atom Expression when in TopComparePattern."); return 0; }
+    { _Erroring("ValueTable","Atom Expression when in TopComparePattern."); return 0; }
   // pat1 and pat2 must be List
   // pat2 is none Sequence Pattern(Black is Allowed) which is in the first part of pattern Table
   int l1 = pat1.Size(), l2 = pat2.Size();
@@ -262,7 +262,7 @@ bool ValueTable::UpdateOrInsertPattern(const Object&left_in,
 
 int ValueTable::GetValueFromPattern(const Object &in,Object&out){
   if ( not in.ListQ() ) {
-    Erroring("ValueTable","Cannot Get value from pattern Table for an Atom Object.");
+    _Erroring("ValueTable","Cannot Get value from pattern Table for an Atom Object.");
     return 0;
   }
   //firstly search top head

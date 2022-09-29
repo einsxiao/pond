@@ -65,7 +65,10 @@ for item in pond_library_path.split(':'):
     #print item
     pass
 
-for i in range(2,len(sys.argv)):
+current_pulled = False
+N = len(sys.argv)
+i = 2
+while i < N:
     is_find = False;
     mod = sys.argv[i]
     path = os.path.join( pond_home,mod);
@@ -104,16 +107,20 @@ for i in range(2,len(sys.argv)):
         pass
 
     if not is_find:
-        sys.stderr.write(""" Error: Dependency failed.
-        Cannot find Depending Module '%s'.
-        Please execute 'pond get %s' ahead of current operation.
-        """%(mod,mod) );
-        exit(1);
+        if not current_pulled:
+            os.system('pd pull '+mod)
+            current_pulled = True
+            continue
+        else:
+            sys.stderr.write(""" Error: Dependency failed.
+            Cannot find Depending Module '%s'.
+            Please execute 'pond get %s' ahead of current operation.
+            """%(mod,mod) );
+            exit(1);
         pass
-
-
+    i += 1
+    current_pulled = False
     pass
-
 
 sys.stdout.write(inc)
 exit(0);

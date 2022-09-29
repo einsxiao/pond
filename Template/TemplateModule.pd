@@ -5,4 +5,4 @@
 # R-Copyleft(r-ɔ) : DATE
 ####################################
 hey(p~) := print('Hey! ', p )
-hey('X')
+#hey('X')

@@ -2,7 +2,7 @@
 #Current Module:Template
 ################################################################
 DEPENDED_MODULES := 
-LIBS := -ldl
+LIBS := -ldl -fopenmp
 SUBDIRS :=
 #MPI_ENABLE := True
 ################################################################
@@ -34,9 +34,12 @@ all: release debug
 install: release
 
 #debug: all-prepare dexe post-work
+
 debug: all-prepare exe post-work
 
 release: all-prepare exe post-work
+
+ddebug: all-prepare dexe post-work
 
 ########################################################################################################
 dexe: $(DOBJECTS)

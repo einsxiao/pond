@@ -145,7 +145,6 @@ namespace pond{
   std::string    GetFileMD5(std::string filename);
   constexpr unsigned
   int            RSimpleHashCodeOfString(const char *s,unsigned int code = 5381, int off = 0){return (((s[off]=='\0') ? code : RSimpleHashCodeOfString(s,(code*33)^s[off],off+1)));}
-  //#define KCase(key) case RSimpleHashCodeOfString(#key)
   /* long           GetMemInUse(); */
   bool           GPUDeviceQ();
   ////////////////

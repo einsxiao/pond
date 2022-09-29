@@ -87,7 +87,7 @@ int ClassModule::PD_class(Object&argv){
     }
     //   else{//unexpected expression
     //   zhErroring("类定义","不合法的类定义表达式 "+body[i].ToString() ) ||
-    //     Erroring("class","unexpected expression in class defination "+body[i].ToString() );
+    //     _Erroring("class","unexpected expression in class defination "+body[i].ToString() );
     //   EvaKernel->deleteContext();
     //   ReturnError;
     // }
@@ -95,7 +95,7 @@ int ClassModule::PD_class(Object&argv){
       int res = pairTable.DictInsertPairRef( pair );
       if ( not res ){
         zhErroring("类定义","重复定义类变量 "+body[i].ToString() ) ||
-          Erroring("class","Redefination of class variable "+body[i].ToString() );
+          _Erroring("class","Redefination of class variable "+body[i].ToString() );
         EvaKernel->deleteContext();
         ReturnError;
       }
@@ -154,7 +154,7 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
 
     if ( not var.SymbolQ() ){
       zhErroring("类","只有类成员才能被赋值 "+var.ToString()+" 不是一个符号")||
-        Erroring("class", "Only class member can be assigned a value" +var.ToString()+" is not a Symbol.");
+        _Erroring("class", "Only class member can be assigned a value" +var.ToString()+" is not a Symbol.");
     }
     Object &pairTable = def[2];
     //dout<<"pairTable = "<<pairTable<<endl;
@@ -184,7 +184,7 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
       Object pair = pairTable.DictGetPair( oper );
       if ( pair.NullQ() ){
         zhErroring("类","类 "+name.ToString()+" 没有名为"+oper.ToString()+" 的变量或者方法")||
-          Erroring("class", "class "+name.ToString()+" does not have member named "+oper.ToString() );
+          _Erroring("class", "class "+name.ToString()+" does not have member named "+oper.ToString() );
         ReturnError;
       }
       //dout<< "as a normal symbol member"<<endl;
@@ -205,7 +205,7 @@ int ClassModule::PD_CLASS$DEFINED$(Object&Argv){ // A($$_i_j,A)
       }
       // try test pattern table
       zhErroring("类","类 "+name.ToString()+" 名为"+oper.ToString()+" 成员不是函数")||
-        Erroring("class", "class "+name.ToString()+" member named "+oper.ToString()+" is not a function." );
+        _Erroring("class", "class "+name.ToString()+" member named "+oper.ToString()+" is not a function." );
       ReturnError;
     }
     ReturnNormal;
@@ -254,7 +254,7 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
     Object&insobj = Argv[1];
     CheckArgsShouldNoLessThan(insobj,1);
     if ( not insobj[1].SymbolQ(SYMID_OF_SerialCode ) ){
-      Erroring("Class","Only an installation of Class can access their members.");
+      _Erroring("Class","Only an installation of Class can access their members.");
       return -1;
     }
     Object vartable = insobj[2];
@@ -268,7 +268,7 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
       Object pair = vartable.DictGetPair( oper );
       if ( pair.NullQ() ){
         zhErroring("类::点运算",oper.ToString()+" 不是类实例成员")||
-          Erroring("Class::Conjunct",oper.ToString()+" is not a member of class instance.");
+          _Erroring("Class::Conjunct",oper.ToString()+" is not a member of class instance.");
         ReturnError;
       }
       Argv.CopyObject( pair[2] );
@@ -285,11 +285,11 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
       }
       // try test pattern table
       zhErroring("类","类 "+name.ToString()+" 名为"+oper.ToString()+" 成员不是函数")||
-        Erroring("class", "class "+name.ToString()+" member named "+oper.ToString()+" is not a function." );
+        _Erroring("class", "class "+name.ToString()+" member named "+oper.ToString()+" is not a function." );
       ReturnError;
     }
     zhErroring("类::点运算","数值或者字符串不能作为类成员.")||
-      Erroring("Class::Conjunct","String or Number cannot be member of class.");
+      _Erroring("Class::Conjunct","String or Number cannot be member of class.");
     ReturnError;
   }
   Set_Context( Conjunct ){ // a.x = 3
@@ -309,7 +309,7 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
       ReturnNull;
     }
     zhErroring("类","类 "+name.ToString()+" 成员指定 "+oper.ToString()+" 不合法")||
-      Erroring("class", "class "+name.ToString()+" member specification "+oper.ToString()+" is not valid." );
+      _Erroring("class", "class "+name.ToString()+" member specification "+oper.ToString()+" is not valid." );
     ReturnNormal;
   }
 
@@ -329,8 +329,8 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
 //   //dout<<"into test of class"<<endl;
 //   CheckShouldEqual(2);
 //   if ( not Argv[1].ListQ() or not Argv[1][0].SymbolQ() ){
-//     _Erroring(zh,Argv[0].ToString(),"函数声明格式错误: "+Argv[1].ToString() )||
-//       Erroring(Argv[0].ToString(),"function declaration is in the wrong form: "+Argv[1].ToString() );
+//     __Erroring(zh,Argv[0].ToString(),"函数声明格式错误: "+Argv[1].ToString() )||
+//       _Erroring(Argv[0].ToString(),"function declaration is in the wrong form: "+Argv[1].ToString() );
 //     ReturnError;
 //   }
 //   CheckShouldBeListWithHead(2, SYMID_OF_ExpressionList );
@@ -344,13 +344,13 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
 //   while ( i<= args.Size() ){
 //     if ( args[i].SymbolQ() ){
 //       if ( not packVar.NullQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"位置参数出现在参数包后") ||
-//           Erroring(Argv[0].ToString(),"Positional argument follows arguments pack");
+//         __Erroring(zh,Argv[0].ToString(),"位置参数出现在参数包后") ||
+//           _Erroring(Argv[0].ToString(),"Positional argument follows arguments pack");
 //         ReturnError;
 //       }
 //       if ( not dictPackVar.NullQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"位置参数出现在字典参数包后") ||
-//           Erroring(Argv[0].ToString(),"Positional argument follows keyword arguments pack");
+//         __Erroring(zh,Argv[0].ToString(),"位置参数出现在字典参数包后") ||
+//           _Erroring(Argv[0].ToString(),"Positional argument follows keyword arguments pack");
 //         ReturnError;
 //       }
 //     }else if ( args[i].PairQ( SYMID_OF_Set ) ){
@@ -359,26 +359,26 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
 //       Object::iterator iter;
 //       bool res = dict.DictGetPosition( args[i][1], iter ); 
 //       if ( res == 0 ){
-//         _Erroring(zh,Argv[0].ToString(),"字典参数 "+args[i][1].ToString()+" 被重复指定") ||
-//           Erroring(Argv[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
+//         __Erroring(zh,Argv[0].ToString(),"字典参数 "+args[i][1].ToString()+" 被重复指定") ||
+//           _Erroring(Argv[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
 //         ReturnError;
 //       }
 //       dict.InsertRef(iter, args[i] );
 //       i++; //args.Delete(i);
 //       continue;
 //     }else if ( args[i].PairQ( SYMID_OF_SetDelayed ) ){
-//       _Erroring(zh,Argv[0].ToString(),"延迟赋值不能用来给参数提供默认值") ||
-//         Erroring(Argv[0].ToString(),"SetDelayed can not be used to provide default value");
+//       __Erroring(zh,Argv[0].ToString(),"延迟赋值不能用来给参数提供默认值") ||
+//         _Erroring(Argv[0].ToString(),"SetDelayed can not be used to provide default value");
 //       ReturnError;
 //     }else if ( args[i].ListQ( SYMID_OF_Unpack )  ){
 //       if ( not packVar.NullQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"参数包只能又一个") ||
-//           Erroring(Argv[0].ToString(),"Multi argument pack");
+//         __Erroring(zh,Argv[0].ToString(),"参数包只能又一个") ||
+//           _Erroring(Argv[0].ToString(),"Multi argument pack");
 //         ReturnError;
 //       }
 //       if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"参数包应该具有符号名字") ||
-//           Erroring(Argv[0].ToString(),"Arguments pack should has a symbol name");
+//         __Erroring(zh,Argv[0].ToString(),"参数包应该具有符号名字") ||
+//           _Erroring(Argv[0].ToString(),"Arguments pack should has a symbol name");
 //         ReturnError;
 //       }
 //       packVar = args[i][1];
@@ -387,13 +387,13 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
 //       continue;
 //     }else if ( args[i].ListQ( SYMID_OF_UnpackDict )  ){
 //       if ( not dictPackVar.NullQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"字典参数包只能有一个") ||
-//           Erroring(Argv[0].ToString(),"Multi keyword argument pack");
+//         __Erroring(zh,Argv[0].ToString(),"字典参数包只能有一个") ||
+//           _Erroring(Argv[0].ToString(),"Multi keyword argument pack");
 //         ReturnError;
 //       }
 //       if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
-//         _Erroring(zh,Argv[0].ToString(),"字典参数包应该具有符号名字") ||
-//           Erroring(Argv[0].ToString(),"Dict arguments pack should has a symbol name");
+//         __Erroring(zh,Argv[0].ToString(),"字典参数包应该具有符号名字") ||
+//           _Erroring(Argv[0].ToString(),"Dict arguments pack should has a symbol name");
 //         ReturnError;
 //       }
 //       dictPackVar = args[i][1];
@@ -401,8 +401,8 @@ int ClassModule::PD_CLASS$INSTANCE$(Object&Argv){
 //       args.Delete(i);
 //       continue;
 //     }else{
-//       _Erroring(zh,Argv[0].ToString(),args[i].ToString() + "不能用来作为参数") ||
-//         Erroring(Argv[0].ToString(),args[i].ToString() + " can not be used to as argument");
+//       __Erroring(zh,Argv[0].ToString(),args[i].ToString() + "不能用来作为参数") ||
+//         _Erroring(Argv[0].ToString(),args[i].ToString() + " can not be used to as argument");
 //       ReturnError;
 //     }
 //     i++;

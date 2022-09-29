@@ -250,7 +250,7 @@ int ArithmaticsModule::PD_AddTo(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -277,7 +277,7 @@ int ArithmaticsModule::PD_SubtractFrom(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -306,7 +306,7 @@ int ArithmaticsModule::PD_TimesBy(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -333,7 +333,7 @@ int ArithmaticsModule::PD_DivideBy(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -362,7 +362,7 @@ int ArithmaticsModule::PD_PowerWith(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -389,7 +389,7 @@ int ArithmaticsModule::PD_Increment(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -416,7 +416,7 @@ int ArithmaticsModule::PD_Decrement(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -443,7 +443,7 @@ int ArithmaticsModule::PD_PreIncrement(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }
@@ -469,7 +469,7 @@ int ArithmaticsModule::PD_PreDecrement(Object &argv){
         ReturnNormal;
       }
     }else{
-      Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
+      _Erroring(argv.Key(),argv[1].ToString()+" is not a variable with a value.");
       ReturnError;
     }
   }

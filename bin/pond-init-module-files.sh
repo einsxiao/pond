@@ -17,13 +17,19 @@ if ! [ -d $POND_HOME/$module_name ]; then
 fi
 
 cd $POND_HOME/$module_name
-cp -rf $POND_ROOT/Template/Makefile            ./
-cp -rf $POND_ROOT/Template/TemplateModule.h    ./${module_name}Module.h
-cp -rf $POND_ROOT/Template/TemplateModule.cu   ./${module_name}Module.cu
-cp -rf $POND_ROOT/Template/TemplateModule.pd   ./${module_name}Module.pd
-cp -rf $POND_ROOT/Template/input.pd            ./
-cp -rf $POND_ROOT/Template/.gitignore          ./
-cp -rf $POND_ROOT/Template/.vscode             ./
+cp -rf $POND_ROOT/Template/Makefile             ./
+cp -rf $POND_ROOT/Template/TemplateModule.h     ./${module_name}Module.h
+echo -n "Enable cuda in module? ([y]/n): "
+read cuda_enable
+if [[ $cuda_enable == 'y' ]] || [[ $cuda_enable == 'Y' ]] ; then
+    cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cu
+else
+    cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cpp
+fi
+cp -rf $POND_ROOT/Template/TemplateModule.pd    ./${module_name}Module.pd
+cp -rf $POND_ROOT/Template/input.pd             ./
+cp -rf $POND_ROOT/Template/.gitignore           ./
+cp -rf $POND_ROOT/Template/.vscode              ./
 
 change_from_to ./ Template ${module_name} 2>&1 >/dev/null
 change_from_to ./ MOD_DATE "`date`" 2>&1>/dev/null

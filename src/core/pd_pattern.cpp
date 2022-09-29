@@ -94,7 +94,7 @@ int Pattern::UnifyRule( Object & rule ){
   }
   if ( not RuleQ(rule) ){
     zhErroring("标准化规则","尝试标准化的表达式不是规则")||
-      Erroring("UnifyRule","Try to unify a non-rule-form Expression.");
+      _Erroring("UnifyRule","Try to unify a non-rule-form Expression.");
     return 8;
   }
   return UnifyRule( rule[1],rule[2] );
@@ -130,7 +130,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
            pat.ListQ(SYMID_OF_HoldPattern ) ||
            pat.ListQ(SYMID_OF_Parenthesis ) ){
         if ( pat.Size() != 1 ){
-          Erroring("Pattern",pat.ToString() + " is in the wrong form.");
+          _Erroring("Pattern",pat.ToString() + " is in the wrong form.");
           return_false;
         }
         //dout<<" try pat oneidentiry "<< pat <<endl;
@@ -139,14 +139,14 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
         return_false; //same reason as one
       }else if ( pat.ListQ( SYMID_OF_Pattern ) ){
         if ( pat.Size() < 2 ){
-          Erroring("Pattern",expr.ToString()+" is in the wrong form.");
+          _Erroring("Pattern",expr.ToString()+" is in the wrong form.");
           return_false;
         }
         //dprintf("pat %s is a Pattern, expr = %s",pat.ToString().c_str(),expr.ToString().c_str() );
         unsigned int varI = pat(1).re();
         if ( varI != 0  ){
           if ( varI > pair_size + 1 ){
-            Erroring("Pattern","Unified Pattern is in the wrong form.");
+            _Erroring("Pattern","Unified Pattern is in the wrong form.");
             return_false; 
           }
           if ( varI <= pair_size ){ // VariableT already recorded
@@ -245,7 +245,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
       u_int varI = pat(pos2)[1].re();
       if ( varI != 0  ){ // pattern exist
         if ( varI > pair_size + 1 ){
-          Erroring("Pattern","Coding of unified pattern is not right.");
+          _Erroring("Pattern","Coding of unified pattern is not right.");
           return_false; 
         }
         if ( varI <= pair_size ){ // VariableT already recorded
@@ -274,7 +274,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
   //situation II.2: pat[pos2] is pattern and its content is BlackSequence or BlackNullSequence
   if ( pat(pos2).ListQ( SYMID_OF_Pattern )  ){
     if ( pat(pos2).Size() < 2 ){
-      Erroring("Pattern","Pattern is in the wrong form.");
+      _Erroring("Pattern","Pattern is in the wrong form.");
       return_false; 
     }
     if ( (singleq=pat(pos2)[2].ListQ(SYMID_OF_Black ) )   or
@@ -292,7 +292,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
         if ( varI > pair_size + 1 ){
           //dprintf("error pat: %s",pat.ToString().c_str() );
           //dprintf("varI = %d, pair_size=%d, real pair size = %d",varI,pair_size,(int)pairs.size() );
-          Erroring("Pattern","Coding of unified pattern is not right.");
+          _Erroring("Pattern","Coding of unified pattern is not right.");
           return_false;
         }
         if ( varI <= pair_size ){ // VariableT already recorded // pattern Exist
@@ -307,7 +307,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
               vector<Object>&tlist=GlobalPool.Lists.Get( pairs[varI].idx );
               if ( pairs[varI].p + i >= tlist.size() ){
                 //dprintf("\nexpr=%s,\npat=%s, \n pair_size=%d pos1=%d, pos2=%d \n n=%d,size=%d varI=%d ", expr.ToString().c_str(), pat.ToString().c_str(), pair_size, pos1, pos2, pairs[varI].n, (int)tlist.size(),(int)varI );
-                Erroring("MatchQ","recorded matched list index out of range.");
+                _Erroring("MatchQ","recorded matched list index out of range.");
                 return_false;
               }
               if ( tlist[ pairs[varI].p+i ] != expr(pos1+i) )
@@ -412,7 +412,7 @@ bool UNIFY_MATCHQ(const Object&expr,const Object &pat, vector<MatchRecord> &pair
     }else{//not one of Black BlackSequence or BlackNullSequence
       //dout<< " try match "<< expr<<" to "<<pat<< " pair_size = "<< pair_size<<" pos1 ="<<pos1<<" pos2="<<pos2<<endl;
       //dout<< expr(pos1) << "  ?  "<< pat(pos2) <<endl;
-      Erroring("Pattern","Content of pattern is required to be Black, BlackSequence, BlackNullSequence or Query.");
+      _Erroring("Pattern","Content of pattern is required to be Black, BlackSequence, BlackNullSequence or Query.");
       return_false;
     }
   }else if ( (singleq = pat(pos2).ListQ( SYMID_OF_Black ) ) or
@@ -601,7 +601,7 @@ void Pattern::UnifiedApplyPatternPairs(Object &Argv,vector<MatchRecord>&pairs){
         return;
       }
     }else{
-      Erroring("Pattern","Pattern unify is not right.");
+      _Erroring("Pattern","Pattern unify is not right.");
       return;
       //return;
     }
@@ -615,7 +615,7 @@ void Pattern::UnifiedApplyPatternPairs(Object &Argv,vector<MatchRecord>&pairs){
 
 int Pattern::UnifiedRawReplaceAll(Object &Argv, Object &rule,bool repeated){
   if ( rule.Size() < 2 ) {
-    Erroring("UnifiedRawReplaceAll","Rule is not in the required form.");
+    _Erroring("UnifiedRawReplaceAll","Rule is not in the required form.");
     return false;
   }
   Index idx = GlobalPool.Matches.New();
@@ -651,11 +651,11 @@ int Pattern::UnifiedReplaceAll(Object &Argv, Object &rule,bool repeated){
   if ( !RuleQ(rule) ){
     if ( repeated ) {
       zhErroring("标准化全部替换",rule.ToString()+"不是规则")||
-        Erroring("UnifiedReplaceAll",rule.ToString()+" is not a rule.");
+        _Erroring("UnifiedReplaceAll",rule.ToString()+" is not a rule.");
       return false;
     }else{
       zhErroring("标准化替换",rule.ToString()+"不是规则")||
-        Erroring("UnifiedReplace",rule.ToString()+" is not a rule.");
+        _Erroring("UnifiedReplace",rule.ToString()+" is not a rule.");
       return false;
     }
   }
@@ -689,10 +689,10 @@ int ApplyPatternPairs(Object &Argv,map<Object ,Object >&pairs){
 //   }
 //   if ( !RuleQ(rule) ){
 //     if ( repeated ){
-//         Erroring("ReplaceAll",rule.ToString()+" is not a rule.");
+//         _Erroring("ReplaceAll",rule.ToString()+" is not a rule.");
 //         return false;
 //     }else {
-//       Erroring("Replace",rule.ToString()+" is not a rule.");
+//       _Erroring("Replace",rule.ToString()+" is not a rule.");
 //       return false;
 //     }
 //   }

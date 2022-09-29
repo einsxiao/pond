@@ -4,14 +4,17 @@
 namespace pond{
 
   ///////////////////////////////////////////
-#define pow2(x) ((x)*(x))
-#define pow3(x) ((x)*(x)*(x))
-#define pow4(x) ((x)*(x)*(x)*(x))
-#define pow5(x) ((x)*(x)*(x)*(x)*(x))
-#define pow6(x) ((x)*(x)*(x)*(x)*(x)*(x))
-#define pow7(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x))
-#define pow8(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
-#define sign(num) ((num)>0?1:((num)<0?-1:0)); 
+  #define pow2(x) ((x)*(x))
+  #define pow3(x) ((x)*(x)*(x))
+  #define pow4(x) ((x)*(x)*(x)*(x))
+  #define pow5(x) ((x)*(x)*(x)*(x)*(x))
+  #define pow6(x) ((x)*(x)*(x)*(x)*(x)*(x))
+  #define pow7(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x))
+  #define pow8(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
+  #define pow9(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
+  #define pow10(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
+  #define pow11(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
+  #define pow12(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
 
   struct floatcomplex{
   public:

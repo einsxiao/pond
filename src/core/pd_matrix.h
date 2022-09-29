@@ -134,7 +134,7 @@ namespace pond{
 
   template<class ostype,class type> ostype &operator<<(ostype &os, const Matrix_T<type>&data){
     if (data.Size() == 0 ){ // not assigned space
-      Warning("Matrix_T","No element in Matrix_T");
+      _Warning("Matrix_T","No element in Matrix_T");
       return os;
     }
     for (int i=0; i<= data.ND; i++)
@@ -149,7 +149,7 @@ namespace pond{
     data.Free();
     int n; is>>n;
     if ( n > 8 ) {
-      Erroring("Matrix::>>","Matrix only supported max to 8 dimensions.");
+      _Erroring("Matrix::>>","Matrix only supported max to 8 dimensions.");
       return is;
     }
     data.ND	=	n;
@@ -212,7 +212,7 @@ namespace pond{
     case 7: D7 = Np; return;
     case 8: D8 = Np; return;
     default:
-      Erroring("Matrix","Dimension cannot be bigger than 8.");
+      _Erroring("Matrix","Dimension cannot be bigger than 8.");
       return ;
     }
   }
@@ -246,16 +246,16 @@ namespace pond{
   };
 
 #define _check_dimN(N) if ( ND != 1 ){                                  \
-    Erroring("Matrix::at","try get element of "+                        \
+    _Erroring("Matrix::at","try get element of "+                        \
              ToString((int)ND)+" Dimension(s) Matrix with 1 index ");   \
     return 0;                                                           \
   }
 #define _check_dimith(N) if ( p##N >= D##N ){                   \
-    Erroring("Matrix","index of dimension "#N" out of range."); \
+    _Erroring("Matrix","index of dimension "#N" out of range."); \
     return 0;                                                   \
   }
 #define _check_fdimith(N) if ( p##N > D##N ){                   \
-    Erroring("Matrix","index of dimension "#N" out of range."); \
+    _Erroring("Matrix","index of dimension "#N" out of range."); \
     return 0;                                                   \
   }
   //1
@@ -655,7 +655,7 @@ namespace pond{
     int EleSize =	1;
     for (int i=1;i<=ND;i++){
       if ( dimArr[i] < 1 ){
-        Warning("Matrix::Init","Dimension smaller than 1; set to 1");
+        _Warning("Matrix::Init","Dimension smaller than 1; set to 1");
         SetDim(i,1);
       }else{
         SetDim(i,dimArr[i]); 
@@ -811,7 +811,7 @@ namespace pond{
         if ( line.compare(0,9,"DIMENSION")==0 or line.compare(0,9,"dimensions")==0 ){
           word = pond::RemoveFirstWord(line,line);
           word = pond::RemoveFirstWord(line,line);
-          if ( word == "" ) { Erroring("Matrix::ReadVTKFile", "Dimension specified is in the wrong form."); return -1; }
+          if ( word == "" ) { _Erroring("Matrix::ReadVTKFile", "Dimension specified is in the wrong form."); return -1; }
           D1 = pond::ToNumber( word.c_str() );
           word = pond::RemoveFirstWord(line,line);
           if ( word == "" ){
@@ -823,7 +823,7 @@ namespace pond{
             ND = 2; continue;
           }
           D3 = pond::ToNumber( word.c_str() );
-          if ( line != "" ) { Erroring("Matrix::ReadVTKFile", "Dimension specified is in the wrong form."); return -1; }
+          if ( line != "" ) { _Erroring("Matrix::ReadVTKFile", "Dimension specified is in the wrong form."); return -1; }
           ND = 3;
           continue;
         }
@@ -877,7 +877,7 @@ namespace pond{
   int Matrix_T<type>::DumpFile(std::string filename)
   {
     if (Size() == 0 || Data == NULL ){ 
-      Warning("Matrix_T::DumpFile","Matrix_T is empty.");
+      _Warning("Matrix_T::DumpFile","Matrix_T is empty.");
       return -1;
     }
     std::ofstream os(filename.c_str());
@@ -897,7 +897,7 @@ namespace pond{
   int Matrix_T<type>::DumpVTKFile(std::string filename)
   {
     if (Size() == 0 || Data == NULL ){ 
-      Warning("Matrix_T::DumpFile","Matrix_T is empty.");
+      _Warning("Matrix_T::DumpFile","Matrix_T is empty.");
       return -1;
     }
     bool resized = false;
@@ -952,7 +952,7 @@ namespace pond{
   int Matrix_T<type>::BinaryDumpFile(std::string filename)
   {
     if (Size() ==0 || Data == NULL ){ 
-      Warning("Matrix_T::BinaryDumpFile","Matrix_T is empry.");
+      _Warning("Matrix_T::BinaryDumpFile","Matrix_T is empry.");
       return -1;
     }
     std::ofstream os(filename.c_str(),std::ios::binary);
@@ -968,7 +968,7 @@ namespace pond{
   template<class type> Matrix_T<type> Matrix_T<type>::SubMatrix(int n, ...)
   {
     if ( n >= ND ) {
-      Erroring("SubMatrix","SubMatrix dimension equal or ran out of the original Matrix."); 
+      _Erroring("SubMatrix","SubMatrix dimension equal or ran out of the original Matrix."); 
       return (*this); 
     }
     Matrix_T<type> tMatrix;
@@ -1006,7 +1006,7 @@ namespace pond{
     va_end(args);
 
     if ( new_dim[n+1] > Size() ) {
-      Erroring("Matrix","Matrix can only be reshaped to a matrix of the same or smaller size."); 
+      _Erroring("Matrix","Matrix can only be reshaped to a matrix of the same or smaller size."); 
       return (*this);
     }
 
@@ -1024,7 +1024,7 @@ namespace pond{
       size *= dim[i];
     }
     if ( size > Size() ) {
-      Erroring("Matrix","Matrix can only be reshaped to a matrix of the same or smaller size."); 
+      _Erroring("Matrix","Matrix can only be reshaped to a matrix of the same or smaller size."); 
       return (*this); 
     }
 
@@ -1038,7 +1038,7 @@ namespace pond{
   template<class type> template<class otype> Matrix_T<type>& Matrix_T<type>::Set(const Matrix_T<otype>& other)
   {
     if ( other.Size() <= 0 ) {
-      Erroring("Matrix::Set","Right Matrix is Empty."); return (*this); 
+      _Erroring("Matrix::Set","Right Matrix is Empty."); return (*this); 
     }
     if ( not SameDimensionQ(other) )
       Init(other,pond::GetDataPosition() ); 
@@ -1088,7 +1088,7 @@ namespace pond{
   Matrix_T<type> &Matrix_T<type>::operator=(const vtype value)
   {
     if (Size() <=0 ){
-      Warning("Matrix_T::Set","Matrix_T is Empty.");
+      _Warning("Matrix_T::Set","Matrix_T is Empty.");
       return *this;
     }
 #if defined(__CUDACC__)
@@ -1111,11 +1111,11 @@ namespace pond{
   template<class type> template<class otype>                            \
   Matrix_T<type> &Matrix_T<type>::operator oper(const Matrix_T<otype>&other){ \
     if ( other.Size() <= 0 ) {                                          \
-      Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
+      _Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
       return (*this);                                                   \
     }                                                                   \
     if ( not SameDimensionQ(other) )  {                                 \
-      Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
+      _Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
       return (*this);                                                   \
     }                                                                   \
     if ( pond::IsDataOnHost() ){                                        \
@@ -1135,7 +1135,7 @@ namespace pond{
   template<class type> template<class vtype>                            \
     Matrix_T<type> &Matrix_T<type>::operator oper(const vtype value){   \
     if ( Size() <= 0 ){                                                 \
-      Erroring("Matrix::"#name,"Matrix is Empty.");                     \
+      _Erroring("Matrix::"#name,"Matrix is Empty.");                     \
       return *this;                                                     \
     }                                                                   \
     if ( pond::IsDataOnHost() ){                                        \
@@ -1152,11 +1152,11 @@ namespace pond{
   template<class type> template<class otype>                            \
   Matrix_T<type> &Matrix_T<type>::operator oper(const Matrix_T<otype>&other){ \
     if ( other.Size() <= 0 ) {                                          \
-      Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
+      _Erroring("Matrix::"#name,"Right Matrix is Empty.");               \
       return *this;                                                     \
     }                                                                   \
     if ( not SameDimensionQ(other) ) {                                  \
-      Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
+      _Erroring("Matrix::"#name,"Two Matrix is not the same size.");     \
       return *this;                                                     \
     }                                                                   \
     if ( other.Data != NULL and Data != NULL ){                         \
@@ -1171,7 +1171,7 @@ namespace pond{
   template<class type> template<class vtype>                            \
   Matrix_T<type> &Matrix_T<type>::operator oper(const vtype value){     \
     if ( Size() <= 0 )                                                  \
-      { Erroring("Matrix::"#name,"Matrix is Empty."); return *this; }   \
+      { _Erroring("Matrix::"#name,"Matrix is Empty."); return *this; }   \
     func##_host(Data,Data,value,Size() );                               \
     if ( state==MatrixStateTempFree ) state = MatrixStateTempOccupied;  \
     return *this;                                                       \
@@ -1196,7 +1196,7 @@ namespace pond{
   Matrix_T<type> &Matrix_T<type>::operator ^=(const double value)
   { 
     if ( Size() <= 0 ) 
-      { Erroring("Matrix::PowerBy","Matrix is Empty.");  return *this; }
+      { _Erroring("Matrix::PowerBy","Matrix is Empty.");  return *this; }
 #ifdef __CUDACC__
     if ( pond::IsDataOnHost() ){ 
       power_host(Data,Data,value,Size() );        
@@ -1263,7 +1263,7 @@ namespace pond{
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
-        Erroring("Matrix_T::MinRevised","Matrix_T has no data on device side."); return 0;
+        _Erroring("Matrix_T::MinRevised","Matrix_T has no data on device side."); return 0;
       }
       while (n_in >1){
         bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
@@ -1278,7 +1278,7 @@ namespace pond{
     }
 #endif
     if ( n_in == 0 or Data == NULL ) {
-      Erroring("Matrix_T::MinRevised","Matrix_T has no data on host side."); return 0;
+      _Erroring("Matrix_T::MinRevised","Matrix_T has no data on host side."); return 0;
     }
     type value = Data[0];
 #pragma omp parallel for reduction(min:value)
@@ -1300,7 +1300,7 @@ namespace pond{
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
-        Erroring("Matrix_T::MaxRevised","Matrix_T has no data on device side."); return 0;
+        _Erroring("Matrix_T::MaxRevised","Matrix_T has no data on device side."); return 0;
       }
       while (n_in >1){
         bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
@@ -1314,7 +1314,7 @@ namespace pond{
     }
 #endif
     if ( n_in == 0 or Data == NULL ) {
-      Erroring("Matrix_T::MaxRevised","Matrix_T has no data on host side."); return 0;
+      _Erroring("Matrix_T::MaxRevised","Matrix_T has no data on host side."); return 0;
     }
     value = Data[0];
 #pragma omp parallel for reduction(max:value)
@@ -1336,7 +1336,7 @@ namespace pond{
       int tn = __CudaThreadNumberPerBlock;
       int bn;
       if ( n_in == 0 or DataDevice == NULL ) {
-        Erroring("Matrix_T::TotalRevised","Matrix_T has no data on device side."); return 0;
+        _Erroring("Matrix_T::TotalRevised","Matrix_T has no data on device side."); return 0;
       }
       while (n_in >1){
         bn = (n_in-1)/tn+1; if (bn > __CudaMaxBlockNumber) bn = __CudaMaxBlockNumber; 
@@ -1350,7 +1350,7 @@ namespace pond{
     }
 #endif
     if ( n_in == 0 or Data == NULL ) {
-      Erroring("Matrix_T::TotalRevised","Matrix_T has no data on host side."); return 0;
+      _Erroring("Matrix_T::TotalRevised","Matrix_T has no data on host side."); return 0;
     }
     sum = Data[0];
 #pragma omp parallel for reduction(+:sum)
@@ -1363,14 +1363,14 @@ namespace pond{
   template<class type>
   type Matrix_T<type>::TotalHost()
   {
-    Warning("Matrix_T::TotalRevised","TotalHost will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
+    _Warning("Matrix_T::TotalRevised","TotalHost will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
     return TotalRevised();
   }
 
   template<class type>
   type Matrix_T<type>::TotalDevice()
   {
-    Warning("Matrix_T::TotalRevised","TotalDevice will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
+    _Warning("Matrix_T::TotalRevised","TotalDevice will be depreciated. Please use pond::Matrix_T::TotalRevised instead.");
     return TotalRevised();
   }
   
@@ -1390,7 +1390,7 @@ namespace pond{
   template<class type,class type1,class type2>                          \
   Matrix_T<type> &name(Matrix_T<type>&arrout,Matrix_T<type1> &data1,Matrix_T<type2> &data2){ \
     if (not (data1.SameDimensionQ(data2) ))                             \
-      { Erroring("Matrix::"#name,"Try to "#func" two Matrixs of different size."); return arrout; } \
+      {_Erroring("Matrix::"#name,"Try to "#func" two Matrixs of different size."); return arrout; } \
     if ( !(arrout.SameDimensionQ(data1)) )                              \
       arrout.Init(data1, pond::GetDataPosition() ) ;                     \
     if ( pond::IsDataOnHost()  )                                        \

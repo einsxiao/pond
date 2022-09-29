@@ -121,9 +121,9 @@ int main(int argc,char* argv[])
           res = kernel.Phrasing();
         }else{
           if ( lang == "zh" ){
-            Warning("pond","脚本文件'"+filename+"'未找到");
+            _Warning("pond","脚本文件'"+filename+"'未找到");
           } else {
-            Warning("pond","Script file "+filename+" is not found.");
+            _Warning("pond","Script file "+filename+" is not found.");
           }
           return 1;
         }
@@ -131,9 +131,9 @@ int main(int argc,char* argv[])
       }
     }else{
       if ( lang == "zh" ){
-        Warning("pond","要求至少1个参数");
+        _Warning("pond","要求至少1个参数");
       } else {
-        Warning("pond","1 argument is required.");
+        _Warning("pond","1 argument is required.");
       }
       return 1;
     }

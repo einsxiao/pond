@@ -74,7 +74,7 @@ int Kernel::Phrasing( ){
         //dout<<"simplesimplfy with function:"<<ssrec<<endl;
         if ( ssrec == NULL ){
           zhWarning("Kernel","函数'SimpleSimplify'未能从模块'System'加载成功.")||
-            Warning("Kernel","Function 'SimpleSimplify' from 'System' is not loaded properly.");
+            _Warning("Kernel","Function 'SimpleSimplify' from 'System' is not loaded properly.");
         }
         ssrec->staticFunction( superList.Last() );
         //dout<<"   evaluate finished, printing: "<< superList.Last() << endl;
@@ -114,12 +114,12 @@ int Kernel::Phrasing( ){
     }catch ( const exception &err){
       //dout<<"get exception in kernel.cpp:"<<err.what()<<endl;
       zhErroring("源代码",err.what() )||
-        Erroring("Sourcecode",err.what() );
+        _Erroring("Sourcecode",err.what() );
       evaluation->EvaluationDepth = 0;
       evaluation->ClearValueTablesTo(1);
     }catch ( ... ){
       zhErroring("系统","出现未预料到的错误." )||
-        Erroring("System","Unexpected error occured." );
+        _Erroring("System","Unexpected error occured." );
       evaluation->EvaluationDepth = 0;
       evaluation->ClearValueTablesTo(1);
     }

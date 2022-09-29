@@ -258,7 +258,7 @@ int pond::StringSplit(string str,vector<string>&strs){
 }
 
 string pond::RandomString(int len){
-  if ( len < 1 ) { Erroring("RandomString","Length specified should bigger than zero."); return ""; }
+  if ( len < 1 ) { _Erroring("RandomString","Length specified should bigger than zero."); return ""; }
   string res = "";
   for ( int i = 0 ; i< len; i++ ){
     char ch =  35+56*pond::Rand();
@@ -268,7 +268,7 @@ string pond::RandomString(int len){
 }
 
 string pond::RandomNumberString(int len){
-  if ( len < 1 ) { Erroring("RandomString","Length specified should bigger than zero."); return ""; }
+  if ( len < 1 ) { _Erroring("RandomString","Length specified should bigger than zero."); return ""; }
   string res = "";
   for ( int i = 0 ; i< len; i++ ){
     char ch =  '0'+(pond::Rand()*9);
@@ -322,7 +322,7 @@ string pond::GetEnv(string name,string default_value){
 
 int pond::SetEnv(string var,string expr,bool overwrite){
   if ( setenv(var.c_str(),expr.c_str(),overwrite )  ){
-    Warning("SetEnv","Failed to change environment varible by Expression: "+ expr);
+    _Warning("SetEnv","Failed to change environment varible by Expression: "+ expr);
     return -1;
   }
   return 0;
@@ -332,7 +332,7 @@ string pond::GetDirectory(){
   string pwd="";
   char *buffer;  
   if( (buffer = getcwd(NULL, 0)) == NULL) {  
-    { Erroring("GetDirectory","Can not get Directory information."); return ""; }
+    { _Erroring("GetDirectory","Can not get Directory information."); return ""; }
   }  
   pwd = buffer;
   free( buffer );
@@ -342,7 +342,7 @@ string pond::GetDirectory(){
 string pond::GetParentDirectory(){
   char *buffer;  
   if( (buffer = getcwd(NULL, 0)) == NULL) {  
-    { Erroring("GetDirectory","Can not get Directory information."); return ""; }
+    { _Erroring("GetDirectory","Can not get Directory information."); return ""; }
   }  
   int ind = strrchr(buffer,'/') - buffer;
   if ( ind <= 0 ) return "";
@@ -377,7 +377,7 @@ static int LocalSystem(string cmd, string&result){
   char line[1024];
   fp = popen(cmd.c_str(),"r");
   if ( fp == NULL ){
-    Warning("System",cmd+" cannot be executed.");
+    _Warning("System",cmd+" cannot be executed.");
     return -1;
   }
   if ( fgets(line,sizeof(line),fp) != NULL ){
@@ -506,7 +506,7 @@ const char* pond::Type2String(ObjectType type){
   case ObjectType::Symbol: return "Symbol";
   case ObjectType::List: return "List";
   }
-  { Erroring("Type2String","switch error."); return ""; }
+  { _Erroring("Type2String","switch error."); return ""; }
 }
 
 
@@ -537,7 +537,7 @@ AttributeType pond::String2AttributeType(const char*str){
     CT(Locked);
     CT(MAXENUM);
   }
-  { Erroring("Attribute",(string)"Unknown Attribute type "+str+"."); return AttributeType::Null; }
+  { _Erroring("Attribute",(string)"Unknown Attribute type "+str+"."); return AttributeType::Null; }
 }
 #undef CT
 
@@ -568,7 +568,7 @@ const char* pond::AttributeType2String(AttributeType type){
     CT(Locked);
     CT(MAXENUM);
   }
-  Erroring("Attribute","Unkown Attribute type.");
+  _Erroring("Attribute","Unkown Attribute type.");
   return "";
 }
 #undef CT

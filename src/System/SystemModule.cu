@@ -99,12 +99,15 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   }
   {
     RegisterFunction("Replace",             Replace,this);
+    AddAttribute("Replace",  AttributeType::HoldAll );
   }
   {
     RegisterFunction("ReplaceAll",          ReplaceAll,this);
+    AddAttribute("ReplaceAll",  AttributeType::HoldAll );
   }
   {
     RegisterFunction("ReplaceAllRepeated",  ReplaceAllRepeated,this);
+    AddAttribute("ReplaceAllRepeated",  AttributeType::HoldAll );
   }
   {
     RegisterFunction("ShowModuleFunctions",ShowModuleFunctions,this);
@@ -338,7 +341,7 @@ int SystemModule::PD_EvaluateString(Object &ARGV){
   Object result;
   EvaKernel->EvaluateString(code, result, 0, true);
   ARGV = result;
-  Return(result);
+  ReturnObject(result);
 }
 
 int SystemModule::PD_EvaluateFile(Object &ARGV){
@@ -368,7 +371,7 @@ int SystemModule::PD_EvaluateFileWithReturn(Object &ARGV){
   CheckShouldBeString(1);
   Object result;
   EvaKernel->EvaluateFile(ARGV[1].Key(), result, 0, false);
-  Return(result);
+  ReturnObject(result);
 }
 
 int SystemModule::PD_Options(Object & ARGV){
@@ -382,14 +385,14 @@ int SystemModule::SetOptions(Object & ARGV){
 int SystemModule::SetAttribute(Object &left,Object&attris){
   if ( not attris.ListQ(SYMID_OF_List) ) {
     zhErroring("设置特性", "特性参数应当以列表的形式传入.") ||
-    Erroring("SetAttribute", "Attributes should be in a List.");
+    _Erroring("SetAttribute", "Attributes should be in a List.");
     ReturnError;
   }
   for ( u_int i =1 ;i<= attris.Size();i++){
     if (not(attris)[i].StringQ())
     {
       zhErroring( "设置属性", "属性应该用字符串表示") ||
-        Erroring("SetAttibute", "Attibutes should be Strings.");
+        _Erroring("SetAttibute", "Attibutes should be Strings.");
       ReturnError;
     }
   }
@@ -397,25 +400,25 @@ int SystemModule::SetAttribute(Object &left,Object&attris){
   if ( left.ListQ( SYMID_OF_Attributes) ){
     if ((left).Size() != 1 ) {
       zhErroring("SetAttributes","Attributes 要求以Object作为参数.")||
-        Erroring("SetAttributes","Attributes requires an Object as argument.");
+        _Erroring("SetAttributes","Attributes requires an Object as argument.");
       ReturnError; }
     if ( not left[1].SymbolQ() ) {
       zhErroring("SetAttribute","只有符号变量才能被赋予属性.")||
-        Erroring("SetAttribute","Only Symbol can assign attributes to.");
+        _Erroring("SetAttribute","Only Symbol can assign attributes to.");
       ReturnError;
     }
     attri = EvaKernel->GetAttributes( (left)[1].Key() );
   }else{
     if ( not left.SymbolQ() ) {
       zhErroring("SetAttribute","只有符号变量才能被赋予属性.")||
-        Erroring("SetAttribute","Only Symbol can assign attributes to.");
+        _Erroring("SetAttribute","Only Symbol can assign attributes to.");
       ReturnError;
     }
     attri = EvaKernel->GetAttributes( left );
   }
   if ( attri == NULL ) {
     zhErroring("SetAttributes","不能创建新的属性.")||
-      Erroring("SetAttributes","Can not create new attributes.");
+      _Erroring("SetAttributes","Can not create new attributes.");
     ReturnError;
   }
   
@@ -423,13 +426,13 @@ int SystemModule::SetAttribute(Object &left,Object&attris){
   for (u_int i=1; i<=attris.Size(); i++ ){
     if ( not attris[i].StringQ() ) {
       zhErroring("SetAttributes","要求一个属性字符串.")||
-        Erroring("SetAttributes","An attribute string is required.");
+        _Erroring("SetAttributes","An attribute string is required.");
       ReturnError;
     }
     type = String2AttributeType( attris[i].Key() );
     if ( type == AttributeType::Null ) {
       zhErroring("SetAttribute",(string)"未知属性 \""+attris[i].Key()+"\".")||
-        Erroring("SetAttribute",(string)"Unkonwn Attribute \""+attris[i].Key()+"\".");
+        _Erroring("SetAttribute",(string)"Unkonwn Attribute \""+attris[i].Key()+"\".");
       ReturnError;
     }
     pond::SetAttribute(attri,type);
@@ -450,30 +453,30 @@ int SystemModule::AddAttribute_Eva(Object &ARGV){
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
   if ( rec == NULL ) {
     zhErroring("AddAttribute","未能获取符号变量 '"+ARGV[1].ToString()+"' 的参数对象.")||
-      Erroring("AddAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
+      _Erroring("AddAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
     ReturnError;
   }
   if ( AttributeQ(rec->attributes,AttributeType::Protected) ) {
     zhErroring("AddAttribute",(string)"符号变量'"+ARGV[1].Key()+"' 处于保护状态中.")||
-      Erroring("AddAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
+      _Erroring("AddAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
     ReturnError;
   }
   if ( ARGV[2].SymbolQ() || ARGV[2].StringQ() ){
     AttributeType attriType = String2AttributeType( ARGV[2].Key() );
     if ( attriType == AttributeType::Null ) {
       zhErroring("AddAttribute",(string)"给出的属性类型'"+ARGV[2].Key()+"' 不正确.")||
-        Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
+        _Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
       ReturnError;
     }
     pond::SetAttribute(rec->attributes, attriType );
     ReturnNull;
-  }else if ( ARGV[2].ListQ(SYMID_OF_List) ){
+  } else if ( ARGV[2].ListQ(SYMID_OF_List) ){
     AttributeType attriType;
     for ( u_int i =1; i<=ARGV[2].Size() ; i++){
       attriType = String2AttributeType( ARGV[2][i].Key() );
       if ( attriType == AttributeType::Null ) {
         zhErroring("AddAttribute",(string)"给出的属性类型'"+ARGV[2][i].Key()+"' 不正确.")||
-          Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
+          _Erroring("AddAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
         ReturnError;
       }
       pond::SetAttribute( rec->attributes, attriType );
@@ -481,7 +484,7 @@ int SystemModule::AddAttribute_Eva(Object &ARGV){
     ReturnNull;
   }
   zhErroring("AddAttribute","给出的属性值形式不正确.")||
-    Erroring("AddAttribute","Attributes specified is not in the right form.");
+    _Erroring("AddAttribute","Attributes specified is not in the right form.");
   ReturnError;
 };
 
@@ -491,19 +494,19 @@ int SystemModule::RemoveAttributes_Eva(Object &ARGV){
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
   if ( rec == NULL ) {
     zhErroring("RemoveAttribute","未能获取符号变量 '"+ARGV[1].ToString()+"' 的参数对象.")||
-      Erroring("RemoveAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
+      _Erroring("RemoveAttribute","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'.");
     ReturnError;
   }
   if ( AttributeQ(rec->attributes,AttributeType::Protected) ) {
     zhErroring("RemoveAttribute",(string)"符号变量'"+ARGV[1].Key()+"' 处于保护状态中.")||
-      Erroring("RemoveAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
+      _Erroring("RemoveAttribute",(string)"Symbol '"+ARGV[1].Key()+"' is protected.");
     ReturnError;
   }
   if ( ARGV[2].SymbolQ() || ARGV[2].StringQ() ){
     AttributeType attriType = String2AttributeType( ARGV[2].Key() );
     if ( attriType == AttributeType::Null ) {
       zhErroring("RemoveAttribute",(string)"给出的属性类型'"+ARGV[2].Key()+"' 不正确.")||
-        Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
+        _Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2].Key()+"' specified is not right.");
       ReturnError;
     }
     pond::SetAttribute( rec->attributes, attriType,false);
@@ -514,7 +517,7 @@ int SystemModule::RemoveAttributes_Eva(Object &ARGV){
       attriType = String2AttributeType( ARGV[2][i].Key() );
       if ( attriType == AttributeType::Null ) {
         zhErroring("RemoveAttribute",(string)"给出的属性类型'"+ARGV[2][i].Key()+"' 不正确.")||
-          Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
+          _Erroring("RemoveAttribute",(string)"Attribute type '"+ARGV[2][i].Key()+"' specified is not right.");
         ReturnError;
       }
       pond::SetAttribute( rec->attributes, attriType,false );
@@ -522,7 +525,7 @@ int SystemModule::RemoveAttributes_Eva(Object &ARGV){
     ReturnNull;
   }
   zhErroring("RemoveAttribute","给出的属性值形式不正确.")||
-    Erroring("RemoveAttribute","Attributes specified is not in the right form.");
+    _Erroring("RemoveAttribute","Attributes specified is not in the right form.");
   ReturnError;
 };
 
@@ -540,7 +543,7 @@ int SystemModule::PD_Protect(Object &ARGV){
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
   if ( rec == NULL ) {
     zhErroring("Protect","不能获得符号'"+ARGV[1].ToString()+"'的属性对象")||
-      Erroring("Protect","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'");
+      _Erroring("Protect","Can not get Attributes Object for Symbol '"+ARGV[1].ToString()+"'");
     ReturnError;
   }
   pond::SetAttribute( rec->attributes, AttributeType::Protected, true);
@@ -560,7 +563,7 @@ int SystemModule::PD_UnProtect(Object &ARGV){
   EvaRecord *rec = EvaKernel->GetOrNewEvaRecord( ARGV[1] );
   if ( rec == NULL ) {
     zhErroring("移除属性","不能获得符号"+ARGV[1].ToString()+"的属性对象") ||
-      Erroring("RemoveAttribute","Can not get Attributes Object for Symbol"+ARGV[1].ToString() );
+      _Erroring("RemoveAttribute","Can not get Attributes Object for Symbol"+ARGV[1].ToString() );
     ReturnError;
   }
   pond::SetAttribute( rec->attributes, AttributeType::Protected,false);
@@ -700,7 +703,7 @@ int SystemModule::UnifyRule(Object & ARGV){
   CheckArgsShouldEqual(ARGV,1);
   Object&pattern = ARGV(1);
   if ( (pattern).Size() < 2 ){
-    { Erroring("UnifyRule","Rule form is right."); ReturnError; }
+    { _Erroring("UnifyRule","Rule form is right."); ReturnError; }
   }
   Pattern::UnifyRule( (pattern)[1], (pattern)[2] );
   ARGV = ARGV[1];
@@ -764,7 +767,7 @@ int SystemModule::ReplaceAll(Object & ARGV){
     ARGV = ARGV[1];
     ReturnNormal;
   }
-  // Erroring("ReplaceAll","Second parameter should be a Rule or a ARGV of rules.");
+  // _Erroring("ReplaceAll","Second parameter should be a Rule or a ARGV of rules.");
   // ReturnError; 
 }
 
@@ -864,7 +867,7 @@ int SystemModule::GrammarModule(Object &ARGV){
   EvaKernel->newContext();
   Object variables = ARGV(1);
   if ( not (variables).ListQ( SYMID_OF_List ) ) {
-    Erroring("Module","Local variable should be in a List.");
+    _Erroring("Module","Local variable should be in a List.");
     EvaKernel->deleteContext();
     ReturnError;
   }
@@ -875,7 +878,7 @@ int SystemModule::GrammarModule(Object &ARGV){
       Object&obj = *iter; 
       //cerr<<"use part as local var spec:"<<obj.ToFullFormString()<<endl;
       if ( obj.Size() < 2 ){
-        Erroring("Module","Local variable specification "+obj.ToString()+ " wrong.");
+        _Erroring("Module","Local variable specification "+obj.ToString()+ " wrong.");
         EvaKernel->deleteContext();
         ReturnError;
       }
@@ -884,7 +887,7 @@ int SystemModule::GrammarModule(Object &ARGV){
       ListModule::GetPartList( obj[1], obj, 2, result );
       //cerr<<"result = "<< result << endl;
       if ( not result.SymbolQ() ){
-        Erroring("Module","Local variable specification "+result.ToString()+"("+obj.ToString()+ ") should be a symbol.");
+        _Erroring("Module","Local variable specification "+result.ToString()+"("+obj.ToString()+ ") should be a symbol.");
         EvaKernel->deleteContext();
         ReturnError;
       }
@@ -907,7 +910,7 @@ int SystemModule::GrammarModule(Object &ARGV){
       EvaKernel->InstantInsertOrUpdatePairValue( (*iter)[1],(*iter)[2]);
       continue;
     }
-    Erroring("Module","Local variable specification "+variables.ToString()+" contains "+(*iter).ToString()+" which is not a atom symbol or an assignment to a symbol."); 
+    _Erroring("Module","Local variable specification "+variables.ToString()+" contains "+(*iter).ToString()+" which is not a atom symbol or an assignment to a symbol."); 
     EvaKernel->deleteContext();
     ReturnError;
   }
@@ -929,7 +932,7 @@ int PureFunctionApply(Object&p_expr,Object&ARGV){
     if ( p_expr.ids() == SYMID_OF_FunctionVariable ){
       u_int id = p_expr.re();
       if ( id == 0 or id > ARGV.Size() )
-        { Erroring("PureFunction","PureFunction variable id exceed the number of arguments."); ReturnError; }
+        { _Erroring("PureFunction","PureFunction variable id exceed the number of arguments."); ReturnError; }
       p_expr = ARGV[id];
     }
     return 0;
@@ -967,7 +970,7 @@ int SystemModule::Function(Object &ARGV){
   if ( varlist.SymbolQ() ){
     if ( ARGV.Size() != 1 ) {
       zhErroring("函数","参数列表和调用提供参数不一致.") ||
-        Erroring("Function","Function variable list is different from arguments applied to.");
+        _Erroring("Function","Function variable list is different from arguments applied to.");
       ReturnError;
     }
     EvaKernel->newContext();
@@ -981,14 +984,14 @@ int SystemModule::Function(Object &ARGV){
   }else if ( varlist.ListQ() ){
     if ( ARGV.Size() != varlist.Size() ) {
       zhErroring("函数","参数列表和调用提供参数不一致.") ||
-        Erroring("Function","Function variable list is different from arguments applied to.");
+        _Erroring("Function","Function variable list is different from arguments applied to.");
       ReturnError;
     }
     EvaKernel->newContext();
     for(u_int i = 1; i <= varlist.Size() ; i++){
       if ( not varlist[i].SymbolQ() ) {
         zhErroring("函数","函数参数列表应该是一个符号列表") ||
-          Erroring("Function","Argument list elements are required to be Symbols.") ; 
+          _Erroring("Function","Argument list elements are required to be Symbols.") ; 
         EvaKernel->deleteContext();
         ReturnError; 
       }
@@ -1002,19 +1005,19 @@ int SystemModule::Function(Object &ARGV){
     ReturnNormal;
   }
   zhErroring("函数","函数参数列表应该是符号，或者符号列表") ||
-    Erroring("Function","Arguments should be symbols or list of symbols.") ; 
+    _Erroring("Function","Arguments should be symbols or list of symbols.") ; 
   ReturnError; 
 }
 
 int SystemModule::Conjunct(Object &ARGV){
   CheckShouldEqual(2);
   //Dealing 1st argument evaluate until to a conjunctable expr
-  //dout<<"get into Conjunct with ARGV = "<<ARGV<<endl;
+  //cout<<"get into Conjunct with ARGV = "<<ARGV<<endl;
   Object &fobj = ARGV[1];
   //EvaKernel->Evaluate( fobj ); // should be reference evaluate
   EvaKernel->Evaluate( fobj, false, true );
   // and those obj with Conjunctable should take care of how to update the ref value
-  //dout<<"fobj after eval= "<<fobj<<endl;
+  //cout<<"fobj after eval= "<<fobj<<endl;
   if ( not fobj.SimpleListQ() ){
     ReturnHold;
   }
@@ -1106,7 +1109,7 @@ int SystemModule::Foreach(Object&ARGV){
   Object&lists = ARGV[2];
   Object&expr  = ARGV[3];
   if ( not lists.ListQ() )
-    { Erroring("Foreach","Second argument is required to be a List."); ReturnError; }
+    { _Erroring("Foreach","Second argument is required to be a List."); ReturnError; }
   if ( vars.SymbolQ() ){
     int ptr = EvaKernel->GetStackPtr();
     Object pairobj = EvaKernel->StackPushCopy(vars,vars.Copy() );
@@ -1130,7 +1133,7 @@ int SystemModule::Foreach(Object&ARGV){
     Object newexpr;
     for ( auto iter = lists.Begin(); iter != lists.End(); iter++ ){
       if ( iter->Size() != vobj_list.Size() ) { 
-        Erroring("Foreach::shape","List shape is not consistent with variable list."); 
+        _Erroring("Foreach::shape","List shape is not consistent with variable list."); 
         EvaKernel->SetStackToPtr( ptr );
         ReturnError; 
       }
@@ -1144,7 +1147,7 @@ int SystemModule::Foreach(Object&ARGV){
     EvaKernel->SetStackToPtr( ptr );
     ReturnNull;
   }
-  Erroring("Foreach","Iterator should be a Symbol or a List of Symbols.");
+  _Erroring("Foreach","Iterator should be a Symbol or a List of Symbols.");
   ReturnError; 
 }
 
@@ -1161,7 +1164,7 @@ int SystemModule::Do(Object &ARGV){
   Object&expr = ARGV(1);
   Object&iter = ARGV(2);
   if ( not (iter).ListQ() || iter.Size()<1 || iter.Size()>4) {
-    Erroring("Do", (iter).ToString()+" is not a valid iterator ARGV form."); 
+    _Erroring("Do", (iter).ToString()+" is not a valid iterator ARGV form."); 
     ReturnError; 
   }
   //iteratorToList(iter,newlist);
@@ -1180,12 +1183,12 @@ int SystemModule::Do(Object &ARGV){
       ARGV.SetNull();
       ReturnNormal ;
     }
-    Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
+    _Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
     ReturnError; 
   }
   if ( iter.Size() == 2 ){ // form: {i, 100}
     Object&var = (iter)(1);
-    if ( !var.SymbolQ() ) { Erroring("Do",var.ToString()+" cannot be used as an iterator."); ReturnError; }
+    if ( !var.SymbolQ() ) { _Erroring("Do",var.ToString()+" cannot be used as an iterator."); ReturnError; }
     Object&num = (iter)(2);
     EvaKernel->Evaluate(num);
     //dout<<"try push stack var:"<< var<<" to table:"<<(EvaKernel->currentValueTable->stackTable)<<endl;
@@ -1214,12 +1217,12 @@ int SystemModule::Do(Object &ARGV){
       EvaKernel->StackPop();
       ReturnNull;
     }
-    Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
+    _Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
     ReturnError;
   }
   if ( iter.Size() == 3 ){ // for {i, 1 , 100}
     Object&var = (iter)(1);
-    if ( !var.SymbolQ() ) { Erroring("Do",var.ToString()+" cannot be used as an iterator."); ReturnError; }
+    if ( !var.SymbolQ() ) { _Erroring("Do",var.ToString()+" cannot be used as an iterator."); ReturnError; }
     Object&num1 = (iter)(2);
     Object&num2 = (iter)(3);
     EvaKernel->Evaluate(num1);
@@ -1240,12 +1243,12 @@ int SystemModule::Do(Object &ARGV){
       EvaKernel->StackPop();
       ReturnNull;
     }
-    { Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); ReturnError; }
+    { _Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); ReturnError; }
   }
   if ( iter.Size() == 4 ){ // form :  {i,1,100,3}
     Object var = (iter)(1);
     if ( !var.SymbolQ() ) { 
-      Erroring(ARGV.Key(),var.ToString()+" cannot be used as an iterator."); 
+      _Erroring(ARGV.Key(),var.ToString()+" cannot be used as an iterator."); 
       ReturnError; 
     }
     Object num1 = (iter)(2);
@@ -1258,7 +1261,7 @@ int SystemModule::Do(Object &ARGV){
       double Nbegin = num1.Number( );
       double Nend = num2.Number( );
       double Nincr = incr.Number( );
-      if ( Nincr == 0 ) { Erroring("Do","Increment should not be a zero."); ReturnError; }
+      if ( Nincr == 0 ) { _Erroring("Do","Increment should not be a zero."); ReturnError; }
       int steps = (Nend-Nbegin)/Nincr;
       Object newexpr;
       Object pairobj = EvaKernel->StackPushCopy(var,var);
@@ -1273,7 +1276,7 @@ int SystemModule::Do(Object &ARGV){
       EvaKernel->StackPop();
       ReturnNull;
     }
-    Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
+    _Erroring(ARGV.Key(),"Iterator "+iter.ToString()+" does not have appropriate bounds."); 
     ReturnError;
   }
   ReturnHold;
@@ -1291,7 +1294,7 @@ int SystemModule::ToExpression(Object & ARGV){
   }
   Object tobj = ImportList::ToExpression(s);
   if ( tobj.voidQ() )
-    { Erroring("ToExpression","Ivalid string to transform to POND expression."); ReturnError; }
+    { _Erroring("ToExpression","Ivalid string to transform to POND expression."); ReturnError; }
   ARGV = tobj;
   EvaKernel->Evaluate(ARGV);
   ReturnNormal;
@@ -1303,7 +1306,7 @@ int system_with_print(string cmd, vector<string>&result){
   char line[1024];
   fp = popen(cmd.c_str(),"r");
   if ( fp == NULL ){
-    Erroring("System",cmd+" cannot be excuted");
+    _Erroring("System",cmd+" cannot be excuted");
     return -1;
   }
   while ( fgets(line,sizeof(line),fp) != NULL ){
@@ -1319,10 +1322,10 @@ int system_with_print(string cmd, vector<string>&result){
 int SystemModule::PD_System(Object &ARGV){
   CheckArgsShouldEqual(ARGV,1);
   EvaKernel->Evaluate( ARGV[1] );
-  if ( !ARGV[1].StringQ() ) { Erroring(ARGV.Key(),"First argument should be a string."); ReturnError; }
+  if ( !ARGV[1].StringQ() ) { _Erroring(ARGV.Key(),"First argument should be a string."); ReturnError; }
   vector<string> strs;
   if ( system_with_print( ARGV[1].Key(),strs ) <0 )
-    { Erroring(ARGV.Key(),"cmd "+ARGV[1].ToString()+" execute error."); ReturnError; }
+    { _Erroring(ARGV.Key(),"cmd "+ARGV[1].ToString()+" execute error."); ReturnError; }
   ARGV.SetList();
   for ( int i=0; i<(int)strs.size(); i++){
     ARGV.PushBackString( strs[i].c_str() );
@@ -1334,9 +1337,9 @@ int SystemModule::SystemWithoutOutput(Object &ARGV)
 {
   CheckArgsShouldEqual(ARGV,1);
   EvaKernel->Evaluate( ARGV[1] );
-  if ( !ARGV[1].StringQ() ) { Erroring(ARGV.Key(),"First argument should be a string."); ReturnError; }
+  if ( !ARGV[1].StringQ() ) { _Erroring(ARGV.Key(),"First argument should be a string."); ReturnError; }
   if ( system( ARGV[1].Key() ) <0 )
-    { Erroring(ARGV.Key(),"cmd "+ARGV[1].ToString()+" execute error."); ReturnError; }
+    { _Erroring(ARGV.Key(),"cmd "+ARGV[1].ToString()+" execute error."); ReturnError; }
   ReturnNull;
 }
 
@@ -1358,7 +1361,7 @@ int SystemModule::Set( Object&ARGV){
     if ( right.ListQ(SYMID_OF_List) ){
       if ( left.Size() != right.Size() ) {
         zhErroring("赋值","列表大小不匹配.") ||
-          Erroring("Set","Left List size should match size of right List.");
+          _Erroring("Set","Left List size should match size of right List.");
         ReturnError;
       }
       for ( u_int i = 1; i <= left.Size(); i++ ){
@@ -1378,12 +1381,12 @@ int SystemModule::Set( Object&ARGV){
     //   ARGV.SetVoid();
     //   // ARGV = ARGV[2];
     // }
-    Return( ARGV[2] );
+    ReturnObject( ARGV[2] );
   }
   //normal
   if ( left.NumberQ() or left.StringQ()  ){
     zhErroring("赋值","不能对数字或者字符串赋值.") ||
-      Erroring("Set","Left value of set is not allowed to be a Number or String.");
+      _Erroring("Set","Left value of set is not allowed to be a Number or String.");
     ReturnError; 
   }
   //check if the left is a Setable or DelaySetable List
@@ -1405,7 +1408,7 @@ int SystemModule::Set( Object&ARGV){
             return rec->Call( ARGV );
           }else{
             zhErroring("赋值",conLeft.ToString()+" 不可赋值，因为 "+conLeft[0].ToString()+" 不具备可赋值属性") ||
-              Erroring("Set",conLeft.ToString()+" can not be assigned because "+conLeft[0].ToString()+" does not have Setable Attribute.");
+              _Erroring("Set",conLeft.ToString()+" can not be assigned because "+conLeft[0].ToString()+" does not have Setable Attribute.");
             ReturnHold;
           }
         }
@@ -1429,7 +1432,7 @@ int SystemModule::Set( Object&ARGV){
           }
           // else{
           //   zhErroring("赋值",left.ToString()+" 不可赋值，因为 "+left[0].ToString()+" 不具备可赋值属性") ||
-          //     Erroring("Set",left.ToString()+" can not be assigned because "+left[0].ToString()+" does not have Setable Attribute.");
+          //     _Erroring("Set",left.ToString()+" can not be assigned because "+left[0].ToString()+" does not have Setable Attribute.");
           //   ReturnHold;
           // }
         }
@@ -1446,7 +1449,7 @@ int SystemModule::Set( Object&ARGV){
           }
           // }else{
           //   zhErroring("赋值",left[0][0].ToString()+" 不具备可延迟赋值属性") ||
-          //     Erroring("Set",left[0][0].ToString()+" does not have DelaySetable Attribute.");
+          //     _Erroring("Set",left[0][0].ToString()+" does not have DelaySetable Attribute.");
           //   ReturnHold;
           // }
         }
@@ -1461,7 +1464,7 @@ int SystemModule::Set( Object&ARGV){
     if ( res.ids() != 0 ){//check whether protected
       if (  EvaKernel->AttributeQ(res.ids() ,AttributeType::Protected) ){
         zhErroring("赋值",(left).ToString() +" 处于被保护状态.")||
-          Erroring("Set",(left).ToString() +" is Protected.");
+          _Erroring("Set",(left).ToString() +" is Protected.");
         ReturnError;
       }
     }
@@ -1471,7 +1474,7 @@ int SystemModule::Set( Object&ARGV){
   }
   // if ( ARGV.state() != Set_Temp_State )
   //   ARGV = ARGV[2];
-  Return( ARGV[2] );
+  ReturnObject( ARGV[2] );
   // ARGV.SetVoid();
   // return 1;
 }
@@ -1493,7 +1496,7 @@ int SystemModule::SetDelayed(Object & ARGV){
     if ( res.ids() != 0 ){//check whether protected
       if (  EvaKernel->AttributeQ( res.ids(),AttributeType::Protected) ){
         zhErroring("Set",(left).ToString() +(string)" 处于被保护状态, 不能被赋值.") ||
-          Erroring("Set",(left).ToString() +(string)" is Protected."); 
+          _Erroring("Set",(left).ToString() +(string)" is Protected."); 
         ReturnError; 
       }
     }
@@ -1541,7 +1544,7 @@ int SystemModule::SystemArgv(Object &ARGV)
   }
   CheckShouldBeNumber(1);
   int p = (int)ARGV[1];
-  if ( p < 0 ) { Erroring("SystemArgv","Input should be a non-negative Number."); ReturnError; }
+  if ( p < 0 ) { _Erroring("SystemArgv","Input should be a non-negative Number."); ReturnError; }
   if ( p >= EvaKernel->argc ) ReturnString("");
   ReturnString( EvaKernel->argv[p] );
 }
@@ -1562,12 +1565,12 @@ int SystemModule::Clear(Object&ARGV){
   for ( u_int i=1;i<=ARGV.Size();i++){
     if ( not ARGV[i].SymbolQ() ) {
       zhErroring("Clear","Clear的参数应该是一个符号.") ||
-        Erroring("Clear","Arguments of Clear is required to be Symbol."); 
+        _Erroring("Clear","Arguments of Clear is required to be Symbol."); 
       ReturnError; 
     }
     if ( EvaKernel->Clear(ARGV[i]) < 0 ) {
       zhErroring("清除",ARGV[i].ToString()+" 处于被保护中.")||
-        Erroring("Clear",(string)ARGV[i].Key()+" is Protected.");
+        _Erroring("Clear",(string)ARGV[i].Key()+" is Protected.");
       ReturnError;
     }
   }
@@ -1643,7 +1646,7 @@ int func_elif(Object&ARGV,bool condi){ // if (a, elif(b,(c),d) )
   }else{ // need to check if else or elif
     if ( not ARGV[2].ListQ( SYMID_OF_Parenthesis ) ){
       zhErroring("elif","elif 的条件项应该放在 () 中" ) ||
-        Erroring("elif","elif condition should enclosed with ()" );
+        _Erroring("elif","elif condition should enclosed with ()" );
       ReturnError;
     }
     EvaKernel->Evaluate( ARGV[2] ); // evaluate c
@@ -1691,7 +1694,7 @@ int SystemModule::PD_if(Object&ARGV){
   CheckShouldEqual(2);
   if ( not ARGV[1].ListQ( SYMID_OF_Parenthesis ) ){
     zhErroring("if","if 条件项应该放在 () 中" ) ||
-      Erroring("if","if condition should enclosed with ()" );
+      _Erroring("if","if condition should enclosed with ()" );
     ReturnError;
   }
   EvaKernel->Evaluate(ARGV[1]);
@@ -1721,7 +1724,7 @@ int SystemModule::PD_while(Object&ARGV) {
   CheckShouldEqual(2);
   if ( not ARGV[1].ListQ( SYMID_OF_Parenthesis ) ){
     zhErroring("while","while 后面应该紧跟括号.") ||
-      Erroring("while","while should be followed with ().") ;
+      _Erroring("while","while should be followed with ().") ;
   }
   Object&condition = ARGV(1);
   Object&body = ARGV(2);
@@ -1758,11 +1761,11 @@ int SystemModule::PD_for(Object&ARGV){
   CheckShouldEqual(2);
   if ( not ARGV[1].ListQ( SYMID_OF_Parenthesis ) ){
     zhErroring("for","for 后面应该紧跟括号.") ||
-      Erroring("for","for should be followed with ().");
+      _Erroring("for","for should be followed with ().");
   }
   if ( ARGV[1].Size() < 1 ){
     zhErroring("for","for 括号中参数太少") ||
-      Erroring("for","for has too few arguments in().");
+      _Erroring("for","for has too few arguments in().");
   }
   //dout<<"for ARGV[1]"<<ARGV<<endl;
   if ( ( ARGV[1][1].ListQ( SYMID_OF_in ) )
@@ -1780,12 +1783,12 @@ int SystemModule::PD_for(Object&ARGV){
       // as single variable interate
       if ( not var.SymbolQ() ){
         zhErroring("for:in:range","循环变量应该是一个符号.") ||
-          Erroring("for:in:range","the iterator variable should be a symbol.");
+          _Erroring("for:in:range","the iterator variable should be a symbol.");
       }
       double start, incr; long N;
       if ( ListModule::range_iter(in[2],N,start,incr) == 0 ){
         zhErroring("for:in:range","range 不合法") ||
-          Erroring("for:in:range","range is not valid.");
+          _Erroring("for:in:range","range is not valid.");
         ReturnError;
       }
       Object&vobj = EvaKernel->StackPushCopy(var,var)[2];
@@ -1813,7 +1816,7 @@ int SystemModule::PD_for(Object&ARGV){
       Object&lists = in[2];
       if ( not lists.ListQ() ){
         zhErroring("for","in 后面的参数应该是一个列表.") ||
-          Erroring("for","argument after in is required to be a List.");
+          _Erroring("for","argument after in is required to be a List.");
         ReturnError;
       }
 
@@ -1847,7 +1850,7 @@ int SystemModule::PD_for(Object&ARGV){
         for ( auto iter = lists.Begin(); iter != lists.End(); iter++ ){
           if ( iter->Size() != vobj_list.Size() ) { 
             zhErroring("for::in::shape","列表和变量列表的形状不一致.") ||
-              Erroring("for::in::shape","List shape is not consistent with variable list."); 
+              _Erroring("for::in::shape","List shape is not consistent with variable list."); 
             ReturnError; 
           }
           for ( auto viter=vobj_list.Begin(),liter=(*iter).Begin();viter!=vobj_list.End();viter ++,liter++){
@@ -1870,11 +1873,11 @@ int SystemModule::PD_for(Object&ARGV){
       }
     }
     zhErroring("for:in","variable should be a symbol or list of symbols.")||
-      Erroring("for:in","变量应该是一个符号变量或者一个由符号变量构成的列表."); 
+      _Erroring("for:in","变量应该是一个符号变量或者一个由符号变量构成的列表."); 
     ReturnHold;
   }
   zhErroring("for","for clause should be in form for ( i in [n1,n2,...nN] ) expr;")||
-    Erroring("for","for 语句应该形为 for ( i in [n1,n2,...nN] ) expr;"); 
+    _Erroring("for","for 语句应该形为 for ( i in [n1,n2,...nN] ) expr;"); 
   ReturnHold;
 }
 
@@ -1946,7 +1949,7 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
   CheckShouldEqual(2);
   if ( not ARGV[1].ListQ() or not ARGV[1][0].SymbolQ() ){
     zhErroring(ARGV[0].ToString(),"函数声明格式错误: "+ARGV[1].ToString() )||
-      Erroring(ARGV[0].ToString(),"function declaration is in the wrong form: "+ARGV[1].ToString() );
+      _Erroring(ARGV[0].ToString(),"function declaration is in the wrong form: "+ARGV[1].ToString() );
     ReturnError;
   }
   CheckShouldBeListWithHead(2, SYMID_OF_ExpressionList );
@@ -1961,12 +1964,12 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
     if ( args[i].SymbolQ() ){
       if ( not packVar.NullQ() ){
         zhErroring(ARGV[0].ToString(),"位置参数出现在参数包后") ||
-          Erroring(ARGV[0].ToString(),"Positional argument follows arguments pack");
+          _Erroring(ARGV[0].ToString(),"Positional argument follows arguments pack");
         ReturnError;
       }
       if ( not dictPackVar.NullQ() ){
         zhErroring(ARGV[0].ToString(),"位置参数出现在字典参数包后") ||
-          Erroring(ARGV[0].ToString(),"Positional argument follows keyword arguments pack");
+          _Erroring(ARGV[0].ToString(),"Positional argument follows keyword arguments pack");
         ReturnError;
       }
     }else if ( args[i].PairQ( SYMID_OF_Set ) ){
@@ -1976,7 +1979,7 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
       bool res = dict.DictGetPosition( args[i][1], iter ); 
       if ( res == 0 ){
         zhErroring(ARGV[0].ToString(),"字典参数 "+args[i][1].ToString()+" 被重复指定") ||
-          Erroring(ARGV[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
+          _Erroring(ARGV[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
         ReturnError;
       }
       dict.InsertRef(iter, args[i] );
@@ -1984,17 +1987,17 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
       continue;
     }else if ( args[i].PairQ( SYMID_OF_SetDelayed ) ){
       zhErroring(ARGV[0].ToString(),"延迟赋值不能用来给参数提供默认值") ||
-        Erroring(ARGV[0].ToString(),"SetDelayed can not be used to provide default value");
+        _Erroring(ARGV[0].ToString(),"SetDelayed can not be used to provide default value");
       ReturnError;
     }else if ( args[i].ListQ( SYMID_OF_Unpack )  ){
       if ( not packVar.NullQ() ){
         zhErroring(ARGV[0].ToString(),"参数包只能又一个") ||
-          Erroring(ARGV[0].ToString(),"Multi argument pack");
+          _Erroring(ARGV[0].ToString(),"Multi argument pack");
         ReturnError;
       }
       if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
         zhErroring(ARGV[0].ToString(),"参数包应该具有符号名字") ||
-          Erroring(ARGV[0].ToString(),"Arguments pack should has a symbol name");
+          _Erroring(ARGV[0].ToString(),"Arguments pack should has a symbol name");
         ReturnError;
       }
       packVar = args[i][1];
@@ -2004,12 +2007,12 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
     }else if ( args[i].ListQ( SYMID_OF_UnpackDict )  ){
       if ( not dictPackVar.NullQ() ){
         zhErroring(ARGV[0].ToString(),"字典参数包只能有一个") ||
-          Erroring(ARGV[0].ToString(),"Multi keyword argument pack");
+          _Erroring(ARGV[0].ToString(),"Multi keyword argument pack");
         ReturnError;
       }
       if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
         zhErroring(ARGV[0].ToString(),"字典参数包应该具有符号名字") ||
-          Erroring(ARGV[0].ToString(),"Dict arguments pack should has a symbol name");
+          _Erroring(ARGV[0].ToString(),"Dict arguments pack should has a symbol name");
         ReturnError;
       }
       dictPackVar = args[i][1];
@@ -2018,7 +2021,7 @@ int function_def_process(Object&ARGV){ //, "通用函数定义"
       continue;
     }else{
       zhErroring(ARGV[0].ToString(),args[i].ToString() + "不能用来作为参数") ||
-        Erroring(ARGV[0].ToString(),args[i].ToString() + " can not be used to as argument");
+        _Erroring(ARGV[0].ToString(),args[i].ToString() + " can not be used to as argument");
       ReturnError;
     }
     i++;
@@ -2039,7 +2042,7 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   // CheckShouldEqual(2);
   // if ( not ARGV[1].ListQ() or not ARGV[1][0].SymbolQ() ){
   //   zhErroring(ARGV[0].ToString(),"函数声明格式错误: "+ARGV[1].ToString() )||
-  //     Erroring(ARGV[0].ToString(),"function declaration is in the wrong form: "+ARGV[1].ToString() );
+  //     _Erroring(ARGV[0].ToString(),"function declaration is in the wrong form: "+ARGV[1].ToString() );
   //   ReturnError;
   // }
   // CheckShouldBeListWithHead(2, SYMID_OF_ExpressionList );
@@ -2054,12 +2057,12 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   //   if ( args[i].SymbolQ() ){
   //     if ( not packVar.NullQ() ){
   //       zhErroring(ARGV[0].ToString(),"位置参数出现在参数包后") ||
-  //         Erroring(ARGV[0].ToString(),"Positional argument follows arguments pack");
+  //         _Erroring(ARGV[0].ToString(),"Positional argument follows arguments pack");
   //       ReturnError;
   //     }
   //     if ( not dictPackVar.NullQ() ){
   //       zhErroring(ARGV[0].ToString(),"位置参数出现在字典参数包后") ||
-  //         Erroring(ARGV[0].ToString(),"Positional argument follows keyword arguments pack");
+  //         _Erroring(ARGV[0].ToString(),"Positional argument follows keyword arguments pack");
   //       ReturnError;
   //     }
   //   }else if ( args[i].PairQ( SYMID_OF_Set ) ){
@@ -2069,7 +2072,7 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   //     bool res = dict.DictGetPosition( args[i][1], iter ); 
   //     if ( res == 0 ){
   //       zhErroring(ARGV[0].ToString(),"字典参数 "+args[i][1].ToString()+" 被重复指定") ||
-  //         Erroring(ARGV[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
+  //         _Erroring(ARGV[0].ToString(),"Multiple Keyword argument "+args[i][1].ToString()+" specified.");
   //       ReturnError;
   //     }
   //     dict.InsertRef(iter, args[i] );
@@ -2077,17 +2080,17 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   //     continue;
   //   }else if ( args[i].PairQ( SYMID_OF_SetDelayed ) ){
   //     zhErroring(ARGV[0].ToString(),"延迟赋值不能用来给参数提供默认值") ||
-  //       Erroring(ARGV[0].ToString(),"SetDelayed can not be used to provide default value");
+  //       _Erroring(ARGV[0].ToString(),"SetDelayed can not be used to provide default value");
   //     ReturnError;
   //   }else if ( args[i].ListQ( SYMID_OF_Unpack )  ){
   //     if ( not packVar.NullQ() ){
   //       zhErroring(ARGV[0].ToString(),"参数包只能又一个") ||
-  //         Erroring(ARGV[0].ToString(),"Multi argument pack");
+  //         _Erroring(ARGV[0].ToString(),"Multi argument pack");
   //       ReturnError;
   //     }
   //     if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
   //       zhErroring(ARGV[0].ToString(),"参数包应该具有符号名字") ||
-  //         Erroring(ARGV[0].ToString(),"Arguments pack should has a symbol name");
+  //         _Erroring(ARGV[0].ToString(),"Arguments pack should has a symbol name");
   //       ReturnError;
   //     }
   //     packVar = args[i][1];
@@ -2097,12 +2100,12 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   //   }else if ( args[i].ListQ( SYMID_OF_UnpackDict )  ){
   //     if ( not dictPackVar.NullQ() ){
   //       zhErroring(ARGV[0].ToString(),"字典参数包只能有一个") ||
-  //         Erroring(ARGV[0].ToString(),"Multi keyword argument pack");
+  //         _Erroring(ARGV[0].ToString(),"Multi keyword argument pack");
   //       ReturnError;
   //     }
   //     if ( args[i].Size() != 1 and not args[i][1].SymbolQ() ){
   //       zhErroring(ARGV[0].ToString(),"字典参数包应该具有符号名字") ||
-  //         Erroring(ARGV[0].ToString(),"Dict arguments pack should has a symbol name");
+  //         _Erroring(ARGV[0].ToString(),"Dict arguments pack should has a symbol name");
   //       ReturnError;
   //     }
   //     dictPackVar = args[i][1];
@@ -2111,7 +2114,7 @@ int SystemModule::PD_def(Object&ARGV){ //, "通用函数定义"
   //     continue;
   //   }else{
   //     zhErroring(ARGV[0].ToString(),args[i].ToString() + "不能用来作为参数") ||
-  //       Erroring(ARGV[0].ToString(),args[i].ToString() + " can not be used to as argument");
+  //       _Erroring(ARGV[0].ToString(),args[i].ToString() + " can not be used to as argument");
   //     ReturnError;
   //   }
   //   i++;
@@ -2142,7 +2145,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
        not ( func[5].NullQ() or func[5].SymbolQ()  )
   ){
     zhErroring("函数调用","非法的函数调用")||
-      Erroring("DefinedFunction","Invalid function call.");
+      _Erroring("DefinedFunction","Invalid function call.");
     _err_return;
   }
 
@@ -2189,7 +2192,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
       EvaKernel->Evaluate( ARGV[i] );
       if ( not ARGV[i].ListQ( SYMID_OF_Sequence ) ){
         zhErroring("函数调用",funcargs[0].ToString()+"() 试图对非字典数据进行字典解包")||
-          Erroring("Function call",funcargs[0].ToString()+"() try to dict-unpack none dict type.");
+          _Erroring("Function call",funcargs[0].ToString()+"() try to dict-unpack none dict type.");
         _err_return;
       }
       ARGV.InsertRef(ARGV.Begin()+i, ARGV[i].Begin(), ARGV[i].End() );
@@ -2209,7 +2212,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
       //dout<<"find result ="<<res<<endl;
       if ( res == 0 ){ // find position
         zhErroring("函数调用",funcargs[0].ToString()+"() 重复获得字典参数 "+ARGV[i][1].ToString()+"的值")||
-          Erroring("Function call",funcargs[0].ToString()+"() got multiple values for keyword argument "+ARGV[i][1].ToString()+"");
+          _Erroring("Function call",funcargs[0].ToString()+"() got multiple values for keyword argument "+ARGV[i][1].ToString()+"");
         _err_return;
       }else{
         // find if a keyword para
@@ -2236,7 +2239,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
       }
       if ( packDict.NullQ() ){
         zhErroring("函数调用",funcargs[0].ToString()+"() 遇到预期之外的参数 "+ARGV[i].ToString() )||
-          Erroring("DefinedFunction",funcargs[0].ToString()+"() called with unexpected arugment: "+ARGV[i].ToString() );
+          _Erroring("DefinedFunction",funcargs[0].ToString()+"() called with unexpected arugment: "+ARGV[i].ToString() );
         _err_return;
       }
       EvaKernel->Evaluate( ARGV[i][2] );
@@ -2249,7 +2252,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
       //dout<<"deal positional argument "<<i<<" = "<<ARGV[i]<<endl;
       if ( isDict ){
         zhErroring("函数调用",funcargs[0].ToString()+"() 位置参数处于字典参数之后")||
-          Erroring("DefinedFunction",funcargs[0].ToString()+"() called with positional argument follows  kwyword argument");
+          _Erroring("DefinedFunction",funcargs[0].ToString()+"() called with positional argument follows  kwyword argument");
         _err_return;
       }
       if ( i <= funcargs.Size() ){
@@ -2266,7 +2269,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
           bool res = pairTable.DictGetPosition( funcargs[i][1], iter ); 
           if ( res == 0 ){
             zhErroring("函数调用",funcargs[0].ToString()+"() 重复获得字典参数 "+ARGV[i][1].ToString()+"的值")||
-              Erroring("Function call",funcargs[0].ToString()+"() got multiple values for keyword argument "+ARGV[i][1].ToString()+"");
+              _Erroring("Function call",funcargs[0].ToString()+"() got multiple values for keyword argument "+ARGV[i][1].ToString()+"");
             _err_return;
           }
           Object pair;   pair.SetPairRef( funcargs[i][1], ARGV[i] );
@@ -2283,7 +2286,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
       // extra real positional arguments, push to packVar list, or report error
       if ( pack.NullQ() ){
         zhErroring("函数调用",funcargs[0].ToString()+"() 调用使用了额外的位置参数")||
-          Erroring("DefinedFunction",funcargs[0].ToString()+"() called with extra positional argument");
+          _Erroring("DefinedFunction",funcargs[0].ToString()+"() called with extra positional argument");
         _err_return;
       }
       EvaKernel->Evaluate( ARGV[i] );
@@ -2302,7 +2305,7 @@ int SystemModule::PD_FUNCTION$DEFINED$(Object&ARGV){
 
   if ( ARGV.Size() < funcargs.Size() and not funcargs[ ARGV.Size()+1 ].PairQ() ){
     zhErroring("函数调用",funcargs[0].ToString()+"() 未提供值给 "+funcargs[ARGV.Size()+1].ToString() )||
-      Erroring("DefinedFunction",funcargs[0].ToString()+"() called without value for "+funcargs[ARGV.Size()+1].ToString() );
+      _Erroring("DefinedFunction",funcargs[0].ToString()+"() called without value for "+funcargs[ARGV.Size()+1].ToString() );
     _err_return;
   }
   //dout<<"try insert extra optional argument values into pairTable dict="<<dict<<endl;
@@ -2378,7 +2381,7 @@ int SystemModule::PD_var(Object&args){
       ListModule::GetPartList( args[i][1], args[i], 2, result );
       if ( not result.SymbolQ() ){
         zhErroring("var","本地变量定义 "+result.ToString()+" 需要是一个符号.") ||
-          Erroring("var","Local variable specification "+result.ToString()+ " should be a symbol.");
+          _Erroring("var","Local variable specification "+result.ToString()+ " should be a symbol.");
         ReturnError;
       }
       pair.SetPairRef(result, result.Copy() );
@@ -2392,7 +2395,7 @@ int SystemModule::PD_var(Object&args){
         ListModule::GetPartList( args[i][1][1], args[i][1], 2, result );
         if ( not result.SymbolQ() ){
           zhErroring("var","本地变量定义 "+result.ToString()+" 需要是一个符号.") ||
-            Erroring("var","Local variable specification "+result.ToString()+ " should be a symbol.");
+            _Erroring("var","Local variable specification "+result.ToString()+ " should be a symbol.");
           ReturnError;
         }
         pair.SetPairRef( result, args[i][2] );
@@ -2400,7 +2403,7 @@ int SystemModule::PD_var(Object&args){
       }
     }else{
       zhErroring("本地变量声明","错误的局部变量定义表达式"+args[i].ToString() ) ||
-        Erroring("var","invalid local variable defination expression "+args[i].ToString() );
+        _Erroring("var","invalid local variable defination expression "+args[i].ToString() );
       ReturnError;
     }
   }
@@ -2436,7 +2439,7 @@ int SystemModule::PD_type(Object&args){
   case ObjectType::List   : ReturnSymbol( "List"   );
   }
   zhErroring("Object::type","") ||
-    Erroring("Object::type","");
+    _Erroring("Object::type","");
   ReturnError;
 }
 

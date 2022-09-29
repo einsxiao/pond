@@ -5,7 +5,7 @@ using namespace pond;
 
 EvaMemoryPool::EvaMemoryPool(){
 #define _DS2(sym,pL,pR) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym,pL,pR) ){ \
-    Erroring("MemoryPool",#sym " has differnet symbol id when defined in macro"); \
+    _Erroring("MemoryPool",#sym " has differnet symbol id when defined in macro"); \
   }
   //////////////////////////////////////
 
@@ -95,7 +95,7 @@ EvaMemoryPool::EvaMemoryPool(){
   _DS2(FunctionVariable,       0,0);       
   _DS2(KeyValuePair,           200,199);   
   ////////////////////////////////////////////
-#define _DS4(sym,pL,pR,oT,oN) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym,pL,pR,oT,oN) ){ Erroring("MemoryPool",#sym " has differnet symbol id then defined in macro"); }
+#define _DS4(sym,pL,pR,oT,oN) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym,pL,pR,oT,oN) ){ _Erroring("MemoryPool",#sym " has differnet symbol id then defined in macro"); }
   _DS4(if,                     0,220,   1,2); 
   _DS4(else,                   218,219, 3,1);
   _DS4(elif,                   218,219, 3,2);
@@ -120,7 +120,7 @@ EvaMemoryPool::EvaMemoryPool(){
   _DS4(new,                    0,160,   1,1);
   _DS4(del,                    0,160,   1,1);
   _DS4(extends,                220,219, 3,1);
-#define _DS(sym) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym) ){ Erroring("MemoryPool",#sym " has differnet symbol id then defined in macro"); }
+#define _DS(sym) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym) ){ _Erroring("MemoryPool",#sym " has differnet symbol id then defined in macro"); }
   _DS(Part                     );
   _DS(Parenthesis              );
   _DS(Complex                  );

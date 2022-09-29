@@ -47,6 +47,7 @@ def request(argv,options):
         return
 
 
+    print("check with:", username, token )
     jres = module_request('check-login',{
         'username'       : username,
         'token'          : token,

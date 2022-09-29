@@ -122,7 +122,7 @@ namespace pond{
     int             GetModuleMatPathReady(     std::string moduleName);
     int             GetModulePyPathReady(      std::string moduleName);
     //////////////////////////////
-    int             GetModuleLib(              std::string moduleName, bool silent=false);
+    int             GetModuleLib(              std::string moduleName, bool silent=false, bool not_pull=false);
     int             GetModule(                 std::string moduleName, bool silent=false);
     //////////////////////////////////////////////////////////////
     int             RemoveModule(              std::string moduleName);

@@ -26,6 +26,7 @@ MatrixModule::MatrixModule():Module(MODULE_NAME){
     // RegisterFunction("Matrix",(MemberFunction)(&MatrixModule::Matrix_Eva));
     AddAttribute("Matrix",AttributeType::Conjunctable);
     AddAttribute("Matrix",AttributeType::Setable);
+    AddAttribute("Matrix",AttributeType::Partable);
   }
   {
     // RegisterFunction("MatrixExist",(MemberFunction)(&MatrixModule::MatrixExist_Eva));
@@ -70,7 +71,65 @@ Matrix&MatrixModule::operator[](string id){
   return *EvaKernel->GetOrNewMatrix(id);
 }
 
+int get_part_obj_index( Object&partobj, Matrix&mat){
+  EvaKernel->EvaluateRest( partobj );
+  for (int i=2; i<= partobj.Size(); i++){
+    if ( !partobj[i].NumberQ() ){
+      ThrowError("Matrix::Part", "Part indices should be nubmers");
+    }
+  }
+  int ind =  int( partobj[2] );
+  //cout<<"int ind = "<< ind<<endl;
+  for (int i=1; i< mat.ND; i++){
+    ind = int( partobj[i+2] ) + ind * mat.Dim(i+1);
+    //cout<<"deal i= "<< i << ", " << partobj[i+2] <<", " << mat.Dim(i+1)<<" :"<< ind <<endl;
+  }
+  //cout<<" endl ind = "<< ind <<endl;
+  return ind;
+}
 int MatrixModule::PD_Matrix(Object &ARGV){
+  //cout<<"into matrix:"<<ARGV.ToFullFormString() <<endl;
+  Part_Context(Matrix){
+    //cout<<"into matrix part :"<< ARGV.ToFullFormString() << endl;
+    Object&matobj = ARGV[1];
+    CheckArgsShouldEqual(matobj,1);
+    CheckArgsShouldBeString(matobj,1);
+    string matname = matobj[1].Key();
+    Matrix* matptr = GetMatrix( matname );
+    if ( matptr == NULL ){
+      ThrowError("Matrix", "Part operation on a matrix which is not initilized");
+    }
+    Object &partobj = ARGV;
+    if ( partobj.Size() -1 != (*matptr).ND ){
+      ThrowError("Matrix", "Part indices should be same size with the matrix");
+    }
+    int ind = get_part_obj_index( partobj, *matptr);
+    double v = (*matptr)[ ind ];
+    ReturnNumber( v );
+  }
+  Set_Part_Context{
+    // form : Set( c[0,0], 0.3, Matrix("c")     which c = Matrix('c') ahead
+    // from : Set( Matrix('c')[0,0], 0.3, Matrix('c') )
+    //cout<<" met set context for matrix "<< endl;
+    Object&matobj = ARGV[3];
+    CheckArgsShouldEqual(matobj,1);
+    CheckArgsShouldBeString(matobj,1);
+    string matname = matobj[1].Key();
+    Matrix* matptr = GetMatrix( matname );
+    if ( matptr == NULL ){
+      ThrowError("Matrix", "Part operation on a matrix which is not initilized");
+    }
+    Object &partobj = ARGV[1];
+    if ( (partobj.Size() -1) != (*matptr).ND ){
+      ThrowError("Matrix", "Part indices should be same size with the matrix");
+    }
+    //cout<< " partobj = "<< partobj <<endl;
+    int ind = get_part_obj_index( partobj, *matptr);
+    //cout<<" try set index "<<ind<<" to number:"<< ARGV[2] <<endl;
+    double v = double( ARGV[2] );
+    (*matptr)[ ind ] = v;
+    ReturnNumber( v );
+  }
   Conjunct_Context(Matrix){
     Object&matobj = ARGV[1];
     Object&operobj = ARGV[2];
@@ -92,12 +151,30 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       }
       CheckArgsShouldBeList(operobj,1);
       Matrix* matptr = GetOrNewMatrix( matname );
-      Matrix2Object( *matptr, operobj[1] );
+      Object2Matrix( operobj[1], *matptr );
       // ARGV.SetTo(1);
       ARGV = ARGV[1];
       ReturnNormal;
     }
+    Conjunct_Case( Init ){
+      EvaKernel->Evaluate( operobj );
+      for (int i=1; i<= operobj.Size(); i++ ){
+        CheckArgsShouldBeNumber( operobj, i);
+      }
+      if ( operobj[1].Number() + 1 > operobj.Size()  ){
+        ThrowError("Matrix","Called Init without form Init(dimN,dim1,dim2,..dimN)");
+      }
+      Matrix* matptr = GetOrNewMatrix( matname );
+      int *dim = new int[ int(operobj[1].Number()) ];
+      dim[0] = 1;
+      for (int i=0; i<= operobj[1].Number(); i++ ){
+        dim[i] = operobj[i+1].Number();
+      }
+      (*matptr).Init(dim);
+      delete []dim;
 
+      ReturnObject( ARGV[1] );
+    }
     Conjunct_Case( ReadFile ){
       CheckArgsShouldEqual(operobj,1);
       EvaKernel->Evaluate( operobj[1] );
@@ -235,6 +312,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
   }
 
   Set_Context(Matrix){
+    //cout<< "get set context for Matrix "<<endl;
     CheckArgsShouldEqual(ARGV[1],1);
     CheckArgsShouldBeString(ARGV[1],1);
     EvaKernel->Evaluate( ARGV[2] );
@@ -244,70 +322,75 @@ int MatrixModule::PD_Matrix(Object &ARGV){
   }
   
   CheckShouldNoLessThan(1);
-  if ( ARGV[1].StringQ() ){//A Single string, only to figure out the name of the matrix, without care about the existence
+  if ( ARGV[1].StringQ() ){
+    // A Single string, only to figure out the name of the matrix, without care about the existence
+    // form of Matrix('a')
     if ( ARGV.Size() > 1 )
       ThrowError("Matrix","When specify a Matrix with its name, one argument is required.");
     ReturnNormal;
   }
+  ReturnNormal;
 
-  if ( ARGV[1].NumberQ() ){// form of Matrix[3,{5,9,4},"HostDevice"]
-    int dimN=(double)ARGV[1];
-    if ( dimN < 1)
-      ThrowError("Matrix","The number of Matrix Dimensions should be a positive integer.");
-    if ( ARGV.Size() < 2 ){
-      ThrowError("Matrix","When Init Matrix with Dimensions, two or more arguments are required.");
-    }
-    int dim[dimN+2]; dim[0]=dimN;
-    if ( (int)ARGV[2].Size() != dimN )
-      ThrowError("Matrix","The dimension specification is not consistent with previous argument.");
+  // if ( ARGV[1].NumberQ() ){// form of Matrix(3,[5,9,4],"HostDevice")
+  //   int dimN=(double)ARGV[1];
+  //   if ( dimN < 1)
+  //     ThrowError("Matrix","The number of Matrix Dimensions should be a positive integer.");
+  //   if ( ARGV.Size() < 2 ){
+  //     ThrowError("Matrix","When Init Matrix with Dimensions, two or more arguments are required.");
+  //   }
+  //   int dim[dimN+2]; dim[0]=dimN;
+  //   if ( (int)ARGV[2].Size() != dimN )
+  //     ThrowError("Matrix","The dimension specification is not consistent with previous argument.");
 
 
-    for ( int i=1; i<=dimN; i++ ){
-      if ( ! ARGV[2][i].NumberQ() )ThrowError("Matrix","Matrix Dimension specification should be numbers.");
-      dim[i] = (double)ARGV[2][i];
-      if ( dim[i] < 1) ThrowError("Matrix","Matrix Dimension should be a positive integer.");
-    }
-    int matPos= MatrixHost;
-    if ( ARGV.Size() > 2 ){
-      CheckShouldBeString(3);
-      if ( ARGV[3].StringQ("Host") ) matPos = MatrixHost;
-      else if ( ARGV[3].StringQ("Device") ) matPos = MatrixDevice;
-      else if ( ARGV[3].StringQ("HostDevice") ) matPos = MatrixHostDevice;
-      else {
-        ThrowError("Matrix","When Init Matrix, position specification should be one of Host, Device, or HostDevice.");
-      }
-    }
-    for ( ;;){
-      string name = pond::RandomString( Len_Of_New_Matrix_Name );
-      Matrix *mat = GetMatrix(name);
-      if ( mat == NULL ){
-        mat = GetOrNewMatrix(name);
-        mat->Init(dim,matPos);
-        ARGV.DeleteElements();
-        ARGV.PushBackString( name );
-        break;
-      }
-    }
-    ReturnNormal;
-  }
-  if ( ARGV[1].ListQ()  ){
-    if ( ARGV.Size() > 1 )
-      ThrowError("Matrix","When Init Matrix with a List, only one argument is required.");
-    for ( ;;){
-      string name = pond::RandomString( Len_Of_New_Matrix_Name );
-      Matrix *mat = GetMatrix(name);
-      if ( mat == NULL ){
-        mat = GetOrNewMatrix(name);
-        Matrix2Object( *mat, ARGV[1] );
-        ARGV.DeleteElements();
-        ARGV.PushBackString( name );
-        break;
-      }
-    }
+  //   for ( int i=1; i<=dimN; i++ ){
+  //     if ( ! ARGV[2][i].NumberQ() )ThrowError("Matrix","Matrix Dimension specification should be numbers.");
+  //     dim[i] = (double)ARGV[2][i];
+  //     if ( dim[i] < 1) ThrowError("Matrix","Matrix Dimension should be a positive integer.");
+  //   }
+  //   int matPos= MatrixHost;
+  //   if ( ARGV.Size() > 2 ){
+  //     CheckShouldBeString(3);
+  //     if ( ARGV[3].StringQ("Host") ) matPos = MatrixHost;
+  //     else if ( ARGV[3].StringQ("Device") ) matPos = MatrixDevice;
+  //     else if ( ARGV[3].StringQ("HostDevice") ) matPos = MatrixHostDevice;
+  //     else {
+  //       ThrowError("Matrix","When Init Matrix, position specification should be one of Host, Device, or HostDevice.");
+  //     }
+  //   }
+  //   for ( ;;){
+  //     string name = pond::RandomString( Len_Of_New_Matrix_Name );
+  //     Matrix *mat = GetMatrix(name);
+  //     if ( mat == NULL ){
+  //       mat = GetOrNewMatrix(name);
+  //       mat->Init(dim,matPos);
+  //       ARGV.DeleteElements();
+  //       ARGV.PushBackString( name );
+  //       break;
+  //     }
+  //   }
+  //   ReturnNormal;
+  // }
+  // if ( ARGV[1].ListQ()  ){
+  //   if ( ARGV.Size() > 1 ){
+  //     //cout << ARGV <<endl;
+  //     ThrowError("Matrix","When Init Matrix with a List, only one argument is required.");
+  //   }
+  //   for ( ;;){
+  //     string name = pond::RandomString( Len_Of_New_Matrix_Name );
+  //     Matrix *mat = GetMatrix(name);
+  //     if ( mat == NULL ){
+  //       mat = GetOrNewMatrix(name);
+  //       Matrix2Object( *mat, ARGV[1] );
+  //       ARGV.DeleteElements();
+  //       ARGV.PushBackString( name );
+  //       break;
+  //     }
+  //   }
 
       
-  }
-  ReturnHold;
+  // }
+  // ReturnHold;
 }
 
 
@@ -501,13 +584,9 @@ int MatrixModule::Object2Matrix(Object&ARGV,string name){
 
 int MatrixModule::PD_test(Object&argv){
   // test function for Matrix Module
-  cout<<argv<<endl;
+  //cout<<argv<<endl;
   Matrix mat(1,5,MatrixHost);
-  mat = 2;
-  Object res;
-  MatrixModule::Matrix2Object( mat, res );
-  cout<<"res = "<<res<<endl;
-  argv = res;
-  cout<<"argv = "<<argv<<endl;
+  mat.ReadFile("m.txt");
+  cout<< mat <<endl;
   return 0;
 }

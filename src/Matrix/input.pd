@@ -1,6 +1,30 @@
 #!/usr/bin/env pond
-SetRunningMode("cpu");
+SetParallelMode("cpu");
 import Matrix
-Matrix('a').Set({1,2,3,4})
-Matrix('a').ToList()
-test()
+#Matrix('a').Set([1,2,3,4])
+#Matrix('a').ToList()
+#
+#b = Matrix('b');
+#b.ReadFile('m.txt');
+#b.ToList()
+
+c = Matrix('c')
+c.Init(2,3,3)
+c[0,0] = 3
+Matrix('c')[1,1] = 4
+c[2,2] = 9
+range(5)
+for (i in range(3)){
+  for (j in range(3) ){
+    c[i-1,j-1] = i+j;
+  }
+}
+c.ToList()
+
+
+for (i in range(10) ){
+    print(i, end=',')
+}
+
+
+

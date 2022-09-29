@@ -3,11 +3,6 @@
 
 #define EMSCRIPTEN_KEEPALIVE
 
-/* #define GlobalPool      (*pond::__GlobalPoolPtr) */
-/* #define EvaKernel       (pond::__GlobalPoolPtr->Eva) */
-/* #define nbout           (pond::__GlobalPoolPtr->Eva->_nbout) */
-/* #define dout            (pond::__GlobalPoolPtr->Eva->_dout) */
-
 
 #define InitVar(variable,default_value) if ( not (EvaKernel->GetValue(#variable,variable)) ) { variable = default_value; }
 #define InitVar2(variable,default_value) if ( not (EvaKernel->GetValue(#variable,variable)) ) { variable = default_value; }
@@ -187,7 +182,6 @@
 #endif
 
 
-#define Return(arg)        ({ ARGV = arg; return 1; })
 #define ReturnObject(arg)  ({ ARGV = arg; return 1; })
 #define ReturnString(arg)  ({ ARGV.SetString(arg); return 1; })
 #define ReturnSymbol(arg)  ({ ARGV.SetSymbol(arg); return 1; })
@@ -265,7 +259,7 @@
 #define CHECK_POS(pos_type,i) {                                         \
     if (  ((unsigned char)pos_type) != __Any__ && ((unsigned char)pos_type) != ((unsigned char)ARGV[i].type()) ) { \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第 " +pond::ToString(i)+" 个参数应该是 "+pond::ToString(pos_type)+".") || \
-        Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a "+pond::ToString(pos_type)+"."); \
+        _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a "+pond::ToString(pos_type)+"."); \
       ReturnError;                                                      \
     }                                                                   \
   }
@@ -274,7 +268,7 @@
     const int N_ARG = POND_NARG(__VA_ARGS__)+1;                         \
     if ( N_ARG > ARGV.Size() ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数应当是 "+pond::ToString(N_ARG)+" 个. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-        Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments; while ":" argument; while ")+pond::ToString(N_ARG)+" argument"+((N_ARG)>1?"s are":" is")+" required."); \
+        _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments; while ":" argument; while ")+pond::ToString(N_ARG)+" argument"+((N_ARG)>1?"s are":" is")+" required."); \
       ReturnError;                                                      \
     }                                                                   \
     POND_CHECK_FOR_EACH(CHECK_POS, __VA_ARGS__);                        \
@@ -285,14 +279,14 @@
 #define CheckArgsShouldNotEqual(ARGV,n)  {                              \
     if((ARGV).Size()==(n)){                                             \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数不能是 "+pond::ToString((ARGV).Size())+" 个" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" is forbidden to call with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments.":" argument.")); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" is forbidden to call with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments.":" argument.")); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldEqual(ARGV,n) {                                  \
     if ( (ARGV).Size() != (n) ){                                        \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数应当是 "+pond::ToString(n)+" 个. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments; while ":" argument; while ")+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+((ARGV).Size()>1?" arguments; while ":" argument; while ")+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
       ReturnError;                                                      \
     }                                                                   \
   }
@@ -301,119 +295,119 @@
 #define CheckArgsShouldNoLessThan(ARGV,n) {                             \
     if ( (ARGV).Size() < (n) ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数不能少于 "+pond::ToString(n)+" 个. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while no less than "+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while no less than "+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNoMoreThan(ARGV,n) {                             \
     if ( (ARGV).Size() > (n) ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数不能多于 "+pond::ToString(n)+" 个. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while no more than "+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while no more than "+pond::ToString(n)+" argument"+((n)>1?"s are":" is")+" required."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeWithin(ARGV,n1,n2) {                           \
     if ( (ARGV).Size()<(n1) || (ARGV).Size()>(n2) ){                    \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数只能介于 "+ToString(n1)+", "+ToString(n2)+" 之间. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while the required number of arguments should be in the range of "+ToString(n1)+", "+ToString(n2)+"."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while the required number of arguments should be in the range of "+ToString(n1)+", "+ToString(n2)+"."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeWithin(ARGV,n1,n2) {                        \
     if ( (ARGV).Size()>=(n1) && (ARGV).Size()<=(n2) ){                  \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" 调用参数个数不能能介于 "+ToString(n1)+", "+ToString(n2)+" 之间. 实际提供了 "+pond::ToString((ARGV).Size())+" 个参数" )|| \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while the required number of arguments should not be in the range of "+ToString(n1)+", "+ToString(n2)+"."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).ToString()+" called with "+pond::ToString((ARGV).Size())+" argument"+((ARGV).Size()>1?"s":"")+"; while the required number of arguments should not be in the range of "+ToString(n1)+", "+ToString(n2)+"."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldInForm(ARGV,form) {                              \
     if ( !Pattern::CheckArgs( (ARGV),(form) ) ) {                       \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).Key()+" 应该以 "+(ARGV).Key()+"("+form+") 的形式调用") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).Key()+" should be called in the form of "+(ARGV).Key()+"["+form+"]"); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),(ARGV).Key()+" should be called in the form of "+(ARGV).Key()+"["+form+"]"); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeEmpty(ARGV) {                               \
     if ( (ARGV).Size() < 1){                                            \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"调用参数不能为空") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"Argument of "+(ARGV).Key()+" should not be empty."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"Argument of "+(ARGV).Key()+" should not be empty."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeEmpty(ARGV) {                                  \
     if ( (ARGV).Size() > 0){                                            \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"调用参数应该为空") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"Argument of "+(ARGV).Key()+" should be empty."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"Argument of "+(ARGV).Key()+" should be empty."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeNumber(ARGV,i) {                               \
     if ( !(ARGV)[i].NumberQ() ){                                        \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数应该是数字.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a Number."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a Number."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeString(ARGV,i) {                               \
     if ( !(ARGV)[i].StringQ() ){                                        \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数应该是字符串.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a String."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a String."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeSymbol(ARGV,i) {                               \
     if ( !(ARGV)[i].SymbolQ() ){                                        \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数应该是符号.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a Symbol."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be a Symbol."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeList(ARGV,i) {                                 \
     if ( (ARGV)[i].AtomQ() ){                                           \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数应该是列表.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be an List Object."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be an List Object."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldBeListWithHead(ARGV,i,head) {                    \
     if ( not (ARGV)[i].ListQ( head ) ){                                 \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数应该是 "+Object(ObjectType::Symbol,head).ToString()+" 列表.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be an Object with head of "+Object(ObjectType::Symbol,head).ToString()+"."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should be an Object with head of "+Object(ObjectType::Symbol,head).ToString()+"."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeNumber(ARGV,i) {                            \
     if ( (ARGV)[i].NumberQ() ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数不能是数字.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a Number."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a Number."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeString(ARGV,i) {                            \
     if ( (ARGV)[i].StringQ() ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数不能是字符串.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a String."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a String."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeSymbol(ARGV,i) {                            \
     if ( (ARGV)[i].SymbolQ() ){                                         \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数不能是符号.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a Symbol."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be a Symbol."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeList(ARGV,i) {                              \
     if ( (ARGV)[i].ListQ() ){                                           \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数不能是列表.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be an List."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be an List."); \
       ReturnError;                                                      \
     }                                                                   \
   }
 #define CheckArgsShouldNotBeListWithHead(ARGV,i,head) {                 \
     if ( (ARGV)[i].ListQ( head) ){                                      \
       zhWarning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),"第" +pond::ToString(i)+" 个参数不能是 "+Object(ObjectType::Symbol,head).ToString()+" 列表.") || \
-      Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be an List with head of "+Object(ObjectType::Symbol,head).ToString()+"."); \
+      _Warning(std::string(MODULE_NAME)+"::"+(ARGV).Key(),Math::OrderForm(i)+" argument should not be an List with head of "+Object(ObjectType::Symbol,head).ToString()+"."); \
       ReturnError;                                                      \
     }                                                                   \
   }
@@ -504,6 +498,8 @@
 #define Set_Context(func) if ( ARGV.ListQ( SYMID_OF_Set ) and ARGV[1].ListQ( SYMID_OF_##func) )
 
 #define Part_Context(func) if ( ARGV.ListQ( SYMID_OF_Part ) and ARGV[1].ListQ( SYMID_OF_##func) )
+
+#define Set_Part_Context if ( ARGV.ListQ( SYMID_OF_Set ) and ARGV[1].ListQ( SYMID_OF_Part) )
 
 #define DelaySet_Context(func) if ( ARGV.ListQ( SYMID_OF_Set) and ARGV[1].ListQ() and ARGV[1][0].ListQ(SYMID_OF_##func) )
 

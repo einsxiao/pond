@@ -85,7 +85,7 @@ int OSModule::PD_ReadList(Object&Argv)
   Argv.SetList();
   while ( getline(ifs,line) ){
     dout<<line<<endl;
-    if ( (tl = ImportList::ToExpression(line) ).NullQ() ) Warning(Argv.Key(),"Invalid input when reading"+line+".");
+    if ( (tl = ImportList::ToExpression(line) ).NullQ() ) _Warning(Argv.Key(),"Invalid input when reading"+line+".");
     if ( tl.NullQ() ){
       EvaKernel->Evaluate(tl);
       Argv.PushBackRef(tl);
@@ -160,7 +160,7 @@ int OSModule::PD_SetToParentDirectory(Object&Argv)
   auto code = chdir( buffer );
   if ( code != 0 ){
     zhErroring("SetToParentDirector","切换到上级目录失败") ||
-      Erroring("SetToParentDirector","Failed to set to parent directory");
+      _Erroring("SetToParentDirector","Failed to set to parent directory");
     ReturnNormal;
   }
   buffer[ind-1]='\0';

@@ -40,6 +40,7 @@ INCLUDE      := $(INCLUDE) `pond-path pcc $(DEPENDED_MODULES)`
 SRCS         := $(wildcard *.cpp)
 CSRCS        := $(wildcard *.c)
 CUSRCS       := $(wildcard *.cu)
+CCSRCS       := $(wildcard *.cc)
 FOR90SRCS    := $(wildcard *.f90)
 FOR95SRCS    := $(wildcard *.f95)
 FOR03SRCS    := $(wildcard *.f03)
@@ -80,10 +81,9 @@ DALL: dexe debugsharelib
 
 debugsharelib: $(DALLOBJECTS)
 	$(CC) $(DFLAGS) -shared -o lib$(MODULE_NAME)-dev.so $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
-#	@chmod -x lib$(MODULE_NAME).so
-build/debug/%.tcu.o: %.cu $(HEADERS)
+build/debug/%.tcu.o: %.cu $(HEADERS) $(CCSRCS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/debug/%.tcpp.o: %.cpp $(HEADERS)
+build/debug/%.tcpp.o: %.cpp $(HEADERS) $(CCSRCS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tc.o: %.c $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
@@ -101,10 +101,9 @@ ALL: sharelib
 
 sharelib: $(ALLOBJECTS)
 	$(CC) $(FLAGS) -shared -o lib$(MODULE_NAME).so $(ALLOBJECTS) $(INCLUDE)  $(LIBS) 
-#	@chmod -x lib$(MODULE_NAME).so
-build/release/%.tcu.o: %.cu $(HEADERS)
+build/release/%.tcu.o: %.cu $(HEADERS) $(CCSRCS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/release/%.tcpp.o: %.cpp $(HEADERS)
+build/release/%.tcpp.o: %.cpp $(HEADERS) $(CCSRCS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/release/%.tc.o: %.c $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)

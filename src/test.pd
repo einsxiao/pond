@@ -1,0 +1,8 @@
+#!/usr/bin/env pond
+l = []
+l.push([])
+l.push([])
+l[1].push( [] )
+l[1].push( [] )
+l
+

@@ -209,10 +209,10 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
       //dout<<"meet final end at depth "<<depth<<endl;
       if ( depth != 0 ){
         zhErroring("语法","表达式不完整") ||
-          Erroring("Syntax","Incomplete expression.");
+          _Erroring("Syntax","Incomplete expression.");
         if ( parens.size() > 1 ){
           zhErroring("语法",parens.back()+" 不匹配, 第 "+pond::ToString(lineNumber)+" 行") ||
-            Erroring("Syntax",parens.back()+" is not matched at line "+pond::ToString(lineNumber));
+            _Erroring("Syntax",parens.back()+" is not matched at line "+pond::ToString(lineNumber));
         }
         return -1;
       }
@@ -326,7 +326,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                 //met buffer end but not string end
                 if ( not e0 or not e1 or not e2 ) {
                   zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
-                    Erroring( "Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
+                    _Erroring( "Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
                   return -8;
                 }
                 //met string end
@@ -365,7 +365,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               bool e0 = getChar(ch), e1 = getChar(ch1,1); 
               if ( not e0 ){
                 zhErroring( "语法","字符串不完整 位置:"+pond::ToString(lineNumber)+"行") ||
-                  Erroring("Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
+                  _Erroring("Syntax","String uncomplete at line "+pond::ToString(lineNumber) );
                 return -1;
               }
               if ( ch == qch ) break;
@@ -485,12 +485,12 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                 }
                 if ( End() ){
                   zhWarning("语法","注释表达式并未结束 位置: 第 "+pond::ToString(lineNumber)+" 行" ) ||
-                    Warning("Syntax","expression does not end at line [ "+pond::ToString(lineNumber)+" ]" );
+                    _Warning("Syntax","expression does not end at line [ "+pond::ToString(lineNumber)+" ]" );
                 }
                 break;
               }else{
                 zhWarning("语法","注释表达式并未结束 位置: 第 "+pond::ToString(lineNumber)+" 行" ) ||
-                  Warning("Syntax","expression does not end at line [ "+pond::ToString(lineNumber)+" ]" );
+                  _Warning("Syntax","expression does not end at line [ "+pond::ToString(lineNumber)+" ]" );
                 break; 
               }
             }
@@ -538,7 +538,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           case ']': {
             if ( parens.back() != '[' ){
               zhErroring("语法",std::string("括号")+parens.back()+" 未匹配. 先遇到一个 ] 第 "+pond::ToString(lineNumber)+" 行") ||
-                Erroring("Syntax",parens.back()+" not matched. A ] met first at line "+pond::ToString(lineNumber) );
+                _Erroring("Syntax",parens.back()+" not matched. A ] met first at line "+pond::ToString(lineNumber) );
               return -1;
             }
             parens.pop_back();
@@ -549,7 +549,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           case ')': {// ']' can end ( { [ [[ and so on
             if ( parens.back() != '(' ){
               zhErroring("语法",std::string("括号")+parens.back()+" 未匹配. 先遇到一个 ) 第 "+pond::ToString(lineNumber)+" 行") ||
-                Erroring("Syntax",parens.back()+" not matched. A ) met first at line "+pond::ToString(lineNumber) );
+                _Erroring("Syntax",parens.back()+" not matched. A ) met first at line "+pond::ToString(lineNumber) );
               return -1;
             }
             parens.pop_back();
@@ -581,7 +581,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                        not listList[i].ListQ( SYMID_OF_UnpackDict )
                   ){
                     zhErroring("语法","字典结构中不都是 键值对 位置: 第 "+pond::ToString(lineNumber)+" 行" ) ||
-                      Erroring("Sytax","A dict should only contain key-value pair at line [ "+pond::ToString(lineNumber)+" ]" );
+                      _Erroring("Sytax","A dict should only contain key-value pair at line [ "+pond::ToString(lineNumber)+" ]" );
                   }
                   dict.DictInsertOrUpdatePairRef( listList[i] );
                 }
@@ -598,7 +598,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
           case '}': {
             if ( parens.back() != '{' ){
               zhErroring("语法",std::string("括号")+parens.back()+" 未匹配. 先遇到一个 } 第 "+pond::ToString(lineNumber)+" 行") ||
-                Erroring("Syntax",parens.back()+" not matched. A } met first at line "+pond::ToString(lineNumber) );
+                _Erroring("Syntax",parens.back()+" not matched. A } met first at line "+pond::ToString(lineNumber) );
               return -1;
             }
             parens.pop_back();
@@ -849,13 +849,13 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
             if ( e1 ){
               if ( ch1 == '\n' ){
                 zhWarning("语法","请使用()等方式来改变结合方式，而不是使用续行符号. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
-                  Warning("ImportList::Syntax","\\ is is not recommended to use at line [ "+pond::ToString(lineNumber)+" ]" ) ;
+                  _Warning("ImportList::Syntax","\\ is is not recommended to use at line [ "+pond::ToString(lineNumber)+" ]" ) ;
                 rollBack(-1);// just ignore the \ and \n to join two lines.
                 break;
               }
             }
             zhWarning("语法","不必要的转义字符. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
-              Warning("ImportList::Syntax","\\ is not nessesary to use alone at line [ "+pond::ToString(lineNumber)+" ]" ) ;
+              _Warning("ImportList::Syntax","\\ is not nessesary to use alone at line [ "+pond::ToString(lineNumber)+" ]" ) ;
             break;
           }
           case '%':{
@@ -1076,7 +1076,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
               //dout<<"met default branch ch>"<<ch<<endl;
               if ( pond::SpecialCharecterQ(ch) and ch!='$' ){
                 zhErroring("语法","字符 \'"+ToString(ch)+"\' 是系统保留字符，不能在此处使用. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
-                  Erroring("Syntax","Character \'"+ToString(ch)+"\' is reserved at line [ "+pond::ToString(lineNumber)+" ]" ) ;
+                  _Erroring("Syntax","Character \'"+ToString(ch)+"\' is reserved at line [ "+pond::ToString(lineNumber)+" ]" ) ;
                 return -8; 
               }
               currentWord.append(1,ch);
@@ -1305,7 +1305,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                 while ( p + oN > unsigned(listStack.Size()) ){
                   listStack.PushBackNull();
                   // zhErroring("语法",listStack[p].ToString() + " 语句结构不完整. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
-                  //   Erroring("Syntax",listStack[p].ToString() + " clause is not complete at line [ "+pond::ToString(lineNumber)+" ]" ) ;
+                  //   _Erroring("Syntax",listStack[p].ToString() + " clause is not complete at line [ "+pond::ToString(lineNumber)+" ]" ) ;
                   // return -8;
                 }
                 if ( listStack[p-1].SymbolQ( SYMID_OF_LineBreak ) ){
@@ -1448,7 +1448,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
                 p++;
               }else{
                 zhErroring("语法","操作符连接关系分析失败. 位置: 第 "+pond::ToString(lineNumber)+" 行")||
-                  Erroring("Syntax","Failed to analyze operator connection relationship at line "+pond::ToString(lineNumber) ) ;
+                  _Erroring("Syntax","Failed to analyze operator connection relationship at line "+pond::ToString(lineNumber) ) ;
                 return -8;
               }
             }
@@ -1469,7 +1469,7 @@ int ImportList::GetList( Object &parentList ,int depth, bool detectMode ){
         /////////////////////////////////////////////// get final result
         if ( listStack.Size()>1 ){
           zhErroring("语法","表达式分析失败. 位置: 第 "+pond::ToString(lineNumber)+" 行" )||
-            Erroring("Syntax","Expression cannot be reduced at line ["+pond::ToString(lineNumber)+"]" ) ;
+            _Erroring("Syntax","Expression cannot be reduced at line ["+pond::ToString(lineNumber)+"]" ) ;
           return -8;
         }
         //dout<< " get one expression listStack = "<<listStack<<endl;

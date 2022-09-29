@@ -67,14 +67,14 @@ namespace pond{
   class __DebugOutput{public: static DebugOutput out;};
 
 
-#define Warning(cat,mes) ({                                   \
+#define _Warning(cat,mes) ({                                  \
       std::cerr<< std::string(cat) << ":Warning(" <<          \
         std::string(__FILE__) << ":" << __LINE__ << "): "  << \
         std::string(mes) << "\n";                             \
       true;                                                   \
     })
 
-#define Erroring(cat,mes) ({                                  \
+#define _Erroring(cat,mes) ({                                 \
       std::cerr << std::string(cat) << ":Error(" <<           \
         std::string(__FILE__) << ":" << __LINE__ <<  "): " << \
         std::string(mes) << "\n";                             \
@@ -107,21 +107,21 @@ namespace pond{
     false                                                   \
     )
 
-#define Message(mes) ({                                       \
-      std::cout << std::string(mes) << "\n";                  \
-      true;                                                   \
+#define _Message(mes) ({                        \
+      std::cout << std::string(mes) << "\n";    \
+      true;                                     \
     })
 
   // multi language support
 
-#define zhMessage(mes)                                      \
-  ( ( EvaKernel->lang ==  "zh" )?                           \
-    ({                                                      \
-      std::cerr<< std::string(mes) << "\n";                 \
-      true;                                                 \
-    })                                                      \
-    :                                                       \
-    false                                                   \
+#define zhMessage(mes)                          \
+  ( ( EvaKernel->lang ==  "zh" )?               \
+    ({                                          \
+      std::cerr<< std::string(mes) << "\n";     \
+      true;                                     \
+    })                                          \
+    :                                           \
+    false                                       \
     )
 
 };

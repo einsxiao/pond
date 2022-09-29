@@ -10,3 +10,40 @@ fort_plus(3,4)
 #fort_mat_multi([1,2,3,4,5],8)
 fort_mat_multi([1,2],8)
 
+[1,2,3]
+List(1,2,3)
+
+f(2,3)
+
+
+a+b
+
+//C++
+Module:: fort_plus(Object&argv){
+  [fort_plus, 3, 4];
+}
+
+#pond
+fort_plus(3,4)
+f(3,4,"343",A,B)
+
+a = 3    => Set(a,3)  => 3 -> a
+b = 4
+
+List
+Atom
+a, 3,  'fjdls' 
+
+a+b*3     =>   Plus(a, Times(b,3) )
+0:  Symbol(Plus)
+1:  Symbol(a)
+2:  Times(b,3)
+  2-0:  Symbol(Times)
+  2-1:  Symbol(b)
+  2-2:  Number(3)
+
+
+lisp lambda 
+
+
+

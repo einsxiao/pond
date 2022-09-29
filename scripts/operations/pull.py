@@ -42,7 +42,7 @@ def request(argv,options):
     if res.get('git_private_key' ):
         #print("get git_private_key:", res.get('git_private_key') )
         file_content_set( key_file, res.get('git_private_key') )
-        os.system("chmod 600 "+key_file)
+        os.system("chmod 600 "+key_file )
         pass
 
 
@@ -62,19 +62,20 @@ def request(argv,options):
 
     if not os.path.exists( pond_home ): os.mkdir( pond_home )
     os.chdir( pond_home )
+    #print("changed to dir:", pond_home )
     if not os.path.exists( module_dir ):
         # clone the repo
-        #print("try clone")
         cmd = pond_git_cmd + " clone git@{0}:{1}.git".format(POND_SERVER, module_name)
-        #print("do clone with cmd>", cmd)
+        #print("try clone with cmd>", cmd)
         os.system( cmd )
+        #print('clone done')
         pass
     else:
-        #print("try pull")
         os.chdir( module_dir )
         cmd = pond_git_cmd+" pull"
-        #print("do pull with cmd>", cmd)
+        #print("try pull with cmd>", cmd)
         os.system( cmd )
+        #print('pull done')
         pass
 
     # check if empty, if empty then prepare files from pond_root
@@ -87,19 +88,19 @@ def request(argv,options):
         pass
 
     #print("content on server:", res.get('hfile') )
-    if res.get('hfile')   : file_content_set( module_name+"Module.h", res.get('hfile') )
-    if res.get('pdfile')  : file_content_set( module_name+"Module.pd", res.get('pdfile') )
-    if res.get('cppfile') : file_content_set( module_name+"Module.cpp", res.get('cppfile') )
+    #if res.get('hfile')   : file_content_set( module_name+"Module.h", res.get('hfile') )
+    #if res.get('pdfile')  : file_content_set( module_name+"Module.pd", res.get('pdfile') )
+    #if res.get('cppfile') : file_content_set( module_name+"Module.cpp", res.get('cppfile') )
 
     if len( files ) == 1 and files[0] == '.git':
-        os.system(pond_git_cmd+" add .")
+        os.system(pond_git_cmd+" add ." )
         os.system(pond_git_cmd+" commit -m '{0} initializing'".format(module_name) )
         #print("first push with command >",cmd)
         cmd = pond_git_cmd+ " push origin master"
         os.system( cmd )
         pass
     if os.path.exists( "Makefile" ):
-        os.system("make release")
+        os.system("make release" )
     
     return 
 
