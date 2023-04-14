@@ -22,9 +22,19 @@ cp -rf $POND_ROOT/Template/TemplateModule.h     ./${module_name}Module.h
 echo -n "Enable cuda in module? ([y]/n): "
 read cuda_enable
 if [[ $cuda_enable == 'y' ]] || [[ $cuda_enable == 'Y' ]] ; then
-    cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cu
+    if [ -f $POND_ROOT/Template/TemplateModule.cpp ]; then
+        cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cu
+    fi
+    if [ -f $POND_ROOT/Template/TemplateModule.cu ]; then
+        cp -rf $POND_ROOT/Template/TemplateModule.cu   ./${module_name}Module.cu
+    fi
 else
-    cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cpp
+    if [ -f $POND_ROOT/Template/TemplateModule.cpp ]; then
+        cp -rf $POND_ROOT/Template/TemplateModule.cpp   ./${module_name}Module.cpp
+    fi
+    if [ -f $POND_ROOT/Template/TemplateModule.cu ]; then
+        cp -rf $POND_ROOT/Template/TemplateModule.cu   ./${module_name}Module.cpp
+    fi
 fi
 cp -rf $POND_ROOT/Template/TemplateModule.pd    ./${module_name}Module.pd
 cp -rf $POND_ROOT/Template/input.pd             ./
@@ -36,7 +46,7 @@ change_from_to ./ MOD_DATE "`date`" 2>&1>/dev/null
 chmod +r ~/.pond.user.auth
 change_from_to ./ MOD_AUTHOR "`json-item ~/.pond.user.auth nickname`" 2>&1>/dev/null
 chmod -r ~/.pond.user.auth
-change_from_to ./ MOD_VERSION "0.1.0" 2>&1>/dev/null
+change_from_to ./ MOD_VERSION "0.1.1" 2>&1>/dev/null
 
 exit 0
 

@@ -1,7 +1,7 @@
 #ifndef Objectect_POND_H
 #define Objectect_POND_H
 namespace pond{
-  enum struct ObjectType:unsigned char{Symbol, Number, String, List }; //reference is v.idx not 0
+  enum struct ObjectType:unsigned char{Symbol, Number, String, List };
   #define __Symbol__ ObjectType::Symbol
   #define __Number__ ObjectType::Number
   #define __String__ ObjectType::String
@@ -20,11 +20,12 @@ namespace pond{
     friend class Object;
     friend class __EvaObjectTable;
     friend class __EvaListTable;
-    ObjectType            type;        // 1B  255               type
-    u_char                state;       // 1B  255               state
-    u_char                cnt;         // 2B  65535             reference count
+    ObjectType            type;        // 1B  (max 255)               type
+    u_char                state;       // 1B  (max 255)               state
+    u_char                cnt;         // 2B  (max 65535)             reference count
     u_int                 ids;         // 4B  4294967295        symbol id or evarecord
-    _Object_Combine_Type  val;         // 8B  4B*4B             total 16B
+    _Object_Combine_Type  val;         // 8B  4B+4B
+                                       // total size for _Object is 16Byte
     _Object()=default;
     ~_Object()=default;
     _Object &operator=(const _Object&obj){
@@ -54,11 +55,10 @@ namespace pond{
 #define _obj_at_objid GlobalPool.Objects.objs[objid.row][objid.col ]
 namespace pond{
   /*
-    pond::Object is the core class for pond. every expression in pond has
-    a responding object of type pond::Object.
+    pond::Object is the core class for pond.
+    Every expression in pond has a responding pond::Object.
    */
   class Object{
-    //need not to be the pod type, for the convenions we get
   public:
     Index objid;
   private:
@@ -66,15 +66,22 @@ namespace pond{
     void Clear();
     void Free();
     inline void cnt_incr(){
-      //dout<<objid<<" ref incr"<<std::endl;
       _obj_at_objid.cnt++;
     };
     inline void cnt_decr(){
-      //dout<<objid<<" ref decr"<<std::endl;
       _obj_at_objid.cnt--;
     };
   public:
+    ///////////////////////////////////////////////////////////////////////
     Object &operator=(const Object&obj);
+    Object &operator=(const bool v){ return SetBoolean(v); };
+    Object &operator=(const int v){ return SetNumber(v); };
+    Object &operator=(const float v){ return SetNumber(v); };
+    Object &operator=(const double v){ return SetNumber(v); };
+    /* form of "-sym_name-" as symbol,  otherwize as string */
+    Object &operator=(const char*);
+    Object &operator=(const std::string &);
+    ///////////////////////////////////////////////////////////////////////
     Object  Copy()const; // copy self as a new object and return
     ///////////////////////////////////////////////////////////////////////
     inline Object()   { objid.zero(); };
@@ -107,7 +114,6 @@ namespace pond{
     inline Object&      SetVoid(){Free(); return (*this);}
     inline Object&      SetNull(){Clear(); return (*this);}
     Object&             CopyObject(const Object&,bool keepRef=false); 
-    /* Object&             SetObjectRef(const Object&); */
     Object&             SetNumber(const double);
     Object&             SetNumber(const complex);
     Object&             SetString(const char*);
@@ -115,6 +121,7 @@ namespace pond{
     ////////////////
     Object&             SetSymbol(const u_int);
     Object&             SetSymbol(const char*);
+    Object&             SetSymbol(const std::string&s){ return SetSymbol(s.c_str()); };
     Object&             SetBoolean(const bool); // c++ bool to Symmbol True or False
     ////////////////
     Object&             ReserveSize(const u_int);
@@ -129,13 +136,14 @@ namespace pond{
     inline bool         voidQ()const{      return objid.zeroQ();     };
     inline bool         nonvoidQ()const{   return objid.nonzeroQ();  };
     inline bool         SameRefQ(const Object&obj)const{ return objid == obj.objid; };
-    bool                NullQ()const; // object ponter is null or has a null value empty string or null list
+    // object ponter is null or has a null value empty string or null list
+    bool                NullQ()const; 
     bool                AtomQ()const;
     bool                TypeQ(const ObjectType)const;
     bool                SymbolQ()const;
     bool                SymbolQ(const char*)const;
     bool                SymbolQ(const u_int)const;
-    // the so called valuedsymbol is pointed to valuepair idx in valuetable
+    // the ValuedSymbol is pointed to a valuepair idx in valuetable
     bool                ValuedSymbolQ()const; 
     bool                NumberQ()const;
     bool                NumberQ(const double)const;
@@ -164,9 +172,9 @@ namespace pond{
     ////////////////////////////////////////////////////////
     const char*         Head()const;
     ////////////////////////////////////////////////////////
-    const char*         Key()const;//only String and Symbol has key
-    u_int               SymbolId()const;//return 0 if no Id
-    u_int               SymbolWeight()const;//only Symbol applies
+    const char*         Key()const; //only String and Symbol has key
+    u_int               SymbolId()const; //return 0 if no Id
+    u_int               SymbolWeight()const; //only Symbol applies
     ////////////////////////////////////////////////////////
     double              &ref_double();
     std::string         &ref_string();
@@ -175,7 +183,7 @@ namespace pond{
     char                Boolean()const;
     double              Number()const;
     complex             Complex()const;
-    const char*         String()const;//only apply to String
+    const char*         String()const;//only applied to String
     explicit operator   bool()const{              return Boolean();};
     explicit operator   int()const{               return (int)Number();};
     explicit operator   float()const{             return Number();};
@@ -184,15 +192,19 @@ namespace pond{
     explicit operator   floatcomplex()const{      return (floatcomplex)Complex();};
     explicit operator   std::string()const{       return(type()==ObjectType::String)?Key():ToString();};
     ////////////////////////////////////////////////////////
-    static int          Dimensions(const Object&list,Object&dim,int n=-1);
+    static int          Dimensions(const Object&list, Object&dim,int n=-1);
     Object 	            &ElementAt(const u_int id){
       return GlobalPool.Lists.objs[ idx().row ][ idx().col][ id ];
     };
     Object 	            &_ElementAt(const u_int id)const{
       return GlobalPool.Lists.objs[ idx().row ][ idx().col][ id ];
     };
+    inline Object 	    &operator[](const size_t id){      return ElementAt(id);  };
     inline Object 	    &operator[](const u_int id){      return ElementAt(id);  };
+    inline Object 	    &operator[](const int id){        return ElementAt(id);  };
+    inline Object 	    &operator()(const size_t id)const{ return _ElementAt(id); };
     inline Object 	    &operator()(const u_int id)const{ return _ElementAt(id); };
+    inline Object 	    &operator()(const int id)const{   return _ElementAt(id); };
     int            	    ElementsSize()const;
     int                 Size()const;
     Object 	            &First();
@@ -218,6 +230,7 @@ namespace pond{
     Object              &ToList();// make current list to be head 
     Object              &PushBackCopy(const Object&);
     Object              &PushBackRef(const Object&);
+    Object              &PushBackBoolean(const bool);
     Object              &PushBackNumber(const double);
     Object              &PushBackNumber(const complex);
     Object              &PushBackSymbol(const char*key);
@@ -227,6 +240,24 @@ namespace pond{
     Object              &PushBackList(const char*key);
     Object              &PushBackList(u_int symbolId);
     Object              &PushBackNull();
+    /////////////
+    /////////////
+    Object              &push(const bool v){ return PushBackBoolean(v); };
+    Object              &push(const int v){ return PushBackNumber(v); };
+    Object              &push(const float v){ return PushBackNumber(v); };
+    Object              &push(const double v){ return PushBackNumber(v); };
+    /* form of "-sym_name-" as symbol,  otherwize as string */
+    Object              &push(const char*);
+    Object              &push(const std::string &);
+    Object              &push(const Object&, const bool is_ref=false);
+
+    Object              pop(const int i){ return Delete(i); };
+    Object              pop(const u_int i){ return Delete(i); };
+    Object              pop(const size_t i){ return Delete(i); };
+    Object              pop(const char*);
+    Object              pop(const std::string&);
+    Object              pop(const Object&key){ return DictPop(key); };
+    /////////////
     /////////////
     Object              &InsertCopy(u_int pos,       const Object &obj);
     Object              &InsertCopy(iterator iter,   const Object &obj);
@@ -251,10 +282,10 @@ namespace pond{
     std::string         ToString(const bool is_print=false)const;
     ////////////////////////////////////////////////////////////////
     Object              &LoadFromJson(const std::string);
-    std::string         DumpToJson(bool isLeft=false)const;
+    std::string         DumpToJson(bool compact=true,int padding=0,bool isNewLine=true,bool isLeft=false)const;
     ////////////////////////////////////////////////////////////////
-    static int 	        SimpleCompare(const Object&l1,const Object&l2) ; 
-    static int 	        ExpressionCompare(const Object&l1,const Object&l2) ; 
+    static int 	        SimpleCompare(const Object&l1, const Object&l2) ; 
+    static int 	        ExpressionCompare(const Object&l1, const Object&l2) ; 
     Object              &Sort(const ObjectCompareFunction lcf=Object::ExpressionCompare);
     Object              &SimpleSort();
     Object              &ExpressionSort();
@@ -264,6 +295,11 @@ namespace pond{
     bool		            operator==(const Object&other)const;
     bool		            operator!=(const Object&other)const;
     ////////////////////////////////////////////////////////////////
+    Object 	            &operator[](const char*);
+    Object 	            &operator[](const std::string&);
+    Object 	            operator()(const char*);
+    Object 	            operator()(const std::string&);
+
     int                 DictGetPosition(const Object&left_value,iterator &iter_pos); // return res, update iter
     Object              DictGetPair(const Object&left_value);  // return value pair
     Object              DictGetOrNewPair(const Object&left_value); // value pair
@@ -272,6 +308,7 @@ namespace pond{
     bool                DictInsertOrUpdatePairRef(Object&pair);
     Object              DictPop(const Object&left_value);
     bool                DictDelete(const Object&left_value);
+    bool                DictDelete(const std::string&);
     Object&             DictSort();
     //////////////////////////////////////////
     /* int                 OrderListGetPosition(Object&value,iterator&iter,ObjectCompareFunction lcf=Object::SimpleCompare); */

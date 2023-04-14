@@ -35,14 +35,14 @@ prepare:
 	@echo "Release Version"
 
 prepare-all:
-	@rmcp *.h ../../include/
-	@rmcp pond ../../include/
+	@rsync -tl *.h ../../include/
+	$(shell if ! [ -f ../../include/pond ]; then ln -sf pond.h ../../include/pond; fi; )
 	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
 	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )
 	$(shell if [ -f build/release ]; then rm build/release; mkdir build/release; elif ! [ -d build/release ]; then mkdir build/release; fi; )
 
 post-work:
-	@rmcp *.so ../../lib/
+	@rsync *.so ../../lib/
 
 ########################################################################################################
 DALL: debugsharelib 

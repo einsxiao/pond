@@ -32,6 +32,14 @@ ArithmaticsModule::ArithmaticsModule():Module(MODULE_NAME){
     EvaKernel->InsertOrUpdateBottomPairValue(S,v );
     AddAttribute("E",AttributeType::Protected );
   }
+  {
+    Object S(ObjectType::Symbol,"true"),   v(ObjectType::Symbol,SYMID_OF_True);
+    EvaKernel->InsertOrUpdateBottomPairValue(S,v );
+  }
+  {
+    Object S(ObjectType::Symbol,"false"),   v(ObjectType::Symbol,SYMID_OF_False);
+    EvaKernel->InsertOrUpdateBottomPairValue(S,v );
+  }
   ///////////////////////////////////////////////////////////
   // arithmetic functions
   {

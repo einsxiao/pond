@@ -439,6 +439,8 @@ namespace pond{
   _DS(LineBreak,             107);       // a special one
   _DS(ArrowFunction,         108);
   _DS(as,                    109);
+  _DS(true,                  110);
+  _DS(false,                 111);
 #undef _DS
 
 

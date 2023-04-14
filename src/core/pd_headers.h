@@ -14,6 +14,7 @@
 #include <string.h>
 #include <algorithm>
 #include <stdarg.h>
+#include <math.h>
 
 #include "pd_macros.h"
 #include "pd_constant.h"

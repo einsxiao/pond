@@ -1,9 +1,10 @@
 #Created from stadard compile template of Pond
-#Current Module: Template
+#Current Module:test
 ################################################################
+VERSION           := MOD_VERSION
 DEPENDED_MODULES  := 
 INCLUDE           :=
-LIBS              := -lMatrixModule 
+LIBS              := -lMatrixModule
 SUBDIRS           :=
 #MPI_ENABLE        := True
 ################################################################
@@ -22,8 +23,8 @@ FORFLAGS  := -O2
 DFORFLAGS := -g -D DEBUG -Wall -Wextra  -Wno-unused -Wno-unused-parameter 
 ################################################################
 MODULE_NAME := $(notdir $(CURDIR))Module
-CUDAVERSION := $(wildcard *.cu)
-ifdef CUDAVERSION
+CUDA0.1.0 := $(wildcard *.cu)
+ifdef CUDA0.1.0
 OBJFIX  :=tcu
 else
 OBJFIX  :=tcpp
@@ -31,8 +32,8 @@ endif
 EXCU    := exe
 
 ifeq ($(MPI_ENABLE),True)
-LIBS   := $(LIBS) -lmpi
-FORCC  := $(MPIFORCC)
+	LIBS   := $(LIBS) -lmpi
+	FORCC  := $(MPIFORCC)
 endif
 
 INCLUDE      := $(INCLUDE) `pond-path pcc $(DEPENDED_MODULES)` 
@@ -40,29 +41,20 @@ INCLUDE      := $(INCLUDE) `pond-path pcc $(DEPENDED_MODULES)`
 SRCS         := $(wildcard *.cpp)
 CSRCS        := $(wildcard *.c)
 CUSRCS       := $(wildcard *.cu)
-CCSRCS       := $(wildcard *.cc)
-FOR90SRCS    := $(wildcard *.f90)
-FOR95SRCS    := $(wildcard *.f95)
-FOR03SRCS    := $(wildcard *.f03)
-FOR08SRCS    := $(wildcard *.f08)
-FORSRCS      := $(wildcard *.f90 *.f95 *.f03 *.f08)
+FORSRCS      := $(wildcard *.f90)
 HEADERS      := $(wildcard *.h) $(POND_ROOT)/include/pond.h
 
 DOBJECTS     := $(patsubst %.cpp, build/debug/%.tcpp.o, $(SRCS))
 DCUOBJECTS   := $(patsubst %.cu, build/debug/%.tcu.o, $(CUSRCS))
 DCOBJECTS    := $(patsubst %.c, build/debug/%.tc.o, $(CSRCS))
-DFOROBJECTS  := $(patsubst %.f90, build/debug/%.tf90.o, $(FOR90SRCS)) $(patsubst %.f95, build/debug/%.tf95.o, $(FOR95SRCS)) $(patsubst %.f03, build/debug/%.tf03.o, $(FOR03SRCS)) $(patsubst %.f08, build/debug/%.tf08.o, $(FOR08SRCS))
+DFOROBJECTS  := $(patsubst %.f90, build/debug/%.tf90.o, $(FORSRCS))
 DALLOBJECTS  := $(DOBJECTS) $(DCOBJECTS) $(DCUOBJECTS) $(DFOROBJECTS)
 
 OBJECTS      := $(patsubst %.cpp, build/release/%.tcpp.o, $(SRCS))
 CUOBJECTS    := $(patsubst %.cu, build/release/%.tcu.o, $(CUSRCS))
 COBJECTS     := $(patsubst %.c, build/release/%.tc.o, $(CSRCS))
-FOROBJECTS   := $(patsubst %.f90, build/release/%.tf90.o, $(FOR90SRCS)) $(patsubst %.f95, build/release/%.tf95.o, $(FOR95SRCS)) $(patsubst %.f03, build/release/%.tf03.o, $(FOR03SRCS)) $(patsubst %.f08, build/release/%.tf08.o, $(FOR08SRCS))
+FOROBJECTS   := $(patsubst %.f90, build/release/%.tf90.o, $(FORSRCS))
 ALLOBJECTS   := $(OBJECTS) $(COBJECTS) $(CUOBJECTS) $(FOROBJECTS)
-
-ifdef FORSRCS
-LIBS   := $(LIBS) -gfortran
-endif
 
 ################################################################
 in-all: debug
@@ -81,19 +73,14 @@ DALL: dexe debugsharelib
 
 debugsharelib: $(DALLOBJECTS)
 	$(CC) $(DFLAGS) -shared -o lib$(MODULE_NAME)-dev.so $(DALLOBJECTS) $(INCLUDE)  $(LIBS)
-build/debug/%.tcu.o: %.cu $(HEADERS) $(CCSRCS)
+#	@chmod -x lib$(MODULE_NAME).so
+build/debug/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/debug/%.tcpp.o: %.cpp $(HEADERS) $(CCSRCS)
+build/debug/%.tcpp.o: %.cpp $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tc.o: %.c $(HEADERS)
 	$(CC) $(DFLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/debug/%.tf90.o: %.f90 $(HEADERS)
-	$(FORCC) $(DFORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/debug/%.tf95.o: %.f95 $(HEADERS)
-	$(FORCC) $(DFORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/debug/%.tf03.o: %.f03 $(HEADERS)
-	$(FORCC) $(DFORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/debug/%.tf08.o: %.f08 $(HEADERS)
 	$(FORCC) $(DFORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
 
 #############################################################################
@@ -101,19 +88,14 @@ ALL: sharelib
 
 sharelib: $(ALLOBJECTS)
 	$(CC) $(FLAGS) -shared -o lib$(MODULE_NAME).so $(ALLOBJECTS) $(INCLUDE)  $(LIBS) 
-build/release/%.tcu.o: %.cu $(HEADERS) $(CCSRCS)
+#	@chmod -x lib$(MODULE_NAME).so
+build/release/%.tcu.o: %.cu $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/release/%.tcpp.o: %.cpp $(HEADERS) $(CCSRCS)
+build/release/%.tcpp.o: %.cpp $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/release/%.tc.o: %.c $(HEADERS)
 	$(CC) $(FLAGS) -Xcompiler -fPIC -c $< -o $@ -I. $(INCLUDE)
 build/release/%.tf90.o: %.f90 $(HEADERS)
-	$(FORCC) $(FORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/release/%.tf95.o: %.f95 $(HEADERS)
-	$(FORCC) $(FORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/release/%.tf03.o: %.f03 $(HEADERS)
-	$(FORCC) $(FORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
-build/release/%.tf08.o: %.f08 $(HEADERS)
 	$(FORCC) $(FORFLAGS) -fPIC -c $< -o $@ -I. $(INCLUDE)
 
 #############################################################################

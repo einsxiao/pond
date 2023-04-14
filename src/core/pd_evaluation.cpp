@@ -188,6 +188,7 @@ Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   GetModule("Class");
   GetModule("String");
   GetModule("OS");
+  GetModule("plot");
 
   if ( GetEnv("POND_ENABLE_PYTHON")   == "yes" ){
     GetModule("Python"); 
@@ -1645,23 +1646,6 @@ int Evaluation::PD_Print(Object & ARGV){
   if ( isFlush ) cout<<std::flush;
   ReturnNull;
 }
-
-// int Evaluation::PD_Console(Object & ARGV){
-//   string str;
-//   if ( ARGV.Size()>0 ){
-//     for (auto iter=ARGV.Begin(); iter!=ARGV.End(); iter++){
-//       // EvaKernel->Evaluate(*iter);
-//       if(  (*iter).NullQ() ) continue;
-//       str += (*iter).ToString() + " ";
-//       specialCharReplacement(str);
-//     }
-//     cout<< str <<endl;
-//   }else{
-//     cout<< endl;
-//   }
-//   ReturnNull;
-// }
-
 
 // the next three function is for directly print to nb, so no specialchar replacement is needed
 int Evaluation::Print(string str){

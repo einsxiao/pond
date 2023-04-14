@@ -13,11 +13,11 @@ from pond_basic import *
 #import request
 import importlib
 
-pond_server=os.getenv("POND_SERVER");
-pond_server_port=os.getenv("POND_SERVER_PORT");
-pond_proxy=os.getenv("POND_PROXY");
-if not pond_server: pond_server = 'server.doc.run'
-if not pond_server_port: pond_server_port = '5555'
+pond_version='0.2.3'
+pond_server=os.getenv("POND_SERVER",'server.doc.run')
+pond_server_port=os.getenv("POND_SERVER_PORT",'5555')
+pond_git_port=os.getenv("POND_GIT_PORT",'22')
+pond_proxy=os.getenv("POND_PROXY")
 
 #print( pond_server, pond_server_port)
 #user = user_request.UserRequest(pond_server,int(pond_server_port) ,pond_proxy)
@@ -156,11 +156,7 @@ try:
 
   #show local version
   if operation == 'version' or get_option(options,'version'):
-    print("""
-    Pond High Performance Platform.
-    Version: 2.3
-    All rights reserved by OVO.LTD.
-    """)
+    print(pond_version)
     exit(0)
 
   #unkown option or operator

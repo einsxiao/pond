@@ -641,7 +641,8 @@ int pond::specialCharReplace(string &str, const string ori, const string rep){
     pos = str.find(ori);
     if (pos>=0){
       str.replace(pos,ori.size(),rep);
-      pos += rep.size() - ori.size();
+      //pos += rep.size() - ori.size();
+      pos += rep.size() - 1;
     }
   }
   return 0;

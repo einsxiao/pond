@@ -1,7 +1,4 @@
 from pond_basic import *
-import requests
-import datetime 
-import json
 
 # login requried
 def request(argv,options):
@@ -32,13 +29,12 @@ def request(argv,options):
 
     # repo should be created if check-module request recieved on server side
     key_file    = os.path.join(pond_home, ".git_private_key")
+    #print("should get key", fetch_git_key)
     res = module_request( 'check-module',{
         'module_name'      : module_name,
-        'fetch_git_key'    : ('' if os.path.exists( key_file ) else 'yes'),
+        'fetch_git_key'    : 'yes',
         'repo_prepare'     : '1',
     })
-
-    #print("check-module res:",res)
     if res.get('git_private_key' ):
         #print("get git_private_key:", res.get('git_private_key') )
         file_content_set( key_file, res.get('git_private_key') )
@@ -48,6 +44,7 @@ def request(argv,options):
 
     if res.get('git_private_key'):
         file_content_set( os.path.join(pond_home, ".git_private_key"), res.get('git_private_key') )
+        os.system("chmod 600 "+key_file )
         pass
 
     if res.get('status') == 'not_exist':
@@ -65,34 +62,42 @@ def request(argv,options):
     #print("changed to dir:", pond_home )
     if not os.path.exists( module_dir ):
         # clone the repo
-        cmd = pond_git_cmd + " clone git@{0}:{1}.git".format(POND_SERVER, module_name)
+        cmd = pond_git_cmd + " clone ssh://git@{0}:{1}/{2}.git".format(POND_SERVER, POND_GIT_PORT, module_name)
         #print("try clone with cmd>", cmd)
         os.system( cmd )
         #print('clone done')
         pass
     else:
         os.chdir( module_dir )
-        cmd = pond_git_cmd+" pull"
-        #print("try pull with cmd>", cmd)
-        os.system( cmd )
-        #print('pull done')
+        #print("chdir to ", module_dir )
+        if not os.path.exists( './.git/HEAD' ):
+            os.chdir( module_dir )
+            os.system( "if [ -d  .temp ];then rm -rf .temp; fi" )
+            cmd = pond_git_cmd + " clone ssh://git@{0}:{1}/{2}.git .temp".format(POND_SERVER, POND_GIT_PORT, module_name)
+            #print("no git, try with cmd>", cmd)
+            os.system( cmd )
+            os.system( "cp -rf .temp/. ./; rm -rf .temp;")
+            pass
+        else:
+            cmd = pond_git_cmd+" pull"
+            #print("try pull with cmd>", cmd)
+            os.system( cmd )
+            #print('pull done')
+            pass
         pass
 
     # check if empty, if empty then prepare files from pond_root
     os.chdir( module_dir )
     files = os.listdir()
-    if len( files ) == 1 and files[0] == '.git':
+    just_inited = False
+    if not module_name+"Module.h" in files:
         #empty repo, prepare files by templates from pond_root
         print("repo is empty, initializing the repo.")
         os.system( os.path.join( pond_root, 'bin', 'pond-init-module-files.sh')+" "+module_name )
+        just_inited = True
         pass
 
-    #print("content on server:", res.get('hfile') )
-    #if res.get('hfile')   : file_content_set( module_name+"Module.h", res.get('hfile') )
-    #if res.get('pdfile')  : file_content_set( module_name+"Module.pd", res.get('pdfile') )
-    #if res.get('cppfile') : file_content_set( module_name+"Module.cpp", res.get('cppfile') )
-
-    if len( files ) == 1 and files[0] == '.git':
+    if just_inited:
         os.system(pond_git_cmd+" add ." )
         os.system(pond_git_cmd+" commit -m '{0} initializing'".format(module_name) )
         #print("first push with command >",cmd)

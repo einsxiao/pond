@@ -13,8 +13,6 @@ import re
 import sys
 import os
 import pwd
-# import socket
-# import crypt
 import random
 import string
 import subprocess
@@ -28,6 +26,7 @@ except Exception as e:
 DEBUG = False
 
 POND_SERVER        = os.getenv("POND_SERVER")
+POND_GIT_PORT      = os.getenv("POND_GIT_PORT")
 POND_URL           = os.getenv("POND_URL")
 POND_PASS_HINT     = """
   If you are not signed up or forget the account info, 
@@ -411,7 +410,7 @@ def get_pond_auth_info():
     auth_file = os.path.join(user_home,'.pond.user.auth')
     if not os.path.exists(auth_file):
         return {'status': "NONE",}
-    os.system('chmod +r '+auth_file)
+    os.system('chmod 600 '+auth_file)
     hfile = open(auth_file)
     info = hfile.readline()
     hfile.close()

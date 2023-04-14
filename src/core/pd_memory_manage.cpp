@@ -144,6 +144,8 @@ EvaMemoryPool::EvaMemoryPool(){
   _DS(LineBreak                );       // a special one
   _DS4(ArrowFunction,          48,210,  3,1);
   _DS4(as,                     170,170, 3,1);
+  _DS2(true,                   0,0);       
+  _DS2(false,                  0,0);       
   /////////////////////////////////////////////////////////
 
 

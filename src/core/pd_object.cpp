@@ -34,21 +34,12 @@ using namespace std;
     return ret;                                                         \
   }
 
-// #define __check_state_uncomplete(ret)                                   \
-//   if ( _list.size() == 0 ) {                                            \
-//     _Erroring("Object","Uncomplete List.");                              \
-//     return ret;                                                         \
-// }
-
 #undef __check
 #undef __check_not
 #undef __check_not_null
 #define __check(t,ret) 
 #define __check_not(t,ret) 
 #define __check_not_null(ret) 
-// #undef __check_state_blocked
-// #undef __check_state_uncomplete
-// #define __check_state_uncomplete(ret)
 
 static int specialCharReplacement(string &str){
   specialCharReplace(str,"\"","$QUOTATION_MARK$");
@@ -81,7 +72,6 @@ void Object::Free(){
     case ObjectType::String: GlobalPool.Strings.Free( idx() ); break;  
     case ObjectType::List:   GlobalPool.Lists.FreeList( idx() ); break;  
     }
-    //cout<<"Free Object on globalPool with flag = "<<GlobalPool.flag<<endl;
     GlobalPool.Objects.Free( objid );
   }else{
     cnt_decr();
@@ -106,6 +96,18 @@ Object &Object::operator=(const Object&obj){
   }
   return *this;
 };
+
+Object &Object::operator=(const string & s){
+  if (s.size()>3 and  s[0] == '-' and s[ s.size()-1] == '-' ){// a symbol
+    return SetSymbol( s.substr(1, s.size()-2) );
+  } 
+  return SetString(s);
+}
+
+Object &Object::operator=(const char*cs){
+  string s(cs);
+  return (*this)=s;
+}
 
 /*
   this is a core function of the whole system. And it is complex too. Some part need special care.
@@ -137,10 +139,8 @@ Object& Object::CopyObject(const Object&other,bool keepRef){
       _str = GlobalPool.Strings.Get( other.idx() );
       return *this;
     case ObjectType::List:
-      // (const_cast<Object&>(other)).set_state( Object_State_Uncomplete );
       set_idx( GlobalPool.Lists.New() );
       GlobalPool.Lists.SetList( idx(), other.idx() );
-      // (const_cast<Object&>(other)).set_state( 0 );
       return *this;
     }
     return *this;
@@ -176,24 +176,19 @@ Object& Object::CopyObject(const Object&other,bool keepRef){
       return *this;
     }
   case ObjectType::List: // other is complex List,need more complex operation than string
-    // (const_cast<Object&>(other)).set_state( Object_State_Uncomplete );
     switch ( type() ){
     case ObjectType::Number: case ObjectType::Symbol: // this is simple, just malloc new
       _obj = GlobalPool.Objects.Get( other.objid );
       set_idx( GlobalPool.Lists.New() );
       GlobalPool.Lists.SetList( idx(), other.idx() );
-      // (const_cast<Object&>(other)).set_state( 0 );
       return *this;
     case ObjectType::String: // this is string, free old, malloc new
       GlobalPool.Strings.Free(idx());
       set_idx( GlobalPool.Lists.New() );
       GlobalPool.Lists.SetList( idx(), other.idx() );
-      // (const_cast<Object&>(other)).set_state( 0 );
       return *this;
     case ObjectType::List: // both list, update elements is enough
-      // set_idx( GlobalPool.Lists.New() ); // keep idx, otherwize will cause memory leak
       GlobalPool.Lists.SetList( idx(), other.idx() );
-      // (const_cast<Object&>(other)).set_state( 0 );
       return *this;
     }
   }
@@ -1095,6 +1090,40 @@ Object &Object::PushBackNull(){
   return (*this);
 }
 
+Object &Object::PushBackBoolean(const bool v){
+  __check(List,*this);
+  u_int id = v?SYMID_OF_True:SYMID_OF_False;
+  Object obj; obj.SetSymbol(id);
+  _list.push_back( obj );
+  return (*this);
+}
+
+Object &Object::push(const char*cs){
+  string s(cs);
+  return push(s);
+}
+
+Object &Object::push(const string &s){
+  if (s.size()>3 and  s[0] == '-' and s[ s.size()-1] == '-' ){// a symbol
+    return PushBackSymbol( s.substr(1,s.size()-2).c_str() );
+  }
+  return PushBackString( s );
+}
+
+Object &Object::push(const Object& obj, bool is_ref){
+  if ( is_ref ) return PushBackRef(obj);
+  return PushBackCopy(obj);
+}
+
+Object Object::pop(const char*ks){
+  Object key(__String__, ks);
+  return DictPop(key);
+}
+Object Object::pop(const std::string&ks){
+  Object key(__String__, ks);
+  return DictPop(key);
+}
+
 Object &Object::InsertCopy(u_int pos, const Object&obj){
   __check(List,*this);
   if ( pos > ElementsSize() ) { _Erroring("Object","Try to Insert at position out of list range."); return*this; }
@@ -1512,6 +1541,7 @@ int Object::ExpressionCompare(const Object&l1,const Object&l2){
       l2_LIST_SITUATION_DEALING;
       return(-1);
     }
+    default: return(-1);
     }
   }//end of Number
   case ObjectType::String:{
@@ -1523,6 +1553,7 @@ int Object::ExpressionCompare(const Object&l1,const Object&l2){
       l2_LIST_SITUATION_DEALING;
       return(-1);
     }
+    default: return(-1);
     }
   }//end of String
   case ObjectType::Symbol:{
@@ -1545,6 +1576,7 @@ int Object::ExpressionCompare(const Object&l1,const Object&l2){
       l2_LIST_SITUATION_DEALING;
       return(-1);
     }
+    default: return(-1);
     }
   }//end of Symbol
 #undef l2_LIST_SITUATION_DEALING               
@@ -1678,6 +1710,7 @@ int Object::ExpressionCompare(const Object&l1,const Object&l2){
       else
         return(0);
     }//end of ..List
+    default: return(-1);
     }
   }//end of Symbol
   }//end of switch
@@ -1775,8 +1808,7 @@ Object  Object::DictGetPair(const Object&left_value){
 
 Object Object::DictGetOrNewPair(const Object&left_value){
   iterator iter;
-  int result;
-  if ( (result = DictGetPosition( left_value,iter) ) == 0 ){
+  if ( DictGetPosition( left_value,iter) == 0 ){
     return (*iter);
   }else{
     Object pair(ObjectType::List,SYMID_OF_KeyValuePair );
@@ -1824,9 +1856,9 @@ bool Object::DictInsertOrUpdatePairRef(Object&pair){
 
 Object Object::DictPop(const Object&left_value){
   iterator iter;
-  if ( DictGetPosition( left_value,iter) == 0 ){
+  if ( DictGetPosition( left_value, iter) == 0 ){
     Object res = (*iter)[2];
-    //DeleteNoFree(iter);
+    Delete(iter);
     return res;
   }else{
     return NullObject;
@@ -1909,39 +1941,63 @@ Object Object::Copy()const{
   return tmp;
 }
 
-string Object::DumpToJson(bool isLeft)const{
+string Object::DumpToJson(bool compact, int padding, bool isNewLine, bool isLeft)const{
+  const string ps( (compact||not isNewLine)?0:padding,' ' );
   if ( voidQ() ) return "undefined";
   string str;   
   switch ( type() ){
   case ObjectType::Number:
-    if ( isLeft ) return "\""+pond::ToString( re() )+"\"";
-    return pond::ToString( re() );
+    if ( isLeft ) return ps+"\""+pond::ToString( re() )+"\"";
+    return ps + pond::ToString( re() );
   case ObjectType::String:
     str = _str;
     specialCharReplacement( str );
-    return (string)"\""+str+"\"";
+    return ps+"\""+str+"\"";
   case ObjectType::Symbol:
     if ( ids() == 0 )
-      return "null";
-    if ( ids() == SYMID_OF_False ) return "false";
-    if ( ids() == SYMID_OF_True ) return "true";
+      return ps+"null";
+    if ( ids() == SYMID_OF_False ) return ps+"false";
+    if ( ids() == SYMID_OF_True ) return ps+"true";
     if ( ids() == SYMID_OF___Variable ){
-      return "\"$_"+pond::ToString( (int)re() )+"\"";
+      return ps+"\"$_"+pond::ToString( (int)re() )+"\"";
     }else if ( ids() == SYMID_OF_FunctionVariable ){
-      return "\"$"+pond::ToString( (int)re() )+"\"";
+      return ps+"\"$"+pond::ToString( (int)re() )+"\"";
     }else if ( ids() == SYMID_OF_SerialCode ){
-      return "\"$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col )+"\"";
+      return ps+"\"$$_"+pond::ToString( idx().row )+"_"+pond::ToString( idx().col )+"\"";
     }
-    return string("\"")+_sym+"\"";
+    return ps+"\""+_sym+"\"";
   case ObjectType::List:{
     //dout<<" try dump "<<(*this)<< " to json"<<endl;
     if ( isLeft ){
-      return string("\"")+(*this).ToString()+"\"";
+      return ps+"\""+(*this).ToString()+"\"";
     }
     static INIT_SYMID_OF( JSON );
     if ( Size() < 1 )  return "{}"; 
     bool is_head = true;
     bool is_array = true;
+
+    // construct as simple list
+    bool simple = true;
+    string tmp_str = ps+"[";
+    for (int i=1; i<= Size(); i++ ){
+      if ( _list[i].ListQ() ){
+        simple = false;
+        break;
+      }
+      if ( is_head ){
+        is_head = false;
+      } else {
+        tmp_str += ",";
+      }
+      tmp_str += _list[i].DumpToJson(true, 0, false, false );
+
+    }
+    if ( simple ){
+      tmp_str += "]";
+      return tmp_str;
+    }
+
+    is_head = true;
     for( int i=1; i<= Size() ; i++ ){
       if ( _list[i].NullQ() ){
         continue;
@@ -1950,22 +2006,33 @@ string Object::DumpToJson(bool isLeft)const{
         continue;
       }
       // if (  i == Size() and _list[i].NullQ() ){
-      if ( not is_head ) str += ", "; else is_head = false;
+      if ( is_head ){
+        is_head = false;
+      } else {
+        str += compact?",":",\n";
+      }
+      // key value
       if ( _list[i].PairQ(SYMID_OF_KeyValuePair ) ) {
-        str +=  _list[i](1).DumpToJson(true) + ":" + _list[i](2).DumpToJson();
+        str +=  _list[i](1).DumpToJson(compact, padding+4, true, true) +
+          ": " +
+          _list[i](2).DumpToJson(compact, padding+4, false, false);
         is_array = false;
         continue;
       }
-      if ( not is_array ) str += "\"" + pond::ToString( i-1 ) + "\":";
+      // only value
+      if ( not is_array ) str += ps+"\"" + pond::ToString( i-1 ) + "\":";
       if( _list[i].ListQ( SYMID_OF_Complex ) ){
-        str += "\"complex("+_list[i](1).ToString() + "," + _list[i](2).ToString()+")\"";
+        str += ps+"\"complex("+_list[i](1).ToString() + "," + _list[i](2).ToString()+")\"";
       }else{
-        str += _list[i].DumpToJson();
+        str += ps+_list[i].DumpToJson(compact, padding+4, true, false);
       }
     }
 
-    if ( is_array ) str = "[" + str + "]";
-    else            str = "{" + str + "}";
+    if ( is_array ){
+      str = ps+"[" +(compact?"":("\n")) + str +(compact?"":("\n"+string(padding,' ')))+ "]";
+    } else {
+      str = ps+"{" +(compact?"":"\n") + str +(compact?"":("\n"+string(padding,' ')))+ "}";
+    }
     bool isJSON = (ListQ( SYMID_OF_JSON ) or ListQ( SYMID_OF_Dict )); 
     bool isArray = ( ListQ( SYMID_OF_List) or 
                      ListQ( SYMID_OF_Parenthesis) or
@@ -1984,7 +2051,37 @@ string Object::DumpToJson(bool isLeft)const{
 }
 
 Object&Object::LoadFromJson(const std::string str){
+  EvaKernel->EvaluateString(str, *this);
   return (*this);
+}
+
+Object &Object::operator[](const char*key){
+  if ( not ListQ() ){
+    throw Error("fetch value by key for NONE List Object is not valid.");
+  }
+  Object key_obj(__String__,key);
+  Object pair = DictGetOrNewPair(key_obj);
+  return pair[2];
+}
+Object &Object::operator[](const string&key){
+  return (*this)[key.c_str()];
+}
+
+Object Object::operator()(const char*key){
+  if ( not ListQ() ){
+    _Erroring("Object::()","Get value by key for NONE List Object is not valid.");
+    return NullObject;
+  }
+  Object key_obj(__String__,key);
+  Object pair = DictGetPair(key_obj);
+  if ( not pair.NullQ() ){
+    return pair[2];
+  }
+  return NullObject;
+}
+
+Object Object::operator()(const string&key){
+  return (*this)[key.c_str()];
 }
 
 double &Object::ref_double(){

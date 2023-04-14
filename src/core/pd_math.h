@@ -4,17 +4,39 @@
 namespace pond{
 
   ///////////////////////////////////////////
-  #define pow2(x) ((x)*(x))
-  #define pow3(x) ((x)*(x)*(x))
-  #define pow4(x) ((x)*(x)*(x)*(x))
-  #define pow5(x) ((x)*(x)*(x)*(x)*(x))
-  #define pow6(x) ((x)*(x)*(x)*(x)*(x)*(x))
-  #define pow7(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x))
-  #define pow8(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
-  #define pow9(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
-  #define pow10(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
-  #define pow11(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
-  #define pow12(x) ((x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x)*(x))
+  __cond_host_device__ inline double _pow2(double x){ return x*x; }
+  __cond_host_device__ inline double _pow3(double x){ return x*x*x; }
+  __cond_host_device__ inline double _pow4(double x){double pow2=_pow2(x); return pow2*pow2; }
+  __cond_host_device__ inline double _pow5(double x){return _pow4(x)*x;}
+  __cond_host_device__ inline double _pow6(double x){return _pow5(x)*x; }
+  __cond_host_device__ inline double _pow7(double x){return _pow6(x)*x; }
+  __cond_host_device__ inline double _pow8(double x){double pow4 = _pow4(x); return pow4*pow4; }
+  __cond_host_device__ inline double _pow9(double x){return _pow8(x)*x; }
+  __cond_host_device__ inline double _pow10(double x){return _pow8(x)*_pow2(x); }
+  __cond_host_device__ inline double _pow11(double x){return _pow8(x)*_pow3(x); }
+  __cond_host_device__ inline double _pow12(double x){double pow4 = _pow4(x); return pow4*pow4*pow4; }
+  __cond_host_device__ inline double _pow13(double x){return _pow12(x)*x; }
+  __cond_host_device__ inline double _pow14(double x){return _pow12(x)*_pow2(x); }
+  __cond_host_device__ inline double _pow15(double x){return _pow12(x)*_pow3(x); }
+  __cond_host_device__ inline double _pow16(double x){double pow8 = _pow8(x); return pow8*pow8; }
+  constexpr double _powInt(double x,int n){
+    return ( n==1 )?x:x*_powInt(x,n-1);
+  }
+
+  __cond_host_device__ inline double _pow(double x, double y){
+#ifdef __CUDA_ARCH__
+    return powf(x,y);
+#else
+    return pow(x,y);
+#endif
+  }
+  __cond_host_device__ inline float _pow(float x, float y){
+#ifdef __CUDA_ARCH__
+    return powf(x,y);
+#else
+    return pow(x,y);
+#endif
+  }
 
   struct floatcomplex{
   public:
@@ -104,7 +126,7 @@ namespace pond{
       return *this;
     }
     __cond_host_device__  inline  floatcomplex &operator/=(const floatcomplex v){
-      float mo=pow2(v.re)+pow2(v.im);
+      float mo=_pow2(v.re)+_pow2(v.im);
       float tre = re;
       re=(re*v.re+im*v.im)/mo;
       im=(im*v.re-tre*v.im)/mo;
@@ -147,14 +169,14 @@ namespace pond{
     }
 
     __cond_host_device__  inline  friend floatcomplex operator/(const floatcomplex c1,const floatcomplex c2){
-      float mo=pow2(c2.re)+pow2(c2.im);
+      float mo=_pow2(c2.re)+_pow2(c2.im);
       return floatcomplex((c1.re*c2.re+c1.im*c2.im)/mo,(c1.im*c2.re-c1.re*c2.im)/mo);
     }
     __cond_host_device__  inline  friend floatcomplex operator/(const floatcomplex c1,const float c2){
       return floatcomplex(c1.re/c2,c1.im/c2);
     }
     __cond_host_device__  inline  friend floatcomplex operator/(const float c1,const floatcomplex c2){
-      float mo=pow2(c2.re)+pow2(c2.im);
+      float mo=_pow2(c2.re)+_pow2(c2.im);
       return floatcomplex( (c1*c2.re)/mo,(-c1*c2.im)/mo);
     }
     // overload ^
@@ -281,7 +303,7 @@ namespace pond{
       return *this;
     }
     __cond_host_device__  inline  complex &operator/=(const complex v){
-      double mo=pow2(v.re)+pow2(v.im);
+      double mo=_pow2(v.re)+_pow2(v.im);
       double tre = re;
       re=(re*v.re+im*v.im)/mo;
       im=(im*v.re-tre*v.im)/mo;
@@ -324,14 +346,14 @@ namespace pond{
     }
 
     __cond_host_device__  inline  friend complex operator/(const complex c1,const complex c2){
-      double mo=pow2(c2.re)+pow2(c2.im);
+      double mo=_pow2(c2.re)+_pow2(c2.im);
       return complex((c1.re*c2.re+c1.im*c2.im)/mo,(c1.im*c2.re-c1.re*c2.im)/mo);
     }
     __cond_host_device__  inline  friend complex operator/(const complex c1,const double c2){
       return complex(c1.re/c2,c1.im/c2);
     }
     __cond_host_device__  inline  friend complex operator/(const double c1,const complex c2){
-      double mo=pow2(c2.re)+pow2(c2.im);
+      double mo=_pow2(c2.re)+_pow2(c2.im);
       return complex( (c1*c2.re)/mo,(-c1*c2.im)/mo);
     }
     // overload ^

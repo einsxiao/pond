@@ -30,14 +30,14 @@ def request(argv,options):
         if res.get('status') == 'owner':
             print("\n  Module {0} is created by yourself({1}).".format(module_name, res.get('owner')) )
             print("    version     : {0}".format(res.get('version')) )
-            print("    update_time : {0}".format(res.get('update_time')) )
+            print("    update_time : {0}".format(res.get('code_update_time')) )
             if res.get('homepage'):
                 print("\n    Your sharepage url is https://doc.run/p/{0}\n".format(res.get('homepage'),) )
             return
         if res.get('status') == 'someone':
             print("\n  Module {0} is owned by user with nickname {1}.\n".format(module_name, res.get('owner')) )
             print("    version     : {0}".format(res.get('version')) )
-            print("    update_time : {0}".format(res.get('update_time')) )
+            print("    update_time : {0}".format(res.get('code_update_time')) )
             if res.get('homepage'):
                 print("\n    You can visit the author's sharepage by url https://doc.run/p/{0}\n".format(res.get('homepage'),) )
                 pass
@@ -47,7 +47,7 @@ def request(argv,options):
         return
 
 
-    print("check with:", username, token )
+    print("check with:", username )
     jres = module_request('check-login',{
         'username'       : username,
         'token'          : token,
@@ -66,7 +66,7 @@ def request(argv,options):
         print("  update time         \t version \t module name\t")
         print("  -------------------------------------------------------------")
         for mod in jres.get('modules'):
-            print( "  {0}\t {1}   \t {2}".format( pdate(mod['update_time']), mod['version'],mod['name'],  ) )
+            print( "  {0}\t {1}   \t {2}".format( pdate(mod['code_update_time']), mod['version'],mod['name'],  ) )
             pass
         else: pass
         pass
