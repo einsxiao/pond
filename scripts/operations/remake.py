@@ -24,7 +24,7 @@ def request(argv,options):
     # repo should be created if check-module request recieved on server side
 
     #print("check-module res:",res)
-    os.system("make;make release")
+    os.system("make clean; make; make release")
 
     
     return 

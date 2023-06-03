@@ -331,66 +331,6 @@ int MatrixModule::PD_Matrix(Object &ARGV){
   }
   ReturnNormal;
 
-  // if ( ARGV[1].NumberQ() ){// form of Matrix(3,[5,9,4],"HostDevice")
-  //   int dimN=(double)ARGV[1];
-  //   if ( dimN < 1)
-  //     ThrowError("Matrix","The number of Matrix Dimensions should be a positive integer.");
-  //   if ( ARGV.Size() < 2 ){
-  //     ThrowError("Matrix","When Init Matrix with Dimensions, two or more arguments are required.");
-  //   }
-  //   int dim[dimN+2]; dim[0]=dimN;
-  //   if ( (int)ARGV[2].Size() != dimN )
-  //     ThrowError("Matrix","The dimension specification is not consistent with previous argument.");
-
-
-  //   for ( int i=1; i<=dimN; i++ ){
-  //     if ( ! ARGV[2][i].NumberQ() )ThrowError("Matrix","Matrix Dimension specification should be numbers.");
-  //     dim[i] = (double)ARGV[2][i];
-  //     if ( dim[i] < 1) ThrowError("Matrix","Matrix Dimension should be a positive integer.");
-  //   }
-  //   int matPos= MatrixHost;
-  //   if ( ARGV.Size() > 2 ){
-  //     CheckShouldBeString(3);
-  //     if ( ARGV[3].StringQ("Host") ) matPos = MatrixHost;
-  //     else if ( ARGV[3].StringQ("Device") ) matPos = MatrixDevice;
-  //     else if ( ARGV[3].StringQ("HostDevice") ) matPos = MatrixHostDevice;
-  //     else {
-  //       ThrowError("Matrix","When Init Matrix, position specification should be one of Host, Device, or HostDevice.");
-  //     }
-  //   }
-  //   for ( ;;){
-  //     string name = pond::RandomString( Len_Of_New_Matrix_Name );
-  //     Matrix *mat = GetMatrix(name);
-  //     if ( mat == NULL ){
-  //       mat = GetOrNewMatrix(name);
-  //       mat->Init(dim,matPos);
-  //       ARGV.DeleteElements();
-  //       ARGV.PushBackString( name );
-  //       break;
-  //     }
-  //   }
-  //   ReturnNormal;
-  // }
-  // if ( ARGV[1].ListQ()  ){
-  //   if ( ARGV.Size() > 1 ){
-  //     //cout << ARGV <<endl;
-  //     ThrowError("Matrix","When Init Matrix with a List, only one argument is required.");
-  //   }
-  //   for ( ;;){
-  //     string name = pond::RandomString( Len_Of_New_Matrix_Name );
-  //     Matrix *mat = GetMatrix(name);
-  //     if ( mat == NULL ){
-  //       mat = GetOrNewMatrix(name);
-  //       Matrix2Object( *mat, ARGV[1] );
-  //       ARGV.DeleteElements();
-  //       ARGV.PushBackString( name );
-  //       break;
-  //     }
-  //   }
-
-      
-  // }
-  // ReturnHold;
 }
 
 

@@ -11,8 +11,8 @@ CPPCC := g++
 ################################################################
 MAKE := make
 ################################################################
-DFLAGS :=  -std=c++11 -g -D DEBUG -Wall -Wextra -Wno-unused-parameter  
-FLAGS := -std=c++11 -O2 
+DFLAGS :=  -std=c++11 -g -D DEBUG -Wall -Wextra -Wno-unused-parameter -fopenmp
+FLAGS := -std=c++11 -O2 -fopenmp
 ################################################################
 INCLUDE :=  `pond-path pcc`
 RPATH := 

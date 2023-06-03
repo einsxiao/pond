@@ -59,9 +59,9 @@ def request(argv,options):
         print('\nModule {0} does not exist.'.format(module_name) )
         return
 
-    if res.get('status') == 'someone':
-        print('\nModule {0} is not shared by its author.'.format(module_name) )
-        return
+    # if res.get('status') == 'someone':
+    #     print('\nModule {0} is not shared by its author.'.format(module_name) )
+    #     return
 
     os.chdir( module_dir )
     #print("try git add/commit/push")

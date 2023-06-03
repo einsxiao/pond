@@ -594,15 +594,17 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
   dout<<"declare parts"<<endl;
   int source_insert_pos;
   //cout<<"find insert pos"<<endl;
-  if ( fileType == "cu" )
+  if ( fileType == "cu" ){
     source_insert_pos = prepare_insert( lan_ker.declare_insert_pos, 2 );
-  else
+  }else{
     source_insert_pos = prepare_insert( lan_ker.declare_insert_pos, 1 );
+  }
 
   dout<<"do insert launch kernel pos with insert parts "<< source_insert_pos<< " row:"<<pragma.self->start.row<<endl;
-  if ( fileType == "cu" )
+  if ( fileType == "cu" ){
     source.insert( source.begin() + source_insert_pos,
                    __line_info(true, pragma.self->start.row, 0, 0, lan_ker.declare_gpu()+";" ) );
+  }
   source.insert( source.begin() + source_insert_pos,
                  __line_info(true, pragma.self->start.row, 0, 0, lan_ker.declare_cpu()+";" ) );
 
@@ -774,7 +776,7 @@ void Syntax::phrasing(){
   //lineInfo.push_back( pair<int,int>(0,0) );
   processing(tree,0);
   dout<<"source content processing done. "<<endl;
-  dout<<"parsed content is:\n"<< endl;  tree.output();
+  //dout<<"parsed content is:\n"<< endl;  tree.output();/* debug output of tree structure */
 
   //construct the newLines and old_2_new
   int ch_count = 0;
@@ -813,7 +815,7 @@ void Syntax::output(){
   //cout<<"put content to tmp file:"<<tmpFilePath<<endl;
   SetFileContent(tmpFilePath,outContent);
   System((string)"touch -r " + filePath  +" "+ tmpFilePath );
-  dout<<"output:"<<endl<< outContent<<endl;
+  dout<<"source code output:"<<endl<< outContent<<endl;
 }
 
 
