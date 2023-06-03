@@ -1,0 +1,8 @@
+#!/usr/bin/env pond
+####################################
+# Author          : AUTHOR
+# Version         : MatrixOperations.VERSION  
+# R-Copyleft(r-ɔ) : DATE
+####################################
+hey(p~) := print('Hey! ', p )
+#hey('X')

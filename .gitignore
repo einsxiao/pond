@@ -9,3 +9,7 @@ exe
 /packages/
 /include/*
 */__pycache__/
+!/src_packages/*.sh
+/src_packages/*
+/bin/pond
+/bin/pcc

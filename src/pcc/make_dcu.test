@@ -1,0 +1,3 @@
+all:
+	hipcc -G  -c -std=c++11 -fopenmp test_dcu.cu `pond-path pcc` 
+	hipcc -o test_dcu test_dcu.cu.o -fopenmp -lpd `pond-path pcc` 

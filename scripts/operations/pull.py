@@ -1,4 +1,5 @@
 from pond_basic import *
+import subprocess;
 
 # login requried
 def request(argv,options):
@@ -51,11 +52,11 @@ def request(argv,options):
         print('\nModule {0} does not exist.'.format(module_name) )
         return
 
-    if res.get('status') == 'someone':
-        if not res.get('is_shared'):
-            print('\nModule {0} is not shared by its author.'.format(module_name) )
-            return
-        pass
+    # if res.get('status') == 'someone':
+    #     if not res.get('is_shared'):
+    #         print('\nModule {0} is not shared by its author.'.format(module_name) )
+    #         return
+    #     pass
 
     if not os.path.exists( pond_home ): os.mkdir( pond_home )
     os.chdir( pond_home )
@@ -105,7 +106,7 @@ def request(argv,options):
         os.system( cmd )
         pass
     if os.path.exists( "Makefile" ):
-        os.system("make release" )
+        os.system("make release 2>&1" )
     
     return 
 

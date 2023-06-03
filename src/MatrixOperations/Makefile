@@ -104,7 +104,7 @@ clean:
 cleandebug:
 	@rm -rf build/debug
 	$(shell if [ -f exe ]; then rm exe; fi; )
-	$(shell if [ -f lib$(MODULE_NAME).so ]; then rm lib$(MODULE_NAME).so; fi; )
+	$(shell if [ -f lib$(MODULE_NAME)-dev.so ]; then rm lib$(MODULE_NAME)-dev.so; fi; )
 
 cleanrelease:
 	rm -rf build/release;

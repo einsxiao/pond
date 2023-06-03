@@ -415,7 +415,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent, bool not_pull){
         _Warning("GetModule","'"+moduleName+"' located in '"+module_dir+"' may not not load correctly.");
       } else {
       // try pull
-        cout<<"Try pull '"<<moduleName<<"' from repo server."<<endl;
+        cout<<"Pulling '"<<moduleName<<"' from repo server."<<endl;
         System("pd pull " + moduleName );
         return GetModuleLib( moduleName, true, true);
       }

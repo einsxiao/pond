@@ -393,7 +393,7 @@ namespace pond{
 
   };
 
-  floatcomplex::floatcomplex( complex in)
+  __cond_host_device__ floatcomplex::floatcomplex( complex in)
   {
     re = in.re;
     im = in.im;

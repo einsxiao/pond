@@ -1,10 +1,9 @@
 #!/usr/bin/env pond
 import MatrixOperations
 
-SetParallelMode("Cpu")
+SetParallelMode("cpu")
+SetCpuThreadsNumber(1)
 print("Program is running in ",GetParallelMode()," Mode.")
 
-nx=ny=nz=16;
-
-print('start test')
-fftTest()
+print('fftw multithread test')
+multiThreadsTest(512)
