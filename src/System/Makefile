@@ -15,9 +15,9 @@ MPIFORCC          := mpifort
 MAKE              := make
 SHELL             := /bin/bash
 ################################################################
-FLAGS     := -std=c++11 -O2  -DDEBUG -Wno-unused
+FLAGS     := -std=c++11 -O2  -DDEBUG --compiler-options -Wno-unused
 DFLAGS    := -std=c++11 -g -G -D DEBUG --compiler-options -g --compiler-options -Wall --compiler-options -Wextra --compiler-options -Wno-unused --compiler-options -Wno-unused-parameter  --compiler-options -fno-inline-functions
-DFLAGS    := -std=c++11 -g -DDEBUG -Wno-unused
+DFLAGS    := -std=c++11 -g -DDEBUG  --compiler-options -Wno-unused
 FORFLAGS  := -O2
 DFORFLAGS := -g -D DEBUG -Wall -Wextra  -Wno-unused -Wno-unused-parameter 
 ################################################################
