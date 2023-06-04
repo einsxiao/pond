@@ -172,7 +172,7 @@ namespace pond{
     Free();
   };
     
-  template<class type> Matrix_T<type>::Matrix_T(const Matrix_T<type>&other){
+  template<class type> __cond_host_device__ Matrix_T<type>::Matrix_T(const Matrix_T<type>&other){
     state = MatrixStateCopied;
 #define CP(item) item = other.item
     CP(ND);CP(D4);CP(D5);CP(D6);CP(D7);CP(D8);
@@ -218,7 +218,7 @@ namespace pond{
     }
   }
 
-  template<class type> int Matrix_T<type>::DimN()const{
+  template<class type> __cond_host_device__ int Matrix_T<type>::DimN()const{
     return ND;
   }
 

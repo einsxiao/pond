@@ -13,3 +13,6 @@ exe
 /src_packages/*
 /bin/pond
 /bin/pcc
+/src/pond
+/src/pcc/pcc
+/src/pond-dev

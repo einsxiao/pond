@@ -61,7 +61,6 @@ namespace pond{
     int    threadNumberPerKernel;         //4
     ///////////////////////////////////////////////////////////////////////
     void   SetPrintFormat(int precision,bool sci=false){
-      precision = precision;
       if ( precision<=0 )  precision = 1;
       if ( precision>=16 ) precision = 16;
       scientificFormat = sci;

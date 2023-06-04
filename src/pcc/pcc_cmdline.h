@@ -14,6 +14,7 @@ public:
   bool           isOutputSpecified = false;
   bool           isModuleFile = false;
   bool           isForceCpp = false;
+  bool           isPrintCMDLine = false;
   string         moduleName;
   vector<int>    files;
   vector<int>    objects;

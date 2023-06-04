@@ -446,7 +446,7 @@ ARRAY_2_LIST(complex)
 #define MATRIX_2_OBJECT(b_type)                                         \
   int MatrixModule::Matrix2Object(Matrix_T<b_type> &matrix, Object &ARGV){ \
     ARGV.SetList();                                                     \
-    if ( not matrix.Size() == 0 ){                                      \
+    if ( matrix.Size() != 0 ){                                      \
       int *dim = matrix.NewDimArray();                                  \
       Array2List(ARGV, matrix.Data, dim);                               \
       delete []dim;                                                     \
@@ -495,7 +495,7 @@ void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
       matrix = ARGV.Number();                                           \
     }                                                                   \
     Object dim; dim.SetList();                                          \
-    if ( not MatrixQ( ARGV, dim ) )                                     \
+	  if ( !MatrixQ( ARGV, dim ) )                                     \
       ThrowError("Object2Matrix","Matrix assignment from list should be of Matrix form."); \
     int n =dim.Size();                                                  \
     int *arr= new int[n+2];                                             \

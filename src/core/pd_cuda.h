@@ -4,7 +4,7 @@
 namespace pond{
   
   inline int __CudaBlockNumber(int n){
-    register int num=(n+__CudaThreadNumberPerBlock-1)/__CudaThreadNumberPerBlock;
+    int num=(n+__CudaThreadNumberPerBlock-1)/__CudaThreadNumberPerBlock;
     if (num>__CudaMaxBlockNumber) return __CudaMaxBlockNumber; 
     else return num;
   }

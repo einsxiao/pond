@@ -75,10 +75,16 @@ int Engine::processing()
 int Engine::keep_pass_through()
 {
   string cc =   type2CC[cmdLine->fileType] ;
-  if ( cc == "" )
+  if ( cc == "" ){
+	  if ( CommandExist("nvcc") ){
+		  cc = NVCC;
+	  } else {
+		  cc = CPPCC;
+	  }
+  } 
+  if ( cmdLine->isForceCpp ){
     cc = CPPCC;
-  if ( cmdLine->isForceCpp )
-    cc = CPPCC;
+  }
   if ( not CommandExist( cc ) ) ThrowError("pcc","Depended compiler '"+cc+"' is not found." );
   string cmd = cmdLine->keep_pass_construct(cc);
   //cerr<<"cmd constructed is "<<cmd<<endl;

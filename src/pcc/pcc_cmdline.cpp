@@ -38,6 +38,9 @@ CmdLine::CmdLine(int _argc,char*_argv[])
     }else if ( string(_argv[i]) == string("-fc++") or string(_argv[i]) == string("-fcpp") ){
       isForceCpp = true;
       base++; continue;
+    }else if ( string(_argv[i]) == string("-print") ){
+		isPrintCMDLine = true;
+		base++; continue;
     }else if ( string(_argv[i]) == string("-o") ){
       isOutputSpecified = true;
     }    
@@ -209,7 +212,9 @@ string CmdLine::keep_pass_construct(string cc)//just pass forward
 
   string cmd = cc; OPTIONS2CMD;
 
-  dout<<cmd<<endl;
+  if ( isPrintCMDLine ){
+	  cout<<cmd<<endl;
+  }
   return cmd + " 2>&1";
 }
 
@@ -256,7 +261,10 @@ string CmdLine::construct(string cc) //compile and file exist for sure
   }
 
   cmd += " 2>&1";
-  dout<<cmd<<endl;
+  //dout<<cmd<<endl;
+  if ( isPrintCMDLine ){
+	  cout<<cmd<<endl;
+  }
   return cmd;
 }
 
