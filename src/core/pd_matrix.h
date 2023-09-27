@@ -246,18 +246,15 @@ namespace pond{
 #endif
   };
 
-#define _check_dimN(N) if ( ND != 1 ){                                  \
+#define _check_dimN(N) if ( ND != N ){                                  \
     _Erroring("Matrix::at","try get element of "+                        \
              ToString((int)ND)+" Dimension(s) Matrix with 1 index ");   \
-    return 0;                                                           \
   }
 #define _check_dimith(N) if ( p##N >= D##N ){                   \
     _Erroring("Matrix","index of dimension "#N" out of range."); \
-    return 0;                                                   \
   }
 #define _check_fdimith(N) if ( p##N > D##N ){                   \
     _Erroring("Matrix","index of dimension "#N" out of range."); \
-    return 0;                                                   \
   }
   //1
   template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1){
