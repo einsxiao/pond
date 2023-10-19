@@ -2,6 +2,8 @@
 #define EvaError_POND_H
 
 namespace pond{
+
+
   class Error:public std::exception{
   public:
     std::string module,function,message;
@@ -17,13 +19,13 @@ namespace pond{
     inline friend std::ostream &operator<<(std::ostream &os, Error e){ os<<e.what()<<std::endl; return os;}
     static std::string decode_undefined_sybmol_string(char*message);
   };
+
   class ExceptionQuit:public Error{
   public:
     int code;
     ExceptionQuit(){ code = 0; }
     ExceptionQuit(int c){ code = c; }
   };
-
 
   class DebugOutput{
   public:
@@ -64,8 +66,8 @@ namespace pond{
         return *this;
       }
   };
-  class __DebugOutput{public: static DebugOutput out;};
 
+  class __DebugOutput{public: static DebugOutput out;};
 
 #define _Warning(cat,mes) ({                                  \
       std::cerr<< std::string(cat) << ":Warning(" <<          \
@@ -123,6 +125,8 @@ namespace pond{
     :                                           \
     false                                       \
     )
+
+  void __stacktrace_pretty_print();
 
 };
 

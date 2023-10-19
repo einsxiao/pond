@@ -630,14 +630,16 @@ void Syntax::deal_launch_kernel(__node_rec&pragma,int serialN){
 
   //define
   dout<<"define parts"<<endl;
-  if ( fileType == "cu" )
-    source_insert_pos = prepare_insert( lan_ker.define_insert_pos, 3 );
-  else
-    source_insert_pos = prepare_insert( lan_ker.define_insert_pos, 2 );
-  if ( fileType == "cu" )
-    source.insert( source.begin() + source_insert_pos,
-                   __line_info(true, pragma.self->start.row, 0, 0,
-                               lan_ker.define_gpu() ));
+  if (fileType == "cu") {
+      source_insert_pos = prepare_insert(lan_ker.define_insert_pos, 3);
+  } else {
+      source_insert_pos = prepare_insert(lan_ker.define_insert_pos, 2);
+  }
+  if (fileType == "cu") {
+      source.insert(source.begin() + source_insert_pos,
+                    __line_info(true, pragma.self->start.row, 0, 0,
+                                lan_ker.define_gpu()));
+  }
   source.insert( source.begin() + source_insert_pos,
                  __line_info(true, pragma.self->start.row, 0, 0,
                              lan_ker.define_cpu('s') ));
@@ -804,11 +806,9 @@ void Syntax::output(){
     if ( line.deleted ) continue;
     if ( line.revised ){
       //outContent += "#"+ToString( line.row +1 )+" \""+filePath+"\" 1\n";
-      outContent += "#line "+ToString( line.row +1 )+"\n";
-      outContent += string(line.start_pos,' ')+line.content;
-    }else{
-      outContent += string(line.start_pos,' ')+line.content;
+      outContent += "#line " + ToString(line.row + 1) + "\n";
     }
+    outContent += string(line.start_pos, ' ') + line.content;
     if ( (*line.content.rbegin())!='\n' )
       outContent += "\n";
   }

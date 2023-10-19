@@ -35,18 +35,18 @@ void MPIModule::Finalize()
   initialized = false;
 }
 
-static void index_init(int n,int*ind)
+static void index_init(int n, size_t*ind)
 {
   for ( int i=0; i< n; i++ )
     ind[i] = 0;
 }
 
-static void index_copy(int n, int*ind1,int*ind2)
+static void index_copy(int n, size_t*ind1, size_t*ind2)
 {
   memcpy( ind1, ind2, n*sizeof(int) );
 }
 
-static bool index_incr(int*dim,int*ind)
+static bool index_incr(size_t*dim, size_t*ind)
 {
   int p = dim[0] - 1;
   ind[p] ++;
@@ -128,22 +128,22 @@ void   MPIModule::Distribute(Matrix_T<mat_type>&global_matrix,Matrix_T<mat_type>
     MPI_Status status;                                                  \
     if ( rankID == 0 ){                                                 \
       if ( global_matrix.Dim(ith)%rankSize != 0 ){                      \
-        for (int i=1; i< rankSize; i++ ){                    \
+        for (int i=1; i< rankSize; i++ ){                               \
           MPI_Send( &local_size, 1 , MPI_INT, i, 1, MPI_COMM_WORLD);    \
         }                                                               \
         ThrowError("MPI","Distribute","Task dividing requires that size of "+Math::OrderForm(ith)+" matrix dimension should be multiple of the rank size."); \
       }                                                                 \
-      int *dim = global_matrix.NewDimArray();                           \
+      size_t *dim = global_matrix.NewDimArray();                        \
       dim[ith] = dim[ith]/rankSize;                                     \
       local_matrix.Init(dim);                                           \
       local_size = local_matrix.Size();                                 \
-      int *lind = new int[ dim[0] ], *gind = new int[ dim[0] ];         \
+      size_t *lind = new size_t[ dim[0] ], *gind = new size_t[ dim[0] ]; \
       for (int i=rankSize-1; i>= 0; i-- ){                              \
         index_init(dim[0], lind );                                      \
         while ( true ){                                                 \
           index_copy(dim[0], gind, lind);                               \
           gind[ith-1] += dim[ ith ] * i;                                \
-          local_matrix(lind) = global_matrix( gind );                   \
+          local_matrix.Part(lind) = global_matrix.Part( gind );         \
           if (not index_incr(dim, lind ) ) break;                       \
         }                                                               \
         if ( i != 0 ){                                                  \
@@ -158,7 +158,7 @@ void   MPIModule::Distribute(Matrix_T<mat_type>&global_matrix,Matrix_T<mat_type>
       MPI_Recv( &n, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status );        \
       if ( n == 0 )                                                     \
         ThrowError("MPI","Distribute","Task terminated when distributing Matrix."); \
-      int *dim = new int[n+1];                                          \
+      size_t *dim = new size_t[n+1];                                    \
       dim[0] = n;                                                       \
       MPI_Recv( dim+1, n, MPI_INT, 0, 1, MPI_COMM_WORLD, &status );     \
       local_matrix.Init(dim);                                           \
@@ -184,11 +184,11 @@ _def_dis( int    ,        MPI_INT )
     int size = local_size * rankSize;                                   \
     MPI_Status status;                                                  \
     if ( rankID == 0 ){                                                 \
-      int *dim = local_matrix.NewDimArray();                            \
+      size_t *dim = local_matrix.NewDimArray();                         \
       dim[ith] *= rankSize;                                             \
       global_matrix.Init( dim );                                        \
       dim[ ith ] /= rankSize;                                           \
-      int *lind=new int[ dim[0] ],*gind=new int[ dim[0] ];              \
+      size_t *lind=new size_t[ dim[0] ],*gind=new size_t[ dim[0] ];     \
       for ( int i=0; i< rankSize; i++ ){                                \
         if ( i != 0 ){                                                  \
           MPI_Recv( local_matrix.Data, local_size, mpi_type,i, 2, MPI_COMM_WORLD,&status); \
@@ -197,7 +197,7 @@ _def_dis( int    ,        MPI_INT )
         while ( true ){                                                 \
           index_copy(dim[0], gind, lind);                               \
           gind[ith-1] += dim[ ith ] * i;                                \
-          global_matrix( gind ) = local_matrix( lind );                 \
+          global_matrix.Part( gind ) = local_matrix.Part( lind );       \
           if ( not index_incr(dim, lind ) ) break;                      \
         }                                                               \
       }                                                                 \

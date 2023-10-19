@@ -165,7 +165,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
         ThrowError("Matrix","Called Init without form Init(dimN,dim1,dim2,..dimN)");
       }
       Matrix* matptr = GetOrNewMatrix( matname );
-      int *dim = new int[ int(operobj[1].Number()) ];
+      size_t *dim = new size_t[ size_t(operobj[1].Number()) ];
       dim[0] = 1;
       for (int i=0; i<= operobj[1].Number(); i++ ){
         dim[i] = operobj[i+1].Number();
@@ -418,7 +418,7 @@ int MatrixModule::PD_MatrixExist(Object &ARGV){
 ///////////////////////////////////////////////////////////////
 // array2list && matrix2object parts
 template<class type, class to_type>
-static int LocalArray2List(Object &ARGV,type*arr,int *dim,int pdim, int parr){ 
+static int LocalArray2List(Object &ARGV,type*arr,size_t *dim,int pdim, int parr){ 
   if ( pdim>dim[0] ){                                                 
     ARGV.SetNumber( (to_type) arr[parr] );                            
     return parr+1;                                                    
@@ -432,7 +432,7 @@ static int LocalArray2List(Object &ARGV,type*arr,int *dim,int pdim, int parr){
 }
 
 #define ARRAY_2_LIST(type)                                      \
-  int MatrixModule::Array2List(Object &ARGV,type*arr,int *dim){ \
+  int MatrixModule::Array2List(Object &ARGV,type*arr,size_t *dim){ \
     LocalArray2List<type,type>( ARGV,arr,dim,1,0);              \
     return 0;                                                   \
   }
@@ -446,8 +446,8 @@ ARRAY_2_LIST(complex)
 #define MATRIX_2_OBJECT(b_type)                                         \
   int MatrixModule::Matrix2Object(Matrix_T<b_type> &matrix, Object &ARGV){ \
     ARGV.SetList();                                                     \
-    if ( matrix.Size() != 0 ){                                      \
-      int *dim = matrix.NewDimArray();                                  \
+    if ( matrix.Size() != 0 ){                                          \
+      size_t *dim = matrix.NewDimArray();                               \
       Array2List(ARGV, matrix.Data, dim);                               \
       delete []dim;                                                     \
     }else{                                                              \
@@ -495,13 +495,13 @@ void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
       matrix = ARGV.Number();                                           \
     }                                                                   \
     Object dim; dim.SetList();                                          \
-	  if ( !MatrixQ( ARGV, dim ) )                                     \
+    if ( !MatrixQ( ARGV, dim ) )                                        \
       ThrowError("Object2Matrix","Matrix assignment from list should be of Matrix form."); \
     int n =dim.Size();                                                  \
-    int *arr= new int[n+2];                                             \
+    size_t *arr= new size_t[n+2];                                       \
     arr[0]=n;                                                           \
     for (int i=1; i<=n; i++){                                           \
-      arr[i] =  (int)dim[i] ;                                           \
+      arr[i] =  (size_t)dim[i] ;                                        \
     }                                                                   \
     matrix.Init( arr ,MatrixHost);                                      \
     u_long ind=0;                                                       \

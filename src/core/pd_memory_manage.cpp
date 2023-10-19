@@ -1,7 +1,22 @@
-#include<pd_headers.h>
+#include <pd_headers.h>
+#include <signal.h>
 
 using namespace std;
 using namespace pond;
+
+void __stacktrace_handler(int sig) {
+  fprintf(stderr, "program terminated with signal encountered: %d\n", sig);
+
+  // int nptrs;
+  // void* array[10];
+  // nptrs = backtrace(array, 10);
+  // backtrace_symbols_fd(array, nptrs, STDERR_FILENO);
+
+  pond::__stacktrace_pretty_print();
+
+  std::terminate();
+}
+  
 
 EvaMemoryPool::EvaMemoryPool(){
 #define _DS2(sym,pL,pR) if ( SYMID_OF_##sym != Symbols.GetOrNew(#sym,pL,pR) ){ \
@@ -172,6 +187,7 @@ EvaMemoryPool::EvaMemoryPool(){
   EvaSettings.epsilon = 0.000000000000005;
 
   flag = 0;
+  signal(SIGSEGV, __stacktrace_handler);
 }
 
 EvaMemoryPool::~EvaMemoryPool(){

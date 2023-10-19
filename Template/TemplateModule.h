@@ -21,7 +21,6 @@ namespace pond{
     *******************************************************************/
     int PD_welcome(Object &);
     int PD_vector_times(Object &);
-    int PD_mat_oper_test(Object &);
   };
 };
 

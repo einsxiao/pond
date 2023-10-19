@@ -39,6 +39,9 @@ def help_info():
     remake [模块名] 
           重新编译模块
 
+    remake --all
+          重新编译所有模块
+
     login
           使用 https://doc.run 的帐号密码登录系统
 
@@ -78,6 +81,9 @@ def help_info():
     remake [module_name] 
           recompile module
 
+    remake --all
+          recompile all modules
+
     login
           setup account bonded with https://doc.run 
 
@@ -108,7 +114,7 @@ try:
 
   #no argv run something
   script_path = os.path.split(os.path.realpath(__file__))[0]
-  sysargv,options=argv2argsoptions(sys.argv,['version','help','run',],{'?':'help','h':'help','v':'version','r':'run',})
+  sysargv,options=argv2argsoptions(sys.argv,['version','help','run','all'],{'?':'help','h':'help','v':'version','r':'run',})
   #print('sysargv =',sysargv)
   #print('options =',options)
   #no argument

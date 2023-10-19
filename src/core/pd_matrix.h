@@ -18,23 +18,23 @@ namespace pond{
     __cond_host_device__       Matrix_T();
     __cond_host_device__      ~Matrix_T();
     __cond_host_device__       Matrix_T(const Matrix_T&);
-    Matrix_T(int*dim, int dataPosition=MatrixHost);
+    Matrix_T(size_t*dim, int dataPosition=MatrixHost);
     Matrix_T(int n,...);
-    void                       SetDim(const int p,const int Np);
-    __cond_host_device__ int   DimN()const;
-    __cond_host_device__ int   Dim(const int p)const;
-    u_int                      Size()const;
-    int                       *NewDimArray();
-    void                       Init(int*dim,int dataPosition=MatrixHost,bool veryInit=false);
+    void                       SetDim(const size_t p,const size_t Np);
+    __cond_host_device__ size_t DimN()const;
+    __cond_host_device__ size_t Dim(const size_t p)const;
+    size_t                     Size()const;
+    size_t                    *NewDimArray();
+    void                       Init(size_t*dim,int dataPosition=MatrixHost,bool veryInit=false);
     template<class otype> void Init(const Matrix_T<otype>&,int dataPosition=MatrixHost,bool veryInit=false);
     void                       Init(int n,...);
     __cond_host_device__ bool  Free();
     ////////////////////////////////////////////////////////
-    __cond_host_device__ bool  SameDimensionQ(int *);
+    __cond_host_device__ bool  SameDimensionQ(size_t*);
     template<class otype>
     __cond_host_device__ bool  SameDimensionQ(const Matrix_T<otype>&);
     template<class otype> int  DimensionCompare(const Matrix_T<otype>&mat);
-    int                        DimensionCompare(int *);
+    int                        DimensionCompare(size_t*);
     int                        Malloc();
     int                        MallocDevice();
     int                        HostToDevice();
@@ -47,55 +47,55 @@ namespace pond{
     type                       TotalDevice();
     type                       TotalHost();
 
-    int                        Count(type cut_value);
+    size_t                     Count(type cut_value);
     type                       CountDevice(type cut_value);
     type                       CountHost(type cut_value);
 
-    __cond_host_device__ type &Part(int *pArr);
-    __cond_host_device__ type &Index(int *pArr);
-    __cond_host_device__ type &operator()(int *pArr);
-    __cond_host_device__ type &operator[](int p);
-    __cond_host_device__ type &operator()(int p);
-    __cond_host_device__ type &operator()(int p1,int p2);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7);
-    __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8);
-    __cond_host_device__ type &at(int p);
-    __cond_host_device__ type &at(int p1,int p2);
-    __cond_host_device__ type &at(int p1,int p2,int p3);
-    __cond_host_device__ type &at(int p1,int p2,int p3,int p4);
-    __cond_host_device__ type &at(int p1,int p2,int p3,int p4,int p5);
-    __cond_host_device__ type &at(int p1,int p2,int p3,int p4,int p5,int p6);
-    __cond_host_device__ type &at(int p1,int p2,int p3,int p4,int p5,int p6,int p7);
-    __cond_host_device__ type &at(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8);
+    __cond_host_device__ type &Part(size_t*pArr);
+    __cond_host_device__ type &Index(size_t*pArr);
+    // __cond_host_device__ type &operator()(size_t*pArr);
+    __cond_host_device__ type &operator[](size_t p);
+    __cond_host_device__ type &operator()(size_t p);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3,size_t p4);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7);
+    __cond_host_device__ type &operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8);
+    __cond_host_device__ type &at(size_t p);
+    __cond_host_device__ type &at(size_t p1,size_t p2);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3,size_t p4);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7);
+    __cond_host_device__ type &at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8);
 
     //fortran index style with collomn major and index starting with 1
-    __cond_host_device__ type &fPart(int *pArr);
-    __cond_host_device__ type &fIndex(int *pArr);
-    /* __cond_host_device__ type &operator()(char,int *pArr); */
-    /* __cond_host_device__ type &operator()(char,int p); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6,int p7); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8); */
-    __cond_host_device__ type &fat(int p);
-    __cond_host_device__ type &fat(int p1,int p2);
-    __cond_host_device__ type &fat(int p1,int p2,int p3);
-    __cond_host_device__ type &fat(int p1,int p2,int p3,int p4);
-    __cond_host_device__ type &fat(int p1,int p2,int p3,int p4,int p5);
-    __cond_host_device__ type &fat(int p1,int p2,int p3,int p4,int p5,int p6);
-    __cond_host_device__ type &fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7);
-    __cond_host_device__ type &fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8);
+    __cond_host_device__ type &fPart(size_t *pArr);
+    __cond_host_device__ type &fIndex(size_t *pArr);
+    /* __cond_host_device__ type &operator()(char,size_t *pArr); */
+    /* __cond_host_device__ type &operator()(char,size_t p); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3,size_t p4); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7); */
+    /* __cond_host_device__ type &operator()(char,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8); */
+    __cond_host_device__ type &fat(size_t p);
+    __cond_host_device__ type &fat(size_t p1,size_t p2);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3,size_t p4);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7);
+    __cond_host_device__ type &fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8);
 
     Matrix_T                   SubMatrix(int n,...); // n is the number of suffix of to draw the subMatrix out
     Matrix_T                   ReShape(int n,...); //same Size in different shape, Data kept
-    Matrix_T                   ReShape(int*dim); //same Size in different shape, Data kept
+    Matrix_T                   ReShape(size_t*dim); //same Size in different shape, Data kept
 
     template<class otype> Matrix_T &Set(const Matrix_T<otype> &);
     template<class otype> Matrix_T &operator=(const Matrix_T<otype> &);
@@ -123,12 +123,12 @@ namespace pond{
     int  BinaryDumpFile(std::string filename);
     template<class ostype,class mtype> friend ostype &operator<<(ostype &os,const Matrix_T<mtype>&data);
     template<class istype,class mtype> friend istype &operator>>(istype &is,Matrix_T<mtype>&data);
-    static u_int CalculateSize(int*dim);
+    static size_t CalculateSize(size_t*dim);
   };
   template<class type>
-  u_int Matrix_T<type>::CalculateSize(int*dim){
-    int size = 1;
-    for ( int i=1; i<= dim[0]; i++ )
+  size_t Matrix_T<type>::CalculateSize(size_t*dim){
+    size_t size = 1;
+    for ( size_t i=1; i<= dim[0]; i++ )
       size*= dim[i];
     return size;
   }
@@ -138,31 +138,31 @@ namespace pond{
       _Warning("Matrix_T","No element in Matrix_T");
       return os;
     }
-    for (int i=0; i<= data.ND; i++)
+    for (size_t i=0; i<= data.ND; i++)
       os<<data.Dim(i)<<" ";
     os<<"\n";
-    for ( int i = 0; i < data.Size() ; i++)
+    for ( size_t i = 0; i < data.Size() ; i++)
       os<<data.Data[i]<<"\n";
     return os;
   };
 
   template<class istype,class type> istype &operator>>(istype &is,Matrix_T<type>&data){
     data.Free();
-    int n; is>>n;
+    size_t n; is>>n;
     if ( n > 8 ) {
       _Erroring("Matrix::>>","Matrix only supported max to 8 dimensions.");
       return is;
     }
     data.ND	=	n;
     size_t EleSize =	1;
-    for (int i = 1; i <= n ; i++){
-      int num;
+    for (size_t i = 1; i <= n ; i++){
+      size_t num;
       is>>num;
       data.SetDim(i,num);
       EleSize*=num;
     }
     data.Malloc();
-    for (u_int i=0; i< EleSize; i++ )
+    for (size_t i=0; i< EleSize; i++ )
       is>>data.Data[i];
     return is;
   }
@@ -186,7 +186,7 @@ namespace pond{
 #undef CP
   }
 
-  template<class type> __cond_host_device__ int Matrix_T<type>::Dim(const int p)const{
+  template<class type> __cond_host_device__ size_t Matrix_T<type>::Dim(const size_t p)const{
     switch (p){
     case 0: return DimN();
     case 1: return D1;
@@ -201,7 +201,7 @@ namespace pond{
     }
   }
 
-  template<class type> void Matrix_T<type>::SetDim(const int p,const int Np){
+  template<class type> void Matrix_T<type>::SetDim(const size_t p,const size_t Np){
     switch (p){
     case 0: return ;
     case 1: D1 = Np; return;
@@ -218,27 +218,27 @@ namespace pond{
     }
   }
 
-  template<class type> __cond_host_device__ int Matrix_T<type>::DimN()const{
+  template<class type> __cond_host_device__ size_t Matrix_T<type>::DimN()const{
     return ND;
   }
 
-  template<class type> int *Matrix_T<type>::NewDimArray(){
-    int *dim = new int[ ND +2 ];
+  template<class type> size_t *Matrix_T<type>::NewDimArray(){
+    size_t *dim = new size_t[ ND +2 ];
     dim[0] = ND;
-    for ( int i=1;i<=ND;i++)
+    for ( size_t i=1;i<=ND;i++)
       dim[i] = Dim(i);
     dim[ND+1] = Size();
     return dim;
   }
 
-  template<class type> u_int Matrix_T<type>::Size()const{
-    int size = D1;
-    for ( int i=2; i<= ND ; i++ )
+  template<class type> size_t Matrix_T<type>::Size()const{
+    size_t size = D1;
+    for ( size_t i=2; i<= ND ; i++ )
       size *= Dim(i);
     return size;
   }
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator[](int p1){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator[](size_t p1){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1 ];
 #else
@@ -247,24 +247,24 @@ namespace pond{
   };
 
 #define _check_dimN(N) if ( ND != N ){                                  \
-    _Erroring("Matrix::at","try get element of "+                        \
-             ToString((int)ND)+" Dimension(s) Matrix with 1 index ");   \
+    ThrowError("Matrix::at","Try access element of Matrix with "+       \
+               ToString((size_t)ND)+" dimension(s) with "+ToString((size_t)N)+" index(s)."); \
   }
 #define _check_dimith(N) if ( p##N >= D##N ){                   \
-    _Erroring("Matrix","index of dimension "#N" out of range."); \
-  }
+	ThrowError("Matrix::at","index "+ToString((size_t)p##N)+" of dimension "+ToString((size_t)N)+" out of range 0 .. "+ToString((size_t)(D##N-1))+"."); \
+}
 #define _check_fdimith(N) if ( p##N > D##N ){                   \
-    _Erroring("Matrix","index of dimension "#N" out of range."); \
-  }
+	ThrowError("Matrix::at","index "+ToString((size_t)p##N)+" of dimension "+ToString((size_t)N)+" out of range 1 .. "+ToString((size_t)D##N)+"."); \
+}
   //1
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1 ];
 #else
     return Data[ p1 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1 ];
 #else
@@ -273,7 +273,7 @@ namespace pond{
     return Data[ p1 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1-1 ];
 #else
@@ -285,14 +285,14 @@ namespace pond{
 
 
   //2
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1*D2+p2 ];
 #else
     return Data[ p1*D2+p2 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2){
 #ifdef __CUDA_ARCH__
     return DataDevice[ p1*D2+p2 ];
 #else
@@ -302,7 +302,7 @@ namespace pond{
     return Data[ p1*D2+p2 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2){
 #ifdef __CUDA_ARCH__
     return DataDevice[ (p2-1)*D2+p1-1 ];
 #else
@@ -314,14 +314,14 @@ namespace pond{
   };
 
   //3
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3){
 #ifdef __CUDA_ARCH__
     return DataDevice[(p1*D2+p2)*D3+p3 ];
 #else
     return Data[(p1*D2+p2)*D3+p3 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3){
 #ifdef __CUDA_ARCH__
     return DataDevice[(p1*D2+p2)*D3+p3 ];
 #else
@@ -332,7 +332,7 @@ namespace pond{
     return Data[(p1*D2+p2)*D3+p3 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3){
 #ifdef __CUDA_ARCH__
     return DataDevice[((p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
@@ -345,14 +345,14 @@ namespace pond{
   };
   
   //4
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3,int p4){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3,size_t p4){
 #ifdef __CUDA_ARCH__
     return DataDevice[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #else
     return Data[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3,int p4){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3,size_t p4){
 #ifdef __CUDA_ARCH__
     return DataDevice[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #else
@@ -364,7 +364,7 @@ namespace pond{
     return Data[ ((p1*D2+p2)*D3+p3)*D4+p4 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3,size_t p4){
 #ifdef __CUDA_ARCH__
     return DataDevice[ (((p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
@@ -378,14 +378,14 @@ namespace pond{
   };
 
   //5
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3,int p4,int p5){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #else
     return Data[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3,int p4,int p5){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #else
@@ -398,7 +398,7 @@ namespace pond{
     return Data[(((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5 ];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1 ];
 #else
@@ -413,14 +413,14 @@ namespace pond{
   };
 
   //6
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3,int p4,int p5,int p6){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #else
     return Data[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3,int p4,int p5,int p6){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #else
@@ -434,7 +434,7 @@ namespace pond{
     return Data[((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
@@ -450,14 +450,14 @@ namespace pond{
   };
 
   //7
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #else
     return Data[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3,int p4,int p5,int p6,int p7){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #else
@@ -472,7 +472,7 @@ namespace pond{
     return Data[(((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((((p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
@@ -489,14 +489,14 @@ namespace pond{
   };
 
   //8
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #else
     return Data[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::at(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::at(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8){
 #ifdef __CUDA_ARCH__
     return DataDevice[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #else
@@ -512,7 +512,7 @@ namespace pond{
     return Data[((((((p1*D2+p2)*D3+p3)*D4+p4)*D5+p5)*D6+p6)*D7+p7)*D8+p8];
 #endif
   };
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fat(size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8){
 #ifdef __CUDA_ARCH__
     return DataDevice[(((((((p8-1)*D7+p7-1)*D6+p6-1)*D5+p5-1)*D4+p4-1)*D3+p3-1)*D2+p2-1)*D1+p1-1];
 #else
@@ -546,18 +546,18 @@ namespace pond{
     return true;
   }
 
-  template<class type> __cond_host_device__ bool Matrix_T<type>::SameDimensionQ(int *dim)
+  template<class type> __cond_host_device__ bool Matrix_T<type>::SameDimensionQ(size_t *dim)
   {
     if ( dim == NULL ) return false;
 #ifdef __CUDA_ARCH__
     if ( dim[0]!=ND ) return false;
-    for (int i=1; i<=dim[0]; i++)
+    for (size_t i=1; i<=dim[0]; i++)
       if (dim[i]!=Dim(i)) 
         return false;
     return true;
 #else
     if ( dim[0] !=ND ) return false;
-    for (int i=1; i<=dim[0]; i++)
+    for (size_t i=1; i<=dim[0]; i++)
       if (dim[i]!=Dim(i)) 
         return false;
     return true;
@@ -568,7 +568,7 @@ namespace pond{
   {
     if ( ND > mat.ND ) return 1;
     if ( ND < mat.ND ) return -1;
-    for ( int i=1; i<= ND;i++){
+    for ( size_t i=1; i<= ND;i++){
       if ( Dim(i) > mat.Dim(i) )
         return 1;
       else
@@ -577,7 +577,7 @@ namespace pond{
     return 0;
   }
 
-  template<class type> int Matrix_T<type>::DimensionCompare(int *dim)
+  template<class type> int Matrix_T<type>::DimensionCompare(size_t *dim)
   {
     if ( ND > dim[0] ) return 1;
     if ( ND < dim[0] ) return -1;
@@ -590,9 +590,10 @@ namespace pond{
     return 0;
   }
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::Part(int *pArr)
+  template<class type> __cond_host_device__ type&Matrix_T<type>::Part(size_t *pArr)
   {
-    int dim=ND,dt,index=pArr[0];
+    size_t dim=ND, dt;
+    size_t index=pArr[0];
     for (int i=1; i< dim; i++) {
       dt=Dim(i+1);
       index=pArr[i] + index*dt;
@@ -604,20 +605,19 @@ namespace pond{
 #endif
   };//a base
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::Index(int *pArr)
+  template<class type> __cond_host_device__ type&Matrix_T<type>::Index(size_t *pArr)
   {
     return Part(pArr);
   }
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(int *pArr){
-    return Part(pArr);
-  }
+  // template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(size_t *pArr){
+  //   return Part(pArr);
+  // }
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fPart(int *pArr)
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fPart(size_t *pArr)
   {
-    int dim=DimN();
-    int dt;
-    int index=pArr[dim-1]-1;
+    int dim=DimN(), dt;
+    size_t index=pArr[dim-1]-1;
     for (int i=dim-1; i>=0 ; i--) {
       dt = Dim(i+1);
       index = pArr[i] -1 + index*dt;
@@ -629,17 +629,17 @@ namespace pond{
 #endif
   };//a base
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::fIndex(int *pArr)
+  template<class type> __cond_host_device__ type&Matrix_T<type>::fIndex(size_t *pArr)
   {
     return fPart(pArr);
   }
 
-  /* template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,int *pArr) */
+  /* template<class type> __cond_host_device__ type&Matrix_T<type>::operator()(char ch,size_t *pArr) */
   /* { */
   /*   return fPart(pArr); */
   /* } */
 
-  template<class type> void Matrix_T<type>::Init(int *dimArr,int dataPosition,bool veryInit)
+  template<class type> void Matrix_T<type>::Init(size_t *dimArr,int dataPosition,bool veryInit)
   {
     if ( state == MatrixStateCopied ){ // if just copied matrix, set to empty, not free memory
       Data = NULL;
@@ -650,7 +650,7 @@ namespace pond{
           Free();
     }
     ND	=	dimArr[0];
-    int EleSize =	1;
+    size_t EleSize =	1;
     for (int i=1;i<=ND;i++){
       if ( dimArr[i] < 1 ){
         _Warning("Matrix::Init","Dimension smaller than 1; set to 1");
@@ -716,10 +716,10 @@ namespace pond{
   {
     va_list args;
     va_start(args,n);
-    int *arr	=	new int [ n+ 2 ];
+    size_t *arr	=	new size_t [ n+ 2 ];
     arr[0]=n;
     for (int i=1; i<=n; i++)
-      arr[i]	=	va_arg(args,int);
+      arr[i]	=	va_arg(args,size_t);
     int dataPosition	=	va_arg(args,int);
     va_end(args);
     Init(arr,dataPosition);
@@ -730,10 +730,10 @@ namespace pond{
   { //Matrix_T x(2,8,8);
     va_list args;
     va_start(args,n);
-    int *arr	=	new int [ n+ 2 ];
+    size_t *arr	=	new size_t [ n+ 2 ];
     arr[0]=n;
     for (int i=1; i<=n; i++)
-      arr[i]	=	va_arg(args,int);
+      arr[i]	=	va_arg(args,size_t);
     int dataPosition	=	va_arg(args,int);
     va_end(args);
     Init(arr,dataPosition,true);
@@ -832,17 +832,17 @@ namespace pond{
       size_t size = Size();
       Malloc();
       if ( ND == 1 ){
-        for ( u_int i=0; i< size; i++ )
+        for ( size_t i=0; i< size; i++ )
           ifs >> Data[i];
       }else if ( ND == 2 ){
-        for ( u_int j=0; j<D2; j++)
-          for ( u_int i=0; i<D1; i++ )
+        for ( size_t j=0; j<D2; j++)
+          for ( size_t i=0; i<D1; i++ )
             ifs >> (*this)(i,j);
         
       }else{
-        for ( u_int k=0; k<D3; k++ )
-          for ( u_int j=0; j<D2; j++)
-            for ( u_int i=0; i<D1; i++ )
+        for ( size_t k=0; k<D3; k++ )
+          for ( size_t j=0; j<D2; j++)
+            for ( size_t i=0; i<D1; i++ )
               ifs >> (*this)(i,j,k);
       }
       ifs.close();
@@ -884,8 +884,8 @@ namespace pond{
     for (int i=0; i<= DimN(); i++)
       os<<Dim(i)<<" ";
     os<<"\n";
-    int size = Size();
-    for ( int i = 0; i < size ; i++)
+    size_t size = Size();
+    for ( size_t i = 0; i < size ; i++)
       os<<Data[i]<<"\n";
     os.close();
     return 1;
@@ -899,7 +899,7 @@ namespace pond{
       return -1;
     }
     bool resized = false;
-    int  *newdim;
+    size_t  *newdim;
     if ( DimN() > 3 ){
       resized = true;
       newdim = NewDimArray();
@@ -926,16 +926,16 @@ namespace pond{
     os<<"SCALARS volume_scalars float 1"<<"\n";
     os<<"LOOKUP_TABLE default"<<"\n";
     if ( ND == 3 ){
-      for (u_int k=0; k<D3; k++)
-        for (u_int j=0; j<D2; j++)
-          for (u_int i=0; i< D1; i++)
+      for (size_t k=0; k<D3; k++)
+        for (size_t j=0; j<D2; j++)
+          for (size_t i=0; i< D1; i++)
             os<<(*this)(i,j,k)<<"\n";
     }else if ( ND == 2 ){
-      for (u_int j=0; j<D2; j++)
-        for (u_int i=0; i< D1; i++)
+      for (size_t j=0; j<D2; j++)
+        for (size_t i=0; i< D1; i++)
           os<<(*this)(i,j)<<"\n";
     }else{
-      for (u_int i=0; i< D1; i++)
+      for (size_t i=0; i< D1; i++)
         os<<(*this)(i)<<"\n";
     }
     os.close();
@@ -976,11 +976,11 @@ namespace pond{
       tMatrix.SetDim(i, Dim(i+n) );
     }
 
-    int count = 0;
+    size_t count = 0;
     va_list args;
     va_start(args,n);
     for (int i=1; i<=n; i++){
-      count += va_arg(args,int);
+      count += va_arg(args,size_t);
       count *= Dim(i+1);
     }
     va_end(args);
@@ -995,10 +995,10 @@ namespace pond{
   {
     va_list args;
     va_start(args,n);
-    int *new_dim = new int(n+2);
+    size_t *new_dim = new size_t(n+2);
     new_dim[0] = n; new_dim[n+1] = 1;
     for (int i=1; i<=n; i++){
-      new_dim[i] = va_arg(args,int);
+      new_dim[i] = va_arg(args,size_t);
       new_dim[n+1]*= new_dim[i];
     }
     va_end(args);
@@ -1015,9 +1015,9 @@ namespace pond{
     return (*this);
   }
 
-  template<class type> Matrix_T<type> Matrix_T<type>::ReShape(int *dim)
+  template<class type> Matrix_T<type> Matrix_T<type>::ReShape(size_t *dim)
   {
-    int size=1;
+    size_t size=1;
     for (int i=1; i<=dim[0]; i++){
       size *= dim[i];
     }
@@ -1211,12 +1211,12 @@ namespace pond{
 
 #ifdef __CUDACC__ 
   template<class type>
-  __global__ void Matrix_Min_Kernel(type *arr,int n_in)
+  __global__ void Matrix_Min_Kernel(type *arr,size_t n_in)
   {
-    int tid= blockIdx.x*blockDim.x+threadIdx.x;
-    int n_cal= gridDim.x*blockDim.x;
-    int n_out= n_in/2;
-    int n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
+    size_t tid= blockIdx.x*blockDim.x+threadIdx.x;
+    size_t n_cal= gridDim.x*blockDim.x;
+    size_t n_out= n_in/2;
+    size_t n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
     while (tid<n_out){
       if ( arr[tid+n_inc] < arr[tid] ){
         arr[tid] = arr[tid+n_inc];
@@ -1225,12 +1225,12 @@ namespace pond{
     }
   }
   template<class type>
-  __global__ void Matrix_Max_Kernel(type *arr,int n_in)
+  __global__ void Matrix_Max_Kernel(type *arr,size_t n_in)
   {
-    int tid= blockIdx.x*blockDim.x+threadIdx.x;
-    int n_cal= gridDim.x*blockDim.x;
-    int n_out= n_in/2;
-    int n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
+    size_t tid= blockIdx.x*blockDim.x+threadIdx.x;
+    size_t n_cal= gridDim.x*blockDim.x;
+    size_t n_out= n_in/2;
+    size_t n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
     while (tid<n_out){
       if ( arr[tid+n_inc] > arr[tid] ){
         arr[tid] = arr[tid+n_inc];
@@ -1239,12 +1239,12 @@ namespace pond{
     }
   }
   template<class type>
-  __global__ void Matrix_Total_Kernel(type *arr,int n_in)
+  __global__ void Matrix_Total_Kernel(type *arr,size_t n_in)
   {
-    int tid= blockIdx.x*blockDim.x+threadIdx.x;
-    int n_cal= gridDim.x*blockDim.x;
-    int n_out= n_in/2;
-    int n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
+    size_t tid= blockIdx.x*blockDim.x+threadIdx.x;
+    size_t n_cal= gridDim.x*blockDim.x;
+    size_t n_out= n_in/2;
+    size_t n_inc; if (n_in%2==0) n_inc=n_out; else n_inc=n_out+1;
     while (tid<n_out){
       arr[tid]+=arr[tid+n_inc];
       tid+=n_cal;
@@ -1255,11 +1255,11 @@ namespace pond{
   template<class type>
   type Matrix_T<type>::MinRevised()
   {
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
-      int bn;
+      size_t bn;
       if ( n_in == 0 or DataDevice == NULL ) {
         _Erroring("Matrix_T::MinRevised","Matrix_T has no data on device side."); return 0;
       }
@@ -1280,7 +1280,7 @@ namespace pond{
     }
     type value = Data[0];
 #pragma omp parallel for reduction(min:value)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       if ( Data[i] < value ){
         value = Data[i];
       }
@@ -1292,11 +1292,11 @@ namespace pond{
   type Matrix_T<type>::MaxRevised()
   {
     type value;
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
-      int bn;
+      size_t bn;
       if ( n_in == 0 or DataDevice == NULL ) {
         _Erroring("Matrix_T::MaxRevised","Matrix_T has no data on device side."); return 0;
       }
@@ -1316,7 +1316,7 @@ namespace pond{
     }
     value = Data[0];
 #pragma omp parallel for reduction(max:value)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       if ( Data[i] > value ){
         value = Data[i];
       }
@@ -1328,11 +1328,11 @@ namespace pond{
   type Matrix_T<type>::TotalRevised()
   {
     type sum;
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
-      int bn;
+      size_t bn;
       if ( n_in == 0 or DataDevice == NULL ) {
         _Erroring("Matrix_T::TotalRevised","Matrix_T has no data on device side."); return 0;
       }
@@ -1352,7 +1352,7 @@ namespace pond{
     }
     sum = Data[0];
 #pragma omp parallel for reduction(+:sum)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       sum += Data[i];
     }
     return sum;
@@ -1373,15 +1373,15 @@ namespace pond{
   }
   
 
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1){return a[ p1 ];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2){return a[ p1*d[2]+p2 ];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3){return a[(p1*d[2]+p2)*d[3]+p3 ];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4){return a[ ((p1*d[2]+p2)*d[3]+p3)*d[4]+p4 ];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4,int p5){return a[(((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5 ];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4,int p5,int p6){return a[((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4,int p5,int p6,int p7){return a[(((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8){return a[((((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7)*d[8]+p8];};
-  template<class type> __cond_host_device__ type&MatrixPart(type*a,int*d,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8,int p9){return a[(((((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7)*d[8]+p8)*d[9]+p9];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1){return a[ p1 ];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2){return a[ p1*d[2]+p2 ];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3){return a[(p1*d[2]+p2)*d[3]+p3 ];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4){return a[ ((p1*d[2]+p2)*d[3]+p3)*d[4]+p4 ];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5){return a[(((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5 ];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6){return a[((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7){return a[(((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8){return a[((((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7)*d[8]+p8];};
+  template<class type> __cond_host_device__ type&MatrixPart(type*a,size_t*d,size_t p1,size_t p2,size_t p3,size_t p4,size_t p5,size_t p6,size_t p7,size_t p8,size_t p9){return a[(((((((p1*d[2]+p2)*d[3]+p3)*d[4]+p4)*d[5]+p5)*d[6]+p6)*d[7]+p7)*d[8]+p8)*d[9]+p9];};
 
 
 #define POND_Matrix_Arith(name,func)                                    \
@@ -1417,27 +1417,21 @@ namespace pond{
     if ( arrout.state == MatrixStateTempFree )                          \
       arrout.state = MatrixStateTempOccupied;                           \
     return arrout;                                                      \
-  }; 
+  };
 
-  POND_Matrix_Arith(MatrixAdd,add)
-  POND_Matrix_Arith(MatrixPlus,add)
-  POND_Matrix_Arith(MatrixMinus,minus)
-  POND_Matrix_Arith(MatrixTimes,multi)
-  POND_Matrix_Arith(MatrixDivide,divi)
+  POND_Matrix_Arith(MatrixAdd, add) POND_Matrix_Arith(MatrixPlus, add)
+      POND_Matrix_Arith(MatrixMinus, minus)
+          POND_Matrix_Arith(MatrixTimes, multi)
+              POND_Matrix_Arith(MatrixDivide, divi)
 
-  POND_Matrix_Arith_Value(MatrixAdd,add)
-  POND_Matrix_Arith_Value(MatrixPlus,add)
-  POND_Matrix_Arith_Value(MatrixMinus,minus)
-  POND_Matrix_Arith_Value(MatrixTimes,multi)
-  POND_Matrix_Arith_Value(MatrixDivide,divi)
-
-
+                  POND_Matrix_Arith_Value(MatrixAdd, add)
+                      POND_Matrix_Arith_Value(MatrixPlus, add)
+                          POND_Matrix_Arith_Value(MatrixMinus, minus)
+                              POND_Matrix_Arith_Value(MatrixTimes, multi)
+                                  POND_Matrix_Arith_Value(MatrixDivide, divi)
 #undef POND_Matrix_Arith
 #undef POND_Matrix_Arith_Value
 
-
-
-  
 };
 
 #endif

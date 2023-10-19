@@ -3,8 +3,8 @@ PPCC = g++
 DIRS = 
 LIBS = -ldl
 ##################################################################################
-DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp
-FLAGS := -std=c++11 -O2 -fopenmp
+DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp -rdynamic
+FLAGS := -std=c++11 -O2 -fopenmp -rdynamic
 
 ##################################################################################
 
@@ -36,6 +36,7 @@ prepare:
 
 prepare-all:
 	@rsync -tl *.h ../../include/
+	# @rsync -tl *.hpp ../../include/
 	$(shell if ! [ -f ../../include/pond ]; then ln -sf pond.h ../../include/pond; fi; )
 	$(shell if [ -f build ]; then rm build; mkdir build; elif ! [ -d build ]; then mkdir build; fi; )
 	$(shell if [ -f build/debug ]; then rm build/debug; mkdir build/debug; elif ! [ -d build/debug ]; then mkdir build/debug; fi; )

@@ -140,18 +140,18 @@
 #define return_if_not(value,cvalue) { auto __temp_value__ = (value); if ( __temp_value__ != (cvalue) ) return __temp_value__; }
 #define return_if(value,cvalue) { auto __temp_value__ = (value); if ( __temp_value__ == (cvalue) ) return __temp_value__; }
 
-#ifdef DEBUG
-#  define ThrowError(...)  ({                                           \
-      std::cerr<<std::endl<<"Error at "<< __FILE__ <<"("<<__LINE__<<")"<<std::endl; \
-      pond::Error err(__VA_ARGS__); err.trace(); throw err;             \
-    })
-#else
-#  define ThrowError(...)  ({                                           \
-      std::cerr<<std::endl<<"Error at "<< __FILE__ <<"("<<__LINE__<<")"<<std::endl; \
-      pond::Error err(__VA_ARGS__); throw err;                          \
-    })
-#endif
+#define __traceback                                     \
+  ({                                                    \
+    int nptrs;                                          \
+    void* array[10];                                    \
+    nptrs = backtrace(array, 10);                       \
+    backtrace_symbols_fd(array, nptrs, STDERR_FILENO);  \
+  })
 
+#define ThrowError(...)  ({                                             \
+      std::cerr<<std::endl<<"Error at "<< __FILE__ <<":"<<__LINE__<<std::endl; \
+      pond::Error err(__VA_ARGS__); __traceback; throw err;             \
+    })
 
 #ifdef DEBUG
 #  define deprintf(fmt,...) fprintf(stdout,"%s(%d): " fmt "\n",__FILE__,__LINE__,##__VA_ARGS__)
@@ -545,5 +545,18 @@ inline void HandleError( cudaError_t cu_err,const char *file,int line ) {
 #define __CudaThreadNumberPerBlock EvaSettings.threadNumberPerBlock
 #define _cuDim(N) dim3(__CudaBlockNumber(N)),dim3(__CudaThreadNumberPerBlock)
 
+#define __ASSERT_PRAGMA_MATRIX_T_DATA(var)                                     \
+    {                                                                          \
+        if (pond::GetParallelMode() == ParallelModeCpu && !(var).Data) {       \
+            ThrowError("pragma::launch_kernel",                                \
+                       "Data of Matrix_T argument '" #var                      \
+                       "' not initialized when kernel called on cpu mode.");   \
+        }                                                                      \
+        if (pond::GetParallelMode() == ParallelModeGpu && !(var).DataDevice) { \
+            ThrowError("pragma::launch_kernel",                                \
+                       "DataDevice of Matrix_T argument '" #var                \
+                       "' not initialized when kernel called on gpu mode.");   \
+        }                                                                      \
+    }
 
 #endif

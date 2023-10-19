@@ -76,6 +76,7 @@ namespace pond{
     Object &operator=(const Object&obj);
     Object &operator=(const bool v){ return SetBoolean(v); };
     Object &operator=(const int v){ return SetNumber(v); };
+    Object &operator=(const size_t v){ return SetNumber(v); };
     Object &operator=(const float v){ return SetNumber(v); };
     Object &operator=(const double v){ return SetNumber(v); };
     /* form of "-sym_name-" as symbol,  otherwize as string */
@@ -186,6 +187,7 @@ namespace pond{
     const char*         String()const;//only applied to String
     explicit operator   bool()const{              return Boolean();};
     explicit operator   int()const{               return (int)Number();};
+    explicit operator   size_t()const{            return (size_t)Number();};
     explicit operator   float()const{             return Number();};
     explicit operator   double()const{            return Number();};
     explicit operator   complex()const{           return Complex();};

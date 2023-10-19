@@ -26,11 +26,11 @@ namespace pond{
     //store Matrix to table
     int              Object2Matrix(Object&,    std::string matname); 
     ///////////////////////////////
-    static int       Array2List(Object&Argv,  int       *arr,   int  *dim);
-    static int       Array2List(Object&Argv,  long long *arr,   int  *dim);
-    static int       Array2List(Object&Argv,  float     *arr,   int  *dim);
-    static int       Array2List(Object&Argv,  double    *arr,   int  *dim);
-    static int       Array2List(Object&Argv,  complex   *arr,   int  *dim);
+    static int       Array2List(Object&Argv,  int       *arr,   size_t *dim);
+    static int       Array2List(Object&Argv,  long long *arr,   size_t *dim);
+    static int       Array2List(Object&Argv,  float     *arr,   size_t *dim);
+    static int       Array2List(Object&Argv,  double    *arr,   size_t *dim);
+    static int       Array2List(Object&Argv,  complex   *arr,   size_t *dim);
 
     static int       Matrix2Object(Matrix&,              Object&);
     static int       Matrix2Object(ComplexMatrix&,       Object&);

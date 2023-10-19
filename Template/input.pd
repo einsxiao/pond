@@ -4,6 +4,5 @@
 SetParallelMode("cpu") # parallel pragma will run in openmp mode
 import Template
 welcome()
-vector_times([1,2,3,4],3)
-mat_oper_test()
+vector_times([[1,2],[3,4]],3 )
 

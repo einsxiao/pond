@@ -264,6 +264,7 @@ SystemModule::SystemModule():Module(MODULE_NAME){
   // }
   ///////////////////////////////////////////////////////////
   RegisterFunction("SetOutputFormat",SetOutputFormat,this,"Set output format for numbers.\nSetOutputFormat[precison,is_scientific]"); 
+  RegisterFunction("SetPrintFormat",SetOutputFormat,this,"Set output format for numbers.\nSetPrintFormat[precison,is_scientific]"); 
   RegisterFunction("SystemArgv",SystemArgv,this,"Get system input argument variables.");
   ///////////////////////////////////////////////////////////
   RegisterFunction("Help",ShowHelpInfo,this,"Show help information of module functions.");
