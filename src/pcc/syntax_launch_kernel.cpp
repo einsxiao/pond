@@ -176,7 +176,7 @@ string  launch_kernel::declare_cpu(){
   }
   out += string ( this->inputNode->end.pos - args.back().argend -1, ' ');
   for ( u_int i=0; i< iters.size(); i++ ){
-    out += ",const int _N"+iter_i(i);
+    out += ",const u_int _N"+iter_i(i);
   }
   out += ")";
   return out;
@@ -204,14 +204,14 @@ string  launch_kernel::declare_gpu(){
   out += string ( this->inputNode->end.pos - args.back().argend -1, ' ');
   // the Ni,Nj,Nk
   for ( u_int i=0; i< iters.size(); i++ ){
-    out += ",const int _N"+iter_i(i); 
+    out += ",const u_int _N"+iter_i(i); 
   }
   string N_strs[9];
   N_strs[ iters.size() ] = "";
   for ( int i = iters.size()-1; i>=0; i-- ){
     N_strs[i] = iter_i(i)+N_strs[i+1];
     if ( i < (int)iters.size() - 1 ) {
-      out += ",const int _N"+N_strs[i];
+      out += ",const u_int _N"+N_strs[i];
     }
   }
   out += ")";
@@ -311,7 +311,7 @@ string launch_kernel::define_cpu(char part)
   }
   out = string(declare_cpu().size(),' ') + "  ";
   for ( int i=0;i<size; i++ ){
-    out += "for (int " + iter_i(i) + " = 0; "+ iter_i(i) + " < "+ iter_Ni(i) + "; "+ iter_i(i) + "++ )";
+    out += "for (u_int " + iter_i(i) + " = 0; "+ iter_i(i) + " < "+ iter_Ni(i) + "; "+ iter_i(i) + "++ )";
   }
   for (int i=0; i< pragma->self->end.row - pragma->self->start.row -1; i++){
     out += "\n";
@@ -330,22 +330,22 @@ string launch_kernel::define_gpu(){
   for ( int i = iters.size()-1; i>=0; i-- ){
     N_strs[i] = iter_i(i)+N_strs[i+1];
   }
-  out += "int _tid = blockIdx.x*blockDim.x + threadIdx.x; ";
+  out += "u_int _tid = blockIdx.x*blockDim.x + threadIdx.x; ";
   string temp_var = iter_i( iters.size()-1 );
   if ( iters.size() > 2 ){
-    out += "int "+temp_var+";";
+    out += "u_int "+temp_var+";";
   }
   out += "while ( _tid < _N"+N_strs[0]+" ){";
   string iterI;
   if ( iters.size() == 1 ){
-    out += "const int "+iter_i(0) +" = _tid;";
+    out += "const u_int "+iter_i(0) +" = _tid;";
   }else if ( iters.size() == 2 ){
-    out += "const int "+iter_i(0) + " = _tid/" + iter_Ni(1) + ";";
-    out += "const int "+iter_i(1) + " = _tid - " + iter_i(0) + "*" + iter_Ni(1) + ";";
+    out += "const u_int "+iter_i(0) + " = _tid/" + iter_Ni(1) + ";";
+    out += "const u_int "+iter_i(1) + " = _tid - " + iter_i(0) + "*" + iter_Ni(1) + ";";
   }else if ( iters.size() >= 3 ){
-    out += "const int "+iter_i(0) + " = ("+temp_var+" = _tid)/_N"+N_strs[1] + ";"; 
+    out += "const u_int "+iter_i(0) + " = ("+temp_var+" = _tid)/_N"+N_strs[1] + ";"; 
     for ( int i= 1; i < (int)iters.size() -1 ; i++ ){
-      out += "const int "+iter_i(i) + " = ("+temp_var+" -= "+ iter_i(i-1) +"*_N"+ N_strs[i]  +")/_N"+N_strs[i+1] + ";"; 
+      out += "const u_int "+iter_i(i) + " = ("+temp_var+" -= "+ iter_i(i-1) +"*_N"+ N_strs[i]  +")/_N"+N_strs[i+1] + ";"; 
     }
     out += iter_i( iters.size() -1 )+" = ("+temp_var+"-"+ iter_i(iters.size()-2)+"*_N"+N_strs[iters.size()-1] +");"; 
   }

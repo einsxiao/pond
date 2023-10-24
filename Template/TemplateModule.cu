@@ -31,18 +31,16 @@ int TemplateModule::PD_welcome(Object&argv){
 
 int TemplateModule::PD_vector_times(Object&argv){
   /*
-    a vector times a number
+    example function which calculate vector times number parallel on cpu or gpu.
   */
   Matrix mat; MatrixModule::Object2Matrix(argv[1], mat);
-  double factor1 = double(argv[2]);
-  double factor2 = double(argv[3]);
-
-#pragma launch_kernel<<<i: 2*mat.Size()>>>(Matrix mat : mat, double factor1 : factor1)
+  double factor = double(argv[2]);
+  cout<<"initial mat = "<< mat <<endl;
+  mat.HostToDevice();
+#pragma launch_kernel<<<i: mat.Size()>>>(Matrix mat : mat, double factor : factor)
   {
-    mat[i] *= factor1;
+    mat[i] *= factor;
   }
-  mat *= factor2;
-
   MatrixModule::Matrix2Object(mat, argv);
   return 0;
 }

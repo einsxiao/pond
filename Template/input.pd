@@ -1,8 +1,8 @@
 #!/usr/bin/env pond
 #SetCpuThreadsNumber(1)
-#SetParallelMode("gpu") # parallel pragma will run in nvidia device. When no device, error will be reported.
-SetParallelMode("cpu") # parallel pragma will run in openmp mode
+SetParallelMode("gpu") # parallel pragma will run in nvidia device. When no device, error will be reported.
+#SetParallelMode("cpu") # parallel pragma will run in openmp mode
 import Template
 welcome()
-vector_times([[1,2],[3,4]],3 )
+vector_times([[1,2],[3,4]],3, 4 )
 

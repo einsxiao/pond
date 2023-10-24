@@ -122,3 +122,11 @@ const char *pond::Error::what()const throw(){
   return swhat().c_str();
 }
 
+// // simple traceback version:
+// #define __traceback                                     \
+//   ({                                                    \
+//     int nptrs;                                          \
+//     void* array[10];                                    \
+//     nptrs = backtrace(array, 10);                       \
+//     backtrace_symbols_fd(array, nptrs, STDERR_FILENO);  \
+//   })

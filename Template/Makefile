@@ -64,6 +64,7 @@ all: release debug
 install: release upload
 
 debug: all-prepare DALL post-work
+	./exe
 
 release: all-prepare ALL post-work
 

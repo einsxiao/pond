@@ -22,18 +22,20 @@ namespace pond{
   typedef       int (*StaticFunction)(Object &);
   ////////////////////////////////////////////
   template<class type> class Matrix_T;
-  typedef       Matrix_T<double> Matrix;
-  typedef       Matrix_T<complex> ComplexMatrix;
-  typedef       Matrix_T<float> FloatMatrix;
-  typedef       Matrix_T<floatcomplex> FloatComplexMatrix;
-  typedef       Matrix_T<int> IntMatrix;
+  typedef       Matrix_T<double>         Matrix;
+  typedef       Matrix_T<complex>        ComplexMatrix;
+  typedef       Matrix_T<float>          FloatMatrix;
+  typedef       Matrix_T<floatcomplex>   FloatComplexMatrix;
+  typedef       Matrix_T<int>            IntMatrix;
+  typedef       Matrix_T<long>           LongMatrix;
+  typedef       Matrix_T<bool>           BoolMatrix;
   ////////////////////////////////////////////
   class         MatrixModule;
   class         TensorModule;
   class         MatlabEngineModule;
   class         PythonModule;
   class         AlgebraicModule;
-  class 				ClassModule;
+  class         ClassModule;
   class         MPIModule;
   ////////////////////////////////////////////
   void swap(short unsigned int&t1,short unsigned int&t2);

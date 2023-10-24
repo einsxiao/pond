@@ -165,9 +165,10 @@ int MatrixModule::PD_Matrix(Object &ARGV){
         ThrowError("Matrix","Called Init without form Init(dimN,dim1,dim2,..dimN)");
       }
       Matrix* matptr = GetOrNewMatrix( matname );
-      size_t *dim = new size_t[ size_t(operobj[1].Number()) ];
+      u_int ND = u_int(operobj[1].Number());
+      u_int *dim = new u_int[ ND ];
       dim[0] = 1;
-      for (int i=0; i<= operobj[1].Number(); i++ ){
+      for (u_int i=0; i<= ND; i++ ){
         dim[i] = operobj[i+1].Number();
       }
       (*matptr).Init(dim);
@@ -418,7 +419,7 @@ int MatrixModule::PD_MatrixExist(Object &ARGV){
 ///////////////////////////////////////////////////////////////
 // array2list && matrix2object parts
 template<class type, class to_type>
-static int LocalArray2List(Object &ARGV,type*arr,size_t *dim,int pdim, int parr){ 
+static int LocalArray2List(Object &ARGV,type*arr,u_int *dim,int pdim, int parr){ 
   if ( pdim>dim[0] ){                                                 
     ARGV.SetNumber( (to_type) arr[parr] );                            
     return parr+1;                                                    
@@ -432,7 +433,7 @@ static int LocalArray2List(Object &ARGV,type*arr,size_t *dim,int pdim, int parr)
 }
 
 #define ARRAY_2_LIST(type)                                      \
-  int MatrixModule::Array2List(Object &ARGV,type*arr,size_t *dim){ \
+  int MatrixModule::Array2List(Object &ARGV,type*arr,u_int *dim){ \
     LocalArray2List<type,type>( ARGV,arr,dim,1,0);              \
     return 0;                                                   \
   }
@@ -447,7 +448,7 @@ ARRAY_2_LIST(complex)
   int MatrixModule::Matrix2Object(Matrix_T<b_type> &matrix, Object &ARGV){ \
     ARGV.SetList();                                                     \
     if ( matrix.Size() != 0 ){                                          \
-      size_t *dim = matrix.NewDimArray();                               \
+      u_int *dim = matrix.NewDimArray();                                \
       Array2List(ARGV, matrix.Data, dim);                               \
       delete []dim;                                                     \
     }else{                                                              \
@@ -473,10 +474,10 @@ int MatrixModule::Matrix2Object(string name,Object &ARGV){//mat of Object form
 }
 
 template<class type1>
-void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
+void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_int&ind){
   if ( ARGV.ListQ() ){
-    for(u_int i=1;i<=ARGV.Size();i++){
-      localObject2Matrix(mat,ARGV[i],ind);
+    for(u_int i=1; i <= ARGV.Size(); i++){
+      localObject2Matrix(mat, ARGV[i], ind);
     }
     return;
   }else if ( ARGV.NumberQ() ){
@@ -497,14 +498,14 @@ void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
     Object dim; dim.SetList();                                          \
     if ( !MatrixQ( ARGV, dim ) )                                        \
       ThrowError("Object2Matrix","Matrix assignment from list should be of Matrix form."); \
-    int n =dim.Size();                                                  \
-    size_t *arr= new size_t[n+2];                                       \
+    int n = dim.Size();                                                 \
+    u_int *arr= new u_int[n+1];                                         \
     arr[0]=n;                                                           \
     for (int i=1; i<=n; i++){                                           \
-      arr[i] =  (size_t)dim[i] ;                                        \
+      arr[i] =  (u_int)dim[i] ;                                         \
     }                                                                   \
     matrix.Init( arr ,MatrixHost);                                      \
-    u_long ind=0;                                                       \
+    u_int ind=0;                                                        \
     localObject2Matrix( matrix, ARGV, ind);                             \
     delete []arr;                                                       \
     return 1;                                                           \

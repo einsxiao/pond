@@ -140,17 +140,9 @@
 #define return_if_not(value,cvalue) { auto __temp_value__ = (value); if ( __temp_value__ != (cvalue) ) return __temp_value__; }
 #define return_if(value,cvalue) { auto __temp_value__ = (value); if ( __temp_value__ == (cvalue) ) return __temp_value__; }
 
-#define __traceback                                     \
-  ({                                                    \
-    int nptrs;                                          \
-    void* array[10];                                    \
-    nptrs = backtrace(array, 10);                       \
-    backtrace_symbols_fd(array, nptrs, STDERR_FILENO);  \
-  })
-
 #define ThrowError(...)  ({                                             \
       std::cerr<<std::endl<<"Error at "<< __FILE__ <<":"<<__LINE__<<std::endl; \
-      pond::Error err(__VA_ARGS__); __traceback; throw err;             \
+      pond::Error err(__VA_ARGS__); pond::__stacktrace_pretty_print(); throw err; \
     })
 
 #ifdef DEBUG
@@ -517,9 +509,9 @@ inline void HandleError( cudaError_t cu_err,const char *file,int line ) {
   }
 }
 #  define CUDA_HANDLE_ERROR( cu_err ) (HandleError( cu_err, __FILE__, __LINE__ ))
-#  define CUDA_HANDLE_NULL( a ) {                                     \
+#  define CUDA_HANDLE_NULL( a ) {                                       \
     if (a == NULL) { printf( "Host memory failed in %s at line %d\n",	\
-                             __FILE__, __LINE__ );                    \
+                             __FILE__, __LINE__ );                      \
                      exit( EXIT_FAILURE );}}
 #  define CUDA_LAST_ERROR() ({ cudaError_t cu_err = cudaGetLastError(); if ( cu_err!=cudaSuccess ) ThrowError("Cuda", (std::string) cudaGetErrorString(cu_err)); })
 #else
@@ -531,16 +523,16 @@ inline void HandleError( cudaError_t cu_err,const char *file,int line ) {
 #define _blockDim3(ni,nj,nk) dim3(ni,nj,nk)
 #define _blockDim2(ni,nj) dim3(ni,nj)
 #define _blockDim1(ni) dim3(ni)
-#define _blockIdx3(ii,jj,kk) const int ii = blockIdx.x,jj = blockIdx.y,kk = blockIdx.z
-#define _blockIdx2(ii,jj) const int ii = blockIdx.x, jj = blockIdx.y
-#define _blockIdx1(ii) const int ii = blockIdx.x
+#define _blockIdx3(ii,jj,kk) const u_int ii = blockIdx.x,jj = blockIdx.y,kk = blockIdx.z
+#define _blockIdx2(ii,jj) const u_int u_ii = blockIdx.x, jj = blockIdx.y
+#define _blockIdx1(ii) const u_int u_ii = blockIdx.x
 
 #define _threadDim3(ni,nj,nk) dim3(ni,nj,nk)
 #define _threadDim2(ni,nj) dim3(ni,nj)
 #define _threadDim1(ni) dim3(ni)
-#define _threadIdx3(ii,jj,kk) const int ii = threadIdx.x, jj = threadIdx.y, kk = threadIdx.z
-#define _threadIdx2(ii,jj) const int ii = threadIdx.x, jj = threadIdx.y;
-#define _threadIdx1(ii) const int ii = threadIdx.x
+#define _threadIdx3(ii,jj,kk) const u_int ii = threadIdx.x, jj = threadIdx.y, kk = threadIdx.z
+#define _threadIdx2(ii,jj) const u_int ii = threadIdx.x, jj = threadIdx.y;
+#define _threadIdx1(ii) const u_int ii = threadIdx.x
 
 #define __CudaThreadNumberPerBlock EvaSettings.threadNumberPerBlock
 #define _cuDim(N) dim3(__CudaBlockNumber(N)),dim3(__CudaThreadNumberPerBlock)
