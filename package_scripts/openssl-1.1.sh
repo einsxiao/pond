@@ -1,4 +1,5 @@
 #/bin/bash
+cd $POND_ROOT/src_packages
 if ! [ -f openssl-1.1.1i.tar.gz ]; then
     wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1i.tar.gz
 fi

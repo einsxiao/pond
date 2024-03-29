@@ -14,7 +14,7 @@ from pond_basic import *
 import importlib
 
 pond_version='0.2.3'
-pond_server=os.getenv("POND_SERVER",'server.doc.run')
+pond_server=os.getenv("POND_SERVER",'server.powerbyte.online')
 pond_server_port=os.getenv("POND_SERVER_PORT",'5555')
 pond_git_port=os.getenv("POND_GIT_PORT",'22')
 pond_proxy=os.getenv("POND_PROXY")
@@ -40,7 +40,7 @@ def help_info():
           重新编译模块
 
     login
-          使用 https://doc.run 的帐号密码登录系统
+          使用 https://powerbyte.online 的帐号密码登录系统
 
     logout
           清除登录信息
@@ -79,7 +79,7 @@ def help_info():
           recompile module
 
     login
-          setup account bonded with https://doc.run 
+          setup account bonded with https://powerbyte.online 
 
     logout
           clear pond login info

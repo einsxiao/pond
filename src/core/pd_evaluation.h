@@ -146,6 +146,7 @@ namespace pond{
     bool            ClearEvaRecord(             int i);
     int             Clear(                      Object&obj,bool repeated = false);
     //////////////////////////////////////////////////////////////
+    int             Call(                       const char*funcName); //zero arg call
     int             Call(                       const char*funcName,Object&Argv);
     int             Call(                       const EvaRecord *funcEvaRecord,Object&Argv);
     //////////////////////////////////////////////////////////////
@@ -214,10 +215,13 @@ namespace pond{
     ////// Imbeded Matrix
     Matrix          *GetMatrix(                 std::string matrixName);
     ComplexMatrix   *GetComplexMatrix(          std::string matrixName);
-    Matrix          *GetOrNewMatrix(            std::string matrixName);
-    ComplexMatrix   *GetOrNewComplexMatrix(     std::string matrixName);
-    int              RemoveMatrix(              std::string matrixName);
-    int              RemoveComplexMatrix(       std::string matrixName);
+        Matrix          *GetOrNewMatrix(            std::string matrixName);
+        ComplexMatrix   *GetOrNewComplexMatrix(     std::string matrixName);
+        int              RemoveMatrix(              std::string matrixName);
+        int              RemoveComplexMatrix(       std::string matrixName);
+        ////////////////////////////////////////
+    int              GetMPIRank();
+    int              GetMPIRankSize();
     ////////////////////////////////////////
     ////////////////////////////////////////
     static int       PD_Print(                   Object&); 

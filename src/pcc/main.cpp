@@ -7,7 +7,7 @@ int main(int argc,char* argv[]){
   if ( argc == 1 ){
     cout<<"pcc: fatal error: no input files"<<endl;
     cout<<"pcc is a customed compiler for pond high performance platform."<<endl;
-    cout<<"more about pcc: https://doc.run/pd/ce1b95e8dbe99794"<<endl;
+    cout<<"more about pcc: https://powerbyte.online/pd/ce1b95e8dbe99794"<<endl;
     return 0;
   }
   try{

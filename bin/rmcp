@@ -20,6 +20,7 @@ for ori_file in args[1:-1]:
     if os.path.isdir(ori_file): continue
     bfile = os.path.basename(ori_file)
     des_file = os.path.join(des_dir,bfile)
-    if os.path.exists( des_file ):
-        os.remove( des_file );
+    if os.path.exists(des_file):
+        os.remove(des_file)
+        #os.system("rm -rf %s"%(des_file,))
     os.system("cp -rf %s %s"%(ori_file,des_file))

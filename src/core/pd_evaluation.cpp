@@ -245,9 +245,16 @@ Evaluation::~Evaluation(){
   // deconstruct the many Modules or other malloced memory.
   while ( moduleTable.begin()!=moduleTable.end() ){
     // module itself will erase the module and delete the module with its type
-    if ( moduleTable.begin()->second!=NULL )
-      delete moduleTable.begin()->second;
-    moduleTable.erase( moduleTable.begin() );
+    if ( moduleTable.begin()->second!=NULL ){
+      const string module_name = moduleTable.begin()->first;
+      //cout<<"remove module table "<< moduleTable.begin()->first <<endl;
+      this->RemoveModule( module_name ); // will remote this record
+                                                            
+      //dlclose( moduleTable.begin()->second );
+      //delete moduleTable.begin()->second;
+    } else {
+      moduleTable.erase( moduleTable.begin() );
+    }
   }
   while ( evaRecordTable.begin()!=evaRecordTable.end() ){
     if ( *evaRecordTable.begin()  != NULL )
@@ -292,10 +299,21 @@ int try_load_so_in_dir(string _module_dir, string libname,
     string so_file =  _module_dir+"/"+libname;                               
     string temp_so_file = temp_dir+"/"+libname;                              
     if ( FileExistQ(so_file) ){
+
       if ( !FileExistQ(temp_so_file) ||
-           GetFileMD5(so_file) != GetFileMD5(temp_so_file) )
-        System("rmcp "+so_file+" "+temp_dir );
+           GetFileMD5(so_file) != GetFileMD5(temp_so_file) ){
+        if (EvaKernel->GetMPIRank()==0){
+          System("rmcp "+so_file+" "+temp_dir );
+        }
+        EvaKernel->Call("MPIBarrier");
+        pond::sleep_micro(100);
+        EvaKernel->Call("MPIBarrier");
+      }
+
       lib_Handler=dlopen(temp_so_file.c_str(),RTLD_NOW|RTLD_GLOBAL );
+
+      //lib_Handler=dlopen(so_file.c_str(),RTLD_NOW|RTLD_GLOBAL );
+
       if ( !lib_Handler ) {
         if ( !DebugMode && silent ) return 1;
         zhErroring("GetModule", "未能成功载入模块 '"+moduleName+"' 的二进制包")|| 
@@ -342,7 +360,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent, bool not_pull){
     if ( pond_home == "" || pond_root == "" )
       ThrowError("Pond Environment variables are not properly set");
     string libname="lib"+moduleName+"Module.so", devlibname="lib"+moduleName+"Module-dev.so";
-    string so_file,temp_so_file;
+    string so_file;
     string culibname="lib"+moduleName+"Module_cuda.so",cudevlibname="lib"+moduleName+"Module_cuda-dev.so";
     bool nvcc_status = pond::CommandExist("nvcc");
 
@@ -714,7 +732,11 @@ int Evaluation::RemoveModule(string moduleName){
   map<string,void*>::iterator iterlibhandle;
   iterlibhandle = libHandlerTable.find(moduleName);
   if ( iterlibhandle != libHandlerTable.end() ){
-    dlclose( iterlibhandle->second );
+    if ( iterlibhandle->second ){
+      //cout<<"dlclose module table "<< moduleTable.begin()->first<<endl;
+      dlclose( iterlibhandle->second );
+      //delete iterlibhandle->second;
+    }
     libHandlerTable.erase(iterlibhandle);
   }
   moduleTable.erase(itermodule);
@@ -1505,6 +1527,11 @@ int Evaluation::Call( const char *funcName, Object &ARGV)
   return -1;
 }
 
+int Evaluation::Call(const char* funcName){
+  Object tmp_arg;
+  return this->Call(funcName, tmp_arg);
+}
+
 int Evaluation::Call(const EvaRecord*rec,Object&ARGV)
 {
   if ( rec == NULL ) {
@@ -1593,6 +1620,28 @@ int Evaluation::RemoveMatrix(string name){
 
 int Evaluation::RemoveComplexMatrix(string name){
   return GlobalPool.ComplexMatrices.RemoveMatrix(name);
+}
+
+int Evaluation::GetMPIRank(){
+  Object argv;
+  int rank = 0;
+  this->Call("MPIGetRank",argv);
+  if (argv.NumberQ()){
+    rank = (int)argv.Number();
+  } 
+  this->Call("MPIBarrier");
+  return rank;
+}
+
+int Evaluation::GetMPIRankSize(){
+  Object argv;
+  int size = 1;
+  this->Call("MPIGetRankSize",argv);
+  if (argv.NumberQ()){
+    size = (int)argv.Number();
+  } 
+  this->Call("MPIBarrier");
+  return size;
 }
 
 ///////////////////////////////////////////// 

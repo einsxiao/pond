@@ -31,8 +31,12 @@ void MPIModule::Init()
 }
 void MPIModule::Finalize()
 {
-  MPI_Finalize();
-  initialized = false;
+  if (initialized){
+    this->Barrier();
+    //cout<<"MPI env finalized"<<endl;
+    MPI_Finalize();
+    initialized = false;
+  }
 }
 
 static void index_init(int n,int*ind)
@@ -217,14 +221,48 @@ _def_col( int    ,        MPI_INT )
 
 void MPIModule::Barrier()
 {
-  Init();
-  MPI_Barrier( MPI_COMM_WORLD );
+  if (this->initialized){
+    MPI_Barrier( MPI_COMM_WORLD );
+  }
 }
 
 bool MPIModule::IsRootRank()
 {
-  Init();
-  return rankID == 0;
+  if ( initialized ){
+    return rankID == 0;
+  } else {
+    return true;
+  }
+}
+
+int MPIModule::GetRank(){
+  return rankID;
+}
+
+int MPIModule::GetRankSize(){
+  if ( initialized ){
+    return rankSize;
+  } else {
+    return 1;
+  }
+}
+
+int MPIModule::PD_MPIGetRank(Object&Argv){
+  // get mpi rank id of current progress
+  const int rankID = this->GetRank();
+  ReturnNumber(rankID);
+}
+
+int MPIModule::PD_MPIGetRankSize(Object&Argv){
+  // get mpi rank id of current progress
+  const int rankSize = this->GetRankSize();
+  ReturnNumber(rankSize);
+}
+
+int MPIModule::PD_MPIBarrier(Object&Argv){
+  // mpi barrier
+  this->Barrier();
+  ReturnNull;
 }
 
 

@@ -32,14 +32,14 @@ def request(argv,options):
             print("    version     : {0}".format(res.get('version')) )
             print("    update_time : {0}".format(res.get('code_update_time')) )
             if res.get('homepage'):
-                print("\n    Your sharepage url is https://doc.run/p/{0}\n".format(res.get('homepage'),) )
+                print("\n    Your sharepage url is https://powerbyte.online/p/{0}\n".format(res.get('homepage'),) )
             return
         if res.get('status') == 'someone':
             print("\n  Module {0} is owned by user with nickname {1}.\n".format(module_name, res.get('owner')) )
             print("    version     : {0}".format(res.get('version')) )
             print("    update_time : {0}".format(res.get('code_update_time')) )
             if res.get('homepage'):
-                print("\n    You can visit the author's sharepage by url https://doc.run/p/{0}\n".format(res.get('homepage'),) )
+                print("\n    You can visit the author's sharepage by url https://powerbyte.online/p/{0}\n".format(res.get('homepage'),) )
                 pass
             
             return

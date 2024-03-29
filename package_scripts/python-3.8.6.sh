@@ -1,4 +1,5 @@
 #/bin/bash
+cd $POND_ROOT/src_packages
 if ! [ -f Python-3.8.6.tgz ]; then
     wget --no-check-certificate https://www.python.org/ftp/python/3.8.6/Python-3.8.6.tgz
 fi

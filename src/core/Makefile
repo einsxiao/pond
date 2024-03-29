@@ -1,9 +1,10 @@
 #compile setting
 PPCC = g++
 DIRS = 
-LIBS = -ldl
+LIBS = -ldl 
+INCLUDES = 
 ##################################################################################
-DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp
+DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp 
 FLAGS := -std=c++11 -O2 -fopenmp
 
 ##################################################################################
@@ -20,7 +21,7 @@ DALLOBJECTS :=  $(DOBJECTS)
 OBJECTS := $(patsubst %.cpp, build/release/%.tcpp.o, $(SRCS))
 ALLOBJECTS := $(OBJECTS) 
 
-INCLUDE = `pond-path gcc`
+INCLUDE = $(INCLUDES) `pond-path gcc` 
 MAKE = make
 OUT = libpd.so
 DOUT = libpd-dev.so

@@ -3,7 +3,6 @@
 
 #define EMSCRIPTEN_KEEPALIVE
 
-
 #define InitVar(variable,default_value) if ( not (EvaKernel->GetValue(#variable,variable)) ) { variable = default_value; }
 #define InitVar2(variable,default_value) if ( not (EvaKernel->GetValue(#variable,variable)) ) { variable = default_value; }
 #define InitVar3(pd_variable_name,variable,default_value) if ( not (EvaKernel->GetValue(pd_variable_name,variable)) ) { variable = default_value; }
@@ -16,9 +15,13 @@
 #define InitNameVariablePrint(name,variable,default_value)({            \
       if ( not (EvaKernel->GetValue(name,variable)) ) {                 \
         variable = default_value;                                       \
-        cout<<name<<" is set to default value "<< variable<<std::endl;  \
+        if (EvaKernel->GetMPIRank() == 0){                               \
+          cout<<name<<" is set to default value "<< variable<<std::endl; \
+        }                                                               \
       }else{                                                            \
-        cout<<name<<" is set to "<< variable<<std::endl;                \
+        if (EvaKernel->GetMPIRank() == 0){                               \
+          cout<<name<<" is set to "<< variable<<std::endl;              \
+        }                                                               \
       }                                                                 \
     })
 
@@ -54,18 +57,24 @@
       if(not tempObj.ListQ() or tempObj.Size() == 0 ){  \
         err=-1;                                         \
       }else{                                            \
-        cout<< name <<" is set to {";                   \
+        if (EvaKernel->GetMPIRank() == 0){              \
+          cout<< name <<" is set to {";                 \
+        }                                               \
         for (u_int i=0;i<tempObj.Size();i++){           \
           if ( not tempObj[i+1].NumberQ() ){            \
             err = -1;                                   \
             break;                                      \
           }else{                                        \
             array[i] = tempObj[i+1].Number();           \
-            if ( i > 0 ) cout<<",";                     \
-            cout<<array[i];                             \
+            if (EvaKernel->GetMPIRank() == 0){          \
+              if ( i > 0 ) cout<<",";                   \
+              cout<<array[i];                           \
+            }                                           \
           }                                             \
         }                                               \
-        cout<<"}"<<std::endl;                           \
+        if (EvaKernel->GetMPIRank() == 0){              \
+          cout<<"}"<<std::endl;                         \
+        }                                               \
       }                                                 \
       err;                                              \
     })
@@ -94,7 +103,9 @@
         MatrixModule::Object2Matrix(tempObj, matrix);                 \
       }                                                               \
       if( err >= 0 ){                                                 \
-        cout<< name <<" is set to "<<tempObj.ToString()<<std::endl;;  \
+        if (EvaKernel->GetMPIRank() == 0){                              \
+          cout<< name <<" is set to "<<tempObj.ToString()<<std::endl;;  \
+        }                                                               \
       }                                                               \
       err;                                                            \
     })
@@ -116,9 +127,11 @@
       EvaKernel->Evaluate(obj);                                   \
       if ( obj.SymbolQ( name ) )                                  \
         err = -1;                                                 \
-      if( err >= 0 ){                                             \
-        cout<< name <<" is set to "<<obj.ToString()<<std::endl;;  \
-      }                                                           \
+      if( err >= 0 ){                                               \
+        if (EvaKernel->GetMPIRank() == 0){                          \
+          cout<< name <<" is set to "<<obj.ToString()<<std::endl;;  \
+        }                                                           \
+      }                                                             \
       err;                                                        \
     })
 

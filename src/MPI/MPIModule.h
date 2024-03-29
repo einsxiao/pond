@@ -27,7 +27,12 @@ namespace pond{
 
     void            Barrier();
     bool            IsRootRank();
+    int             GetRank();
+    int             GetRankSize();
     int             PD_MPITest(Object&);
+    int             PD_MPIGetRank(Object&);
+    int             PD_MPIGetRankSize(Object&);
+    int             PD_MPIBarrier(Object&);
   };
 
 };

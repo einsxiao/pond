@@ -30,7 +30,7 @@ POND_GIT_PORT      = os.getenv("POND_GIT_PORT")
 POND_URL           = os.getenv("POND_URL")
 POND_PASS_HINT     = """
   If you are not signed up or forget the account info, 
-  please visit https://doc.run to signin/signup.
+  please visit https://powerbyte.online to signin/signup.
 """
 
 
@@ -429,7 +429,7 @@ POND_AUTH_USERNAME = __info__.get('username') or  ''
 
 
 pond_author = POND_AUTH_USERNAME.replace('@','_AT_')
-pond_git_cmd="GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git -c user.name='{1}' -c user.email='{1}@doc.run' ".format(
+pond_git_cmd="GIT_SSH_COMMAND='ssh -i {0}/.git_private_key' git -c user.name='{1}' -c user.email='{1}@powerbyte.online' ".format(
     pond_home, pond_author,
 )
 #pond_git_cmd = os.getenv("POND_GIT_CMD")

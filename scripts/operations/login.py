@@ -15,7 +15,7 @@ def request(argv,options):
     # })
 
     #username
-    sys.stdout.write("DocRun(https://doc.run) username > ")
+    sys.stdout.write("DocRun(https://powerbyte.online) username > ")
     sys.stdout.flush()
     username = input()
     username.strip()

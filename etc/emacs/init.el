@@ -7,8 +7,8 @@
 (custom-set-faces
  '(default ((t (:family "DejaVu Sans Mono" :foundry "unknown" :slant normal :weight normal :height 99 :width normal)))))
 
-(add-to-list 'default-frame-alist '(font . "-outline-Consolas-normal-normal-normal-mono-*-*-*-*-c-*-iso10646-1" ))
-(set-face-attribute 'default t :font "-outline-Consolas-normal-normal-normal-mono-*-*-*-*-c-*-iso10646-1" )
+;(add-to-list 'default-frame-alist '(font . "-outline-Consolas-normal-normal-normal-mono-*-*-*-*-c-*-iso10646-1" ))
+;(set-face-attribute 'default t :font "-outline-Consolas-normal-normal-normal-mono-*-*-*-*-c-*-iso10646-1" )
 
 (setq make-backup-files nil)
 (setq backup-by-copying t)
@@ -101,8 +101,8 @@ There are two things you can do about this warning:
 (require 'pond-full)
 
 
-(require 'rjsx-mode)
-(add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+;;(require 'rjsx-mode)
+;;(add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 
 
 ;;(add-to-list 'ac-modes 'web-mode)
@@ -125,4 +125,10 @@ There are two things you can do about this warning:
 
 
 (global-set-key (kbd "RET") 'newline-and-indent)
+
+;; self-defined file suffix associate with its modes
+(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
+
+
+
 

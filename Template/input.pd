@@ -3,7 +3,6 @@
 #SetParallelMode("gpu") # parallel pragma will run in nvidia device. When no device, error will be reported.
 SetParallelMode("cpu") # parallel pragma will run in openmp mode
 import Template
-welcome()
-vector_times([1,2,3,4],3)
-mat_oper_test()
+print(vector_times([0,2,3,4],3))
+print(vector_times([5,3,1],4))
 

@@ -4,5 +4,5 @@
 # Version         : Template.VERSION  
 # R-Copyleft(r-ɔ) : DATE
 ####################################
-hey(p~) := print('Hey! ', p )
+#hey(p~) := print('Hey! ', p )
 #hey('X')
