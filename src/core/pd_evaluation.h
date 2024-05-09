@@ -43,6 +43,7 @@ namespace pond{
     int                                         maxRecursionDepth = 256;
     int                                         EvaluationDepth;
     bool                                        DebugMode;
+    int                                         rankID = 0, rankSize = 1, mpiEnabled;
     //////////////////////////////////////////////////////////////
     ///////  moduleTables
     std::map<std::string, Module*>				      moduleTable;
@@ -66,10 +67,6 @@ namespace pond{
     /////// specific affairs
     //Object                                      superList,inputList;
   public:
-    /* DocIn                                       _din; */
-    /* DocOut                                      _dout; */
-    /* DocErr                                      _derr; */
-    /* DebugOut                                    _deout; */
     int                                         argc;
     char                                      **argv;
     //////////////////////////////////////////////////////////////
@@ -78,7 +75,7 @@ namespace pond{
     std::map<std::string,std::string>           messages; // main thread message
     bool                                        pmark    = false;
   public:
-    Evaluation(bool debug = false, bool pmark=false, bool pimport=false);  ~Evaluation();
+    Evaluation(bool debug, bool pmark, bool pimport, int argc, char*argv[]);  ~Evaluation();
     //////////////////////////////////////////////////////////////
     ///// Evaluate something
     //  ofDelay if the calling form of delay function, all delayfunction attribute is apply to this form
@@ -215,11 +212,12 @@ namespace pond{
     ////// Imbeded Matrix
     Matrix          *GetMatrix(                 std::string matrixName);
     ComplexMatrix   *GetComplexMatrix(          std::string matrixName);
-        Matrix          *GetOrNewMatrix(            std::string matrixName);
-        ComplexMatrix   *GetOrNewComplexMatrix(     std::string matrixName);
-        int              RemoveMatrix(              std::string matrixName);
-        int              RemoveComplexMatrix(       std::string matrixName);
-        ////////////////////////////////////////
+    Matrix          *GetOrNewMatrix(            std::string matrixName);
+    ComplexMatrix   *GetOrNewComplexMatrix(     std::string matrixName);
+    int              RemoveMatrix(              std::string matrixName);
+    int              RemoveComplexMatrix(       std::string matrixName);
+    ////////////////////////////////////////
+    int              MPIBarrier();
     int              GetMPIRank();
     int              GetMPIRankSize();
     ////////////////////////////////////////

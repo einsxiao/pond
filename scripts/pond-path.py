@@ -53,13 +53,13 @@ add_include( os.path.join(pond_root,'include') )
 #add_include( os.path.join(pond_root,'packages','include') )
 
 #POND_INCLUDE_PATH
-pond_include_path = os.getenv("POND_INCLUDE") or ''
+pond_include_path = os.getenv("POND_INCLUDE_PATH") or ''
 for item in pond_include_path.split(':'):
     add_include(item, True);
     pass
 
 #POND_LIBRARY_PATH
-pond_library_path = os.getenv("POND_LIB") or ''
+pond_library_path = os.getenv("POND_LIBRARY_PATH") or ''
 for item in pond_library_path.split(':'):
     add_lib(item,True);
     #print item

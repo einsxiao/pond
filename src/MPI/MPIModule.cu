@@ -14,15 +14,15 @@ MPIModule::MPIModule():Module(MODULE_NAME)
 
 MPIModule::~MPIModule()
 {
-  if ( initialized ) Finalize();
+  //if ( initialized ) Finalize();
 } 
 
 void MPIModule::Init()
 {
   if ( initialized ) return;
-  MPI_Init( &(EvaKernel->argc), &(EvaKernel->argv) );
-  MPI_Comm_rank( MPI_COMM_WORLD, &rankID );
-  MPI_Comm_size( MPI_COMM_WORLD, &rankSize );
+  // MPI_Init( &(EvaKernel->argc), &(EvaKernel->argv) );
+  // MPI_Comm_rank( MPI_COMM_WORLD, &rankID );
+  // MPI_Comm_size( MPI_COMM_WORLD, &rankSize );
   int namelen;
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   MPI_Get_processor_name( processor_name, &namelen );

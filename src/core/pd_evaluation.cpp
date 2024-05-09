@@ -2,6 +2,7 @@
 #include"dlfcn.h" //dlopen dlsym
 // #include<emscripten.h>
 #include<sstream>
+#include"mpi.h"
 #define __MODULE_NAME__ Kernel
 
 using namespace std;
@@ -90,7 +91,7 @@ bool EvaRecord::isCallable(){
 
 static vector<Index> symidToPairIndex;
 
-Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
+Evaluation::Evaluation(bool debug, bool pmark, bool pimport, int argc, char*argv[]){
   // EvaKernel
   //dout<<"try initialize evaluation"<<endl;
   // exit(0);
@@ -103,6 +104,27 @@ Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   /////////////
   this->DebugMode   = debug;
   this->pmark       = pmark;
+  this->argc        = argc;
+  this->argv        = argv;
+  ///////////////
+  // init mpi information
+  string CWN = pond::GetEnv("OMPI_COMM_WORLD_SIZE");
+  if (CWN != "") {
+    //cout << "CWN SIZE=" << CWN << endl;
+    this->mpiEnabled = true;
+    try {
+      MPI_Init(&(EvaKernel->argc), &(EvaKernel->argv));
+      MPI_Comm_rank(MPI_COMM_WORLD, &this->rankID);
+      MPI_Comm_size(MPI_COMM_WORLD, &this->rankSize);
+    } catch (const Error& err) {
+      cout << "MPI initialize failed:" << err << endl;
+    }
+  } else {
+    this->mpiEnabled = false;
+  }
+
+  ///////////////
+  // init valueTable structrue
   newContext();
   evaRecordTable.push_back(NULL);
   evaRecordTable.push_back(NULL); //Get Value will return a value ( > 2) when is a eva record
@@ -110,6 +132,7 @@ Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   __Status_ImportInfoPrint = pimport;
   ///*
   ///////////////////////////////
+  GetModule("MPI");
   //dout<<"basic info ready, try register core functions"<<endl;
   if ( __Status_ImportInfoPrint ){
     cout<<"Import core with functions:\n    ";
@@ -193,12 +216,9 @@ Evaluation::Evaluation(bool debug, bool pmark, bool pimport){
   if ( GetEnv("POND_ENABLE_PYTHON")   == "yes" ){
     GetModule("Python"); 
   }
-  if ( GetEnv("POND_ENABLE_MPI")      == "yes" ){
-    GetModule("MPI");
-  }
   if ( GetEnv("POND_ENABLE_CUDA")     == "yes" ){
     GetModule("Matrix");
-    GetModule("MatrixOperations");
+    //GetModule("MatrixOperations");
   }
   //*/
 
@@ -267,6 +287,11 @@ Evaluation::~Evaluation(){
     valueTables.erase( valueTables.begin() );
   }
   //cout<<"Evaluation free done"<<endl;
+  if (this->mpiEnabled){
+    this->MPIBarrier();
+    //cout<<"MPI env finalized"<<endl;
+    MPI_Finalize();
+  }
 }
 
 int Evaluation::InsertModule(string moduleName,Module*module){
@@ -305,9 +330,9 @@ int try_load_so_in_dir(string _module_dir, string libname,
         if (EvaKernel->GetMPIRank()==0){
           System("rmcp "+so_file+" "+temp_dir );
         }
-        EvaKernel->Call("MPIBarrier");
+        EvaKernel->MPIBarrier();
         pond::sleep_micro(100);
-        EvaKernel->Call("MPIBarrier");
+        EvaKernel->MPIBarrier();
       }
 
       lib_Handler=dlopen(temp_so_file.c_str(),RTLD_NOW|RTLD_GLOBAL );
@@ -434,7 +459,7 @@ int Evaluation::GetModuleLib(string moduleName,bool silent, bool not_pull){
       } else {
       // try pull
         cout<<"Pulling '"<<moduleName<<"' from repo server."<<endl;
-        System("pd pull " + moduleName );
+        std::system(("pd pull " + moduleName).c_str() );
         return GetModuleLib( moduleName, true, true);
       }
       return -1;
@@ -1622,26 +1647,18 @@ int Evaluation::RemoveComplexMatrix(string name){
   return GlobalPool.ComplexMatrices.RemoveMatrix(name);
 }
 
+int Evaluation::MPIBarrier(){
+  if (this->mpiEnabled) {
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
+  return 0;
+}
 int Evaluation::GetMPIRank(){
-  Object argv;
-  int rank = 0;
-  this->Call("MPIGetRank",argv);
-  if (argv.NumberQ()){
-    rank = (int)argv.Number();
-  } 
-  this->Call("MPIBarrier");
-  return rank;
+  return this->rankID;
 }
 
 int Evaluation::GetMPIRankSize(){
-  Object argv;
-  int size = 1;
-  this->Call("MPIGetRankSize",argv);
-  if (argv.NumberQ()){
-    size = (int)argv.Number();
-  } 
-  this->Call("MPIBarrier");
-  return size;
+  return this->rankSize;
 }
 
 ///////////////////////////////////////////// 

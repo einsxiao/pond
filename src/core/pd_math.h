@@ -198,9 +198,9 @@ struct floatcomplex {
         return floatcomplex(c1.re - c2, c1.im);
     }
     __cond_host_device__ inline friend floatcomplex operator-(
-        const float c2,
-        const floatcomplex c1) {
-        return floatcomplex(c1.re - c2, c1.im);
+        const float c1,
+        const floatcomplex c2) {
+        return floatcomplex(c1 - c2.re, -c2.im);
     }
 
     __cond_host_device__ inline friend floatcomplex operator*(
@@ -215,9 +215,9 @@ struct floatcomplex {
         return floatcomplex(c1.re * c2, c1.im * c2);
     }
     __cond_host_device__ inline friend floatcomplex operator*(
-        const float c2,
-        const floatcomplex c1) {
-        return floatcomplex(c1.re * c2, c1.im * c2);
+        const float c1,
+        const floatcomplex c2) {
+        return floatcomplex(c1 * c2.re, c1 * c2.im);
     }
 
     __cond_host_device__ inline friend floatcomplex operator/(
@@ -386,9 +386,9 @@ struct complex {
                                                          const double c2) {
         return complex(c1.re + c2, c1.im);
     }
-    __cond_host_device__ inline friend complex operator+(const double c2,
-                                                         const complex c1) {
-        return complex(c1.re + c2, c1.im);
+    __cond_host_device__ inline friend complex operator+(const double c1,
+                                                         const complex c2) {
+        return complex(c1 + c2.re, c2.im);
     }
 
     __cond_host_device__ inline friend complex operator-(const complex c1,
@@ -399,9 +399,9 @@ struct complex {
                                                          const double c2) {
         return complex(c1.re - c2, c1.im);
     }
-    __cond_host_device__ inline friend complex operator-(const double c2,
-                                                         const complex c1) {
-        return complex(c1.re - c2, c1.im);
+    __cond_host_device__ inline friend complex operator-(const double c1,
+                                                         const complex c2) {
+        return complex(c1 - c2.re, -c2.im);
     }
 
     __cond_host_device__ inline friend complex operator*(const complex c1,
@@ -413,9 +413,9 @@ struct complex {
                                                          const double c2) {
         return complex(c1.re * c2, c1.im * c2);
     }
-    __cond_host_device__ inline friend complex operator*(const double c2,
-                                                         const complex c1) {
-        return complex(c1.re * c2, c1.im * c2);
+    __cond_host_device__ inline friend complex operator*(const double c1,
+                                                         const complex c2) {
+        return complex(c1 * c2.re, c1 * c2.im);
     }
 
     __cond_host_device__ inline friend complex operator/(const complex c1,

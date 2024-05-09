@@ -16,9 +16,9 @@ Kernel::Kernel(istream *istr_in,bool interactively,int argc,char*argv[],
   
   this->pmark = pmark;
 #ifdef DEBUG
-  evaluation = new Evaluation(true, pmark, pimport);
+  evaluation = new Evaluation(true, pmark, pimport, argc, argv);
 #else
-  evaluation = new Evaluation(false,pmark, pimport);
+  evaluation = new Evaluation(false,pmark, pimport, argc, argv);
 #endif
   //dout<<"nealy done"<<endl;
   // evaluation->superList = this->superList;

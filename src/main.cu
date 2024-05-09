@@ -49,12 +49,12 @@ int main(int argc,char* argv[])
     if ( rcfile.size() == 0 ) rcfile = GetEnv("HOME")+"/.pondrc";
     for(size_t i=0; i<options.size(); i++){
       if ( options[i].first == "version" || options[i].first == "v" ){
-        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        cout<<"Pond Science © LiuBoCloud. All rights reserved."<<endl;
         cout<<"Version "<< POND_VERSION <<endl;
         return 0;
       }
       if ( options[i].first == "help" || options[i].first == "h" ){
-        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        cout<<"Pond Science © LiuBoCloud. All rights reserved."<<endl;
         if ( lang == "zh"){
           cout<<"用法:  pond [选项] ..."<<endl;
           cout<<"    pond [选项] 脚本文件 ..."<<endl;
@@ -102,7 +102,7 @@ int main(int argc,char* argv[])
     }
     if ( args.size() == 1 ){
       if ( isatty( 0 ) ){
-        cout<<"Pond Science © OVO.LTD. All rights reserved."<<endl;
+        cout<<"Pond Science © LiuBoCloud. All rights reserved."<<endl;
         Kernel kernel(&cin, true, argc, argv, rcfile, pmark, pimport);
         res = kernel.Phrasing();
       }else{

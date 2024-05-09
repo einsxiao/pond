@@ -1,7 +1,7 @@
 #compile setting
 PPCC = g++
 DIRS = 
-LIBS = -ldl 
+LIBS = -ldl -lmpi -lmpi_cxx
 INCLUDES = 
 ##################################################################################
 DFLAGS :=  -std=c++11 -g3 -DDEBUG -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-comment -fopenmp 

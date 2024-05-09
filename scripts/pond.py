@@ -108,7 +108,7 @@ try:
 
   #no argv run something
   script_path = os.path.split(os.path.realpath(__file__))[0]
-  sysargv,options=argv2argsoptions(sys.argv,['version','help','run',],{'?':'help','h':'help','v':'version','r':'run',})
+  sysargv,options=argv2argsoptions(sys.argv,['version','help','run','all',],{'?':'help','h':'help','v':'version','r':'run','a':'all'})
   #print('sysargv =',sysargv)
   #print('options =',options)
   #no argument

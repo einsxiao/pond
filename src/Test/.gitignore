@@ -1,0 +1,11 @@
+*.so
+*.o
+*.swp
+*.txt
+*.vtk
+*.tmp
+*.dat
+*.bak
+exe
+/build/
+/task-*/

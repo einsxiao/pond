@@ -71,7 +71,7 @@ namespace pond{
 #define __DEBUG_MAIN__(file)                                            \
   int main(int argc,char*argv[]){                                       \
     pond::dout<<">>>debug main to run '"<<file<<"'<<<"<<std::endl;      \
-    pond::Evaluation eva(true);                                         \
+    pond::Evaluation eva(true, false, false, argc, argv  );             \
     eva.argc = argc; eva.argv = argv;                                   \
     try{                                                                \
       pond::Object tmp;                                                 \

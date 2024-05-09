@@ -50,11 +50,6 @@ def request(argv,options):
         os.system("chmod 600 "+key_file)
         pass
 
-
-    if res.get('git_private_key'):
-        file_content_set( os.path.join(pond_home, ".git_private_key"), res.get('git_private_key') )
-        pass
-
     if res.get('status') == 'not_exist':
         print('\nModule {0} does not exist.'.format(module_name) )
         return
@@ -66,18 +61,25 @@ def request(argv,options):
     os.chdir( module_dir )
     #print("try git add/commit/push")
 
-    cmd = pond_git_cmd+" add ."
-    os.system( cmd )
+    os.system( pond_git_cmd+" checkout master" )
+    os.system( pond_git_cmd+" add ." )
 
     commit_content = ctimestr()
     if len(argv)>1:
         commit_content = ' '.join(argv[1:])
         pass
-    cmd = pond_git_cmd + " commit -m '"  + commit_content + "'"
-    os.system( cmd )
+    os.system( pond_git_cmd + " commit -m '"  + commit_content + "'" )
+    code = os.system( pond_git_cmd+" push" )
 
-    cmd = pond_git_cmd+" push"
-    os.system( cmd )
+    if code == 0:
+        print("prepare exec branch")
+        os.chdir( module_dir )
+        os.system("make release; git checkout -b exec; git checkout exec;")
+        os.system("echo ''> .gitignore; rm -r *.cpp *.cu *.cc *.f90 *.f Makefile build* task-* .vscode")
+        os.system( pond_git_cmd+" add ." )
+        os.system( pond_git_cmd+" commit -m '"  + commit_content + "'" )
+        os.system( pond_git_cmd+" push --force origin exec " )
+        os.system( pond_git_cmd+" checkout master " )
 
     #print("try update repo code info")
     res = module_request( 'update-repo-code-info', {

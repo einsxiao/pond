@@ -52,6 +52,12 @@ def request(argv,options):
         print('\nModule {0} does not exist.'.format(module_name) )
         return
 
+    perm_type = res.get("perm_type")
+    branch = 'master'
+    if perm_type == 'lib_exec':
+        branch = 'exec'
+        pass
+
     # if res.get('status') == 'someone':
     #     if not res.get('is_shared'):
     #         print('\nModule {0} is not shared by its author.'.format(module_name) )
@@ -60,13 +66,13 @@ def request(argv,options):
 
     if not os.path.exists( pond_home ): os.mkdir( pond_home )
     os.chdir( pond_home )
-    #print("changed to dir:", pond_home )
+    print("changed to dir:", pond_home )
     if not os.path.exists( module_dir ):
         # clone the repo
-        cmd = pond_git_cmd + " clone ssh://git@{0}:{1}/{2}.git".format(POND_SERVER, POND_GIT_PORT, module_name)
-        #print("try clone with cmd>", cmd)
+        cmd = pond_git_cmd + " clone -b {3} ssh://git@{0}:{1}/{2}.git".format(POND_SERVER, POND_GIT_PORT, module_name, branch)
+        print("try clone with cmd>", cmd)
         os.system( cmd )
-        #print('clone done')
+        print('clone done')
         pass
     else:
         os.chdir( module_dir )
@@ -74,16 +80,16 @@ def request(argv,options):
         if not os.path.exists( './.git/HEAD' ):
             os.chdir( module_dir )
             os.system( "if [ -d  .temp ];then rm -rf .temp; fi" )
-            cmd = pond_git_cmd + " clone ssh://git@{0}:{1}/{2}.git .temp".format(POND_SERVER, POND_GIT_PORT, module_name)
+            cmd = pond_git_cmd + " clone -b {3} ssh://git@{0}:{1}/{2}.git .temp".format(POND_SERVER, POND_GIT_PORT, module_name, branch)
             #print("no git, try with cmd>", cmd)
             os.system( cmd )
             os.system( "cp -rf .temp/. ./; rm -rf .temp;")
             pass
         else:
-            cmd = pond_git_cmd+" pull"
-            #print("try pull with cmd>", cmd)
+            cmd = pond_git_cmd + " pull origin {0}".format(branch)
+            print("try pull with cmd>", cmd)
             os.system( cmd )
-            #print('pull done')
+            print('pull done')
             pass
         pass
 
