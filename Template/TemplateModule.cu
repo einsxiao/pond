@@ -18,11 +18,11 @@ TemplateModule::TemplateModule():Module(MODULE_NAME){}
 TemplateModule :: ~TemplateModule(){ }
 
 int TemplateModule::PD_vector_times(Object&argv){
-  /* a vector times a number */
+  /* a vector times a number, argv[1] is the matrix, argv[2] is the number */
   Matrix mat; MatrixModule::Object2Matrix(argv[1], mat);
 #pragma launch_kernel<<<i:mat.Size()>>>(Matrix mat:mat,double x:double(argv[2]))
   {
-    mat[i]*=x;
+    mat(i)*=x;
   }
   MatrixModule::Matrix2Object(mat, argv);
   return 0;

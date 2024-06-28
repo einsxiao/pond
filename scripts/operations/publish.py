@@ -61,6 +61,7 @@ def request(argv,options):
     os.chdir( module_dir )
     #print("try git add/commit/push")
 
+    print("")
     os.system( pond_git_cmd+" checkout master" )
     os.system("if [ -d .ignore ]; then cp .ignore/full.ignore ./.gitignore;else cp $POND_ROOT/Template/.ignore/full.ignore ./.gitignore; fi ")
     os.system( pond_git_cmd+" add ." )
@@ -69,19 +70,25 @@ def request(argv,options):
     if len(argv)>1:
         commit_content = ' '.join(argv[1:])
         pass
-    os.system( pond_git_cmd + " commit -m 'master save at "  + commit_content + "'" )
-    code = os.system( pond_git_cmd+" push --all" )
+    os.system( pond_git_cmd + " commit -m 'master commit at "  + commit_content + "'" )
+    code = os.system( pond_git_cmd+" push")
 
-    # exec & publish branch is dealing in operation publish
-    # if code == 0:
-    #     #print("prepare exec branch")
-    #     os.chdir( module_dir )
-    #     os.system("make release; git checkout -b exec; git checkout exec;")
-    #     os.system("echo ''> .gitignore; rm -r *.cpp *.cu *.cc *.f90 *.f Makefile build* task-* .vscode")
-    #     os.system( pond_git_cmd+" add ." )
-    #     os.system( pond_git_cmd+" commit -m '"  + commit_content + "'" )
-    #     os.system( pond_git_cmd+" push --force origin exec " )
-    #     os.system( pond_git_cmd+" checkout master " )
+    os.system("make release; git checkout -b publish; git checkout publish")
+    os.system("git reset --hard master")
+    os.system(pond_git_cmd+" push --force origin publish")
+
+    os.system("git reset --hard master")
+
+    #print("prepare exec branch")
+    os.chdir( module_dir )
+    os.system("make release; git checkout -b exec; git checkout exec;")
+    os.system("if [ -d .ignore ]; then cp .ignore/exec.ignore ./.gitignore; else cp $POND_ROOT/Template/.ignore/exec.ignore ./.gitignore; fi ")
+    os.system("git reset --hard master")
+    os.system("git rm -r --cached .")
+    os.system( pond_git_cmd+" add ." )
+    os.system( pond_git_cmd+" commit -m 'exec commit at "  + commit_content + "'" )
+    os.system( pond_git_cmd+" push --force origin exec " )
+    os.system( pond_git_cmd+" checkout master " )
 
     #print("try update repo code info")
     res = module_request( 'update-repo-code-info', {

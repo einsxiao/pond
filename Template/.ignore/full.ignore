@@ -1,0 +1,14 @@
+*.bak
+*.tmp
+*.log
+*.swp
+
+*.o
+exe
+*.so
+
+*.vtk
+*.dat
+
+/build/
+/task-*/

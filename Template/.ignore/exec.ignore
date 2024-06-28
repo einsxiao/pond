@@ -1,0 +1,17 @@
+*.tmp
+*.bak
+*.log
+*.swp
+
+*.o
+exe
+
+*.vtk
+*.dat
+
+*.cu
+*.cpp
+*.f90
+
+/build/
+/task-*/

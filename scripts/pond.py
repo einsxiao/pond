@@ -30,11 +30,15 @@ def help_info():
     run|-r [脚本]
           在pond核中解释执行[脚本]
 
-    save [模块名]
+    save|push [模块名]
           上传模块内容, 将更改推送到服务端的代码仓库中
 
     pull [模块名] [选项]
           下载模块内容, 从服务端的代码仓库中拉取更改 
+
+    publish [模块名]
+          将当前状态作为公开的程序版本,包含publish分支
+          和exec分支，不随save|push操作变化
 
     remake [模块名] 
           重新编译模块
@@ -69,11 +73,16 @@ def help_info():
     run|-r [script]
           run script in pond kernel
 
-    save [module_name]
+    save|push [module_name]
           upload module, push new code to server side
 
     pull [module_name] [options]
           try to download a module, pull code from server side to local 
+
+    publish [module_name]
+          use the current state as the public program version, including
+          the publish branch and exec branch, and it will not change
+          with save|push operations.
 
     remake [module_name] 
           recompile module
@@ -167,10 +176,11 @@ try:
 
   if operation == 'clear': operation = 'logout'
   if operation == 'list': operation = 'check'
+  if operation == 'push': operation = 'save'
 
   if operation in [
-      'say_hello','login','check','logout','pull', 'push',
-      'save', 'list_packages', 'install', 'remake',
+      'say_hello','login','check','logout','pull', 
+      'save', 'list_packages', 'install', 'remake', 'publish',
   ]:
     #print("processing ",operation )
     mod = importlib.import_module("operations."+operation)

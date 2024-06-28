@@ -57,7 +57,7 @@ FOROBJECTS   := $(patsubst %.f90, build/release/%.tf90.o, $(FORSRCS))
 ALLOBJECTS   := $(OBJECTS) $(COBJECTS) $(CUOBJECTS) $(FOROBJECTS)
 
 ################################################################
-in-all: debug
+in-all: release debug
 
 all: release debug
 

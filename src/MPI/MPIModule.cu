@@ -20,6 +20,7 @@ MPIModule::~MPIModule()
 void MPIModule::Init()
 {
   if ( initialized ) return;
+  // MPI initializing is done in pd_evaluation.cpp by default
   // MPI_Init( &(EvaKernel->argc), &(EvaKernel->argv) );
   // MPI_Comm_rank( MPI_COMM_WORLD, &rankID );
   // MPI_Comm_size( MPI_COMM_WORLD, &rankSize );
