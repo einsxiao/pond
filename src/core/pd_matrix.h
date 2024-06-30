@@ -23,7 +23,7 @@ namespace pond{
     void                       SetDim(const int p,const int Np);
     __cond_host_device__ int   DimN()const;
     __cond_host_device__ int   Dim(const int p)const;
-    u_int                      Size()const;
+    size_t                     Size()const;
     int                       *NewDimArray();
     void                       Init(int*dim,int dataPosition=MatrixHost,bool veryInit=false);
     template<class otype> void Init(const Matrix_T<otype>&,int dataPosition=MatrixHost,bool veryInit=false);
@@ -47,15 +47,15 @@ namespace pond{
     type                       TotalDevice();
     type                       TotalHost();
 
-    int                        Count(type cut_value);
+    size_t                     Count(type cut_value);
     type                       CountDevice(type cut_value);
     type                       CountHost(type cut_value);
 
     __cond_host_device__ type &Part(int *pArr);
     __cond_host_device__ type &Index(int *pArr);
     __cond_host_device__ type &operator()(int *pArr);
-    __cond_host_device__ type &operator[](int p);
-    __cond_host_device__ type &operator()(int p);
+    __cond_host_device__ type &operator[](size_t p);
+    __cond_host_device__ type &operator()(int p1);
     __cond_host_device__ type &operator()(int p1,int p2);
     __cond_host_device__ type &operator()(int p1,int p2,int p3);
     __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4);
@@ -63,7 +63,7 @@ namespace pond{
     __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6);
     __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7);
     __cond_host_device__ type &operator()(int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8);
-    __cond_host_device__ type &at(int p);
+    __cond_host_device__ type &at(int p1);
     __cond_host_device__ type &at(int p1,int p2);
     __cond_host_device__ type &at(int p1,int p2,int p3);
     __cond_host_device__ type &at(int p1,int p2,int p3,int p4);
@@ -75,16 +75,7 @@ namespace pond{
     //fortran index style with collomn major and index starting with 1
     __cond_host_device__ type &fPart(int *pArr);
     __cond_host_device__ type &fIndex(int *pArr);
-    /* __cond_host_device__ type &operator()(char,int *pArr); */
-    /* __cond_host_device__ type &operator()(char,int p); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6,int p7); */
-    /* __cond_host_device__ type &operator()(char,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8); */
-    __cond_host_device__ type &fat(int p);
+    __cond_host_device__ type &fat(int p1);
     __cond_host_device__ type &fat(int p1,int p2);
     __cond_host_device__ type &fat(int p1,int p2,int p3);
     __cond_host_device__ type &fat(int p1,int p2,int p3,int p4);
@@ -123,11 +114,11 @@ namespace pond{
     int  BinaryDumpFile(std::string filename);
     template<class ostype,class mtype> friend ostype &operator<<(ostype &os,const Matrix_T<mtype>&data);
     template<class istype,class mtype> friend istype &operator>>(istype &is,Matrix_T<mtype>&data);
-    static u_int CalculateSize(int*dim);
+    static size_t CalculateSize(int*dim);
   };
   template<class type>
-  u_int Matrix_T<type>::CalculateSize(int*dim){
-    int size = 1;
+  size_t Matrix_T<type>::CalculateSize(int*dim){
+    size_t size = 1;
     for ( int i=1; i<= dim[0]; i++ )
       size*= dim[i];
     return size;
@@ -141,7 +132,7 @@ namespace pond{
     for (int i=0; i<= data.ND; i++)
       os<<data.Dim(i)<<" ";
     os<<"\n";
-    for ( int i = 0; i < data.Size() ; i++)
+    for (size_t i = 0; i < data.Size() ; i++)
       os<<data.Data[i]<<"\n";
     return os;
   };
@@ -162,7 +153,7 @@ namespace pond{
       EleSize*=num;
     }
     data.Malloc();
-    for (u_int i=0; i< EleSize; i++ )
+    for (size_t i=0; i< EleSize; i++ )
       is>>data.Data[i];
     return is;
   }
@@ -227,22 +218,22 @@ namespace pond{
     dim[0] = ND;
     for ( int i=1;i<=ND;i++)
       dim[i] = Dim(i);
-    dim[ND+1] = Size();
+    //dim[ND+1] = Size();
     return dim;
   }
 
-  template<class type> u_int Matrix_T<type>::Size()const{
-    int size = D1;
+  template<class type> size_t Matrix_T<type>::Size()const{
+    size_t size = D1;
     for ( int i=2; i<= ND ; i++ )
       size *= Dim(i);
     return size;
   }
 
-  template<class type> __cond_host_device__ type&Matrix_T<type>::operator[](int p1){
+  template<class type> __cond_host_device__ type&Matrix_T<type>::operator[](size_t p){
 #ifdef __CUDA_ARCH__
-    return DataDevice[ p1 ];
+    return DataDevice[ p ];
 #else
-    return Data[ p1 ];
+    return Data[ p ];
 #endif
   };
 
@@ -592,7 +583,8 @@ namespace pond{
 
   template<class type> __cond_host_device__ type&Matrix_T<type>::Part(int *pArr)
   {
-    int dim=ND,dt,index=pArr[0];
+    int dim=ND,dt;
+    size_t index=pArr[0];
     for (int i=1; i< dim; i++) {
       dt=Dim(i+1);
       index=pArr[i] + index*dt;
@@ -617,7 +609,7 @@ namespace pond{
   {
     int dim=DimN();
     int dt;
-    int index=pArr[dim-1]-1;
+    size_t index=pArr[dim-1]-1;
     for (int i=dim-1; i>=0 ; i--) {
       dt = Dim(i+1);
       index = pArr[i] -1 + index*dt;
@@ -650,7 +642,7 @@ namespace pond{
           Free();
     }
     ND	=	dimArr[0];
-    int EleSize =	1;
+    size_t EleSize =	1;
     for (int i=1;i<=ND;i++){
       if ( dimArr[i] < 1 ){
         _Warning("Matrix::Init","Dimension smaller than 1; set to 1");
@@ -884,8 +876,8 @@ namespace pond{
     for (int i=0; i<= DimN(); i++)
       os<<Dim(i)<<" ";
     os<<"\n";
-    int size = Size();
-    for ( int i = 0; i < size ; i++)
+    size_t size = Size();
+    for (size_t i = 0; i < size ; i++)
       os<<Data[i]<<"\n";
     os.close();
     return 1;
@@ -976,7 +968,7 @@ namespace pond{
       tMatrix.SetDim(i, Dim(i+n) );
     }
 
-    int count = 0;
+    size_t count = 0;
     va_list args;
     va_start(args,n);
     for (int i=1; i<=n; i++){
@@ -996,14 +988,15 @@ namespace pond{
     va_list args;
     va_start(args,n);
     int *new_dim = new int(n+2);
-    new_dim[0] = n; new_dim[n+1] = 1;
+    size_t size = 1;
+    new_dim[0] = n; 
     for (int i=1; i<=n; i++){
       new_dim[i] = va_arg(args,int);
-      new_dim[n+1]*= new_dim[i];
+      size *= new_dim[i];
     }
     va_end(args);
 
-    if ( new_dim[n+1] > Size() ) {
+    if ( size > Size() ) {
       _Erroring("Matrix","Matrix can only be reshaped to a matrix of the same or smaller size."); 
       return (*this);
     }
@@ -1017,7 +1010,7 @@ namespace pond{
 
   template<class type> Matrix_T<type> Matrix_T<type>::ReShape(int *dim)
   {
-    int size=1;
+    size_t size=1;
     for (int i=1; i<=dim[0]; i++){
       size *= dim[i];
     }
@@ -1255,7 +1248,7 @@ namespace pond{
   template<class type>
   type Matrix_T<type>::MinRevised()
   {
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
@@ -1280,7 +1273,7 @@ namespace pond{
     }
     type value = Data[0];
 #pragma omp parallel for reduction(min:value)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       if ( Data[i] < value ){
         value = Data[i];
       }
@@ -1292,7 +1285,7 @@ namespace pond{
   type Matrix_T<type>::MaxRevised()
   {
     type value;
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
@@ -1316,7 +1309,7 @@ namespace pond{
     }
     value = Data[0];
 #pragma omp parallel for reduction(max:value)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       if ( Data[i] > value ){
         value = Data[i];
       }
@@ -1328,7 +1321,7 @@ namespace pond{
   type Matrix_T<type>::TotalRevised()
   {
     type sum;
-    int n_in=Size();
+    size_t n_in=Size();
 #ifdef __CUDACC__ 
     if ( pond::GetParallelMode() == ParallelModeGpu ){
       int tn = __CudaThreadNumberPerBlock;
@@ -1352,7 +1345,7 @@ namespace pond{
     }
     sum = Data[0];
 #pragma omp parallel for reduction(+:sum)
-    for (int i =1; i< Size(); i++){
+    for (size_t i =1; i< Size(); i++){
       sum += Data[i];
     }
     return sum;

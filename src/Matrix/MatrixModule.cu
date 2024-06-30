@@ -73,12 +73,12 @@ Matrix&MatrixModule::operator[](string id){
 
 int get_part_obj_index( Object&partobj, Matrix&mat){
   EvaKernel->EvaluateRest( partobj );
-  for (int i=2; i<= partobj.Size(); i++){
+  for (size_t i=2; i<= partobj.Size(); i++){
     if ( !partobj[i].NumberQ() ){
       ThrowError("Matrix::Part", "Part indices should be nubmers");
     }
   }
-  int ind =  int( partobj[2] );
+  size_t ind =  int( partobj[2] );
   //cout<<"int ind = "<< ind<<endl;
   for (int i=1; i< mat.ND; i++){
     ind = int( partobj[i+2] ) + ind * mat.Dim(i+1);
@@ -103,7 +103,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
     if ( partobj.Size() -1 != (*matptr).ND ){
       ThrowError("Matrix", "Part indices should be same size with the matrix");
     }
-    int ind = get_part_obj_index( partobj, *matptr);
+    size_t ind = get_part_obj_index( partobj, *matptr);
     double v = (*matptr)[ ind ];
     ReturnNumber( v );
   }
@@ -124,7 +124,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       ThrowError("Matrix", "Part indices should be same size with the matrix");
     }
     //cout<< " partobj = "<< partobj <<endl;
-    int ind = get_part_obj_index( partobj, *matptr);
+    size_t ind = get_part_obj_index( partobj, *matptr);
     //cout<<" try set index "<<ind<<" to number:"<< ARGV[2] <<endl;
     double v = double( ARGV[2] );
     (*matptr)[ ind ] = v;
@@ -158,7 +158,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
     }
     Conjunct_Case( Init ){
       EvaKernel->Evaluate( operobj );
-      for (int i=1; i<= operobj.Size(); i++ ){
+      for (size_t i=1; i<= operobj.Size(); i++ ){
         CheckArgsShouldBeNumber( operobj, i);
       }
       if ( operobj[1].Number() + 1 > operobj.Size()  ){
@@ -167,7 +167,7 @@ int MatrixModule::PD_Matrix(Object &ARGV){
       Matrix* matptr = GetOrNewMatrix( matname );
       int *dim = new int[ int(operobj[1].Number()) ];
       dim[0] = 1;
-      for (int i=0; i<= operobj[1].Number(); i++ ){
+      for (size_t i=0; i<= operobj[1].Number(); i++ ){
         dim[i] = operobj[i+1].Number();
       }
       (*matptr).Init(dim);
@@ -372,7 +372,7 @@ int LocalMatrixQ(Object &ARGV,Object &dim){
     dim.SetNull();
     return -1;
   }
-  for ( u_int i=2; i<=ARGV.Size(); i++ ){
+  for (size_t i=2; i<=ARGV.Size(); i++ ){
     Object dim2;
     LocalMatrixQ(ARGV[i],dim2);
     if ( dim1 != dim2 ){
@@ -475,7 +475,7 @@ int MatrixModule::Matrix2Object(string name,Object &ARGV){//mat of Object form
 template<class type1>
 void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
   if ( ARGV.ListQ() ){
-    for(u_int i=1;i<=ARGV.Size();i++){
+    for(size_t i=1;i<=ARGV.Size();i++){
       localObject2Matrix(mat,ARGV[i],ind);
     }
     return;
@@ -497,10 +497,10 @@ void localObject2Matrix(Matrix_T<type1>&mat,Object&ARGV,u_long&ind){
     Object dim; dim.SetList();                                          \
 	  if ( !MatrixQ( ARGV, dim ) )                                     \
       ThrowError("Object2Matrix","Matrix assignment from list should be of Matrix form."); \
-    int n =dim.Size();                                                  \
+    size_t n =dim.Size();                                                  \
     int *arr= new int[n+2];                                             \
     arr[0]=n;                                                           \
-    for (int i=1; i<=n; i++){                                           \
+    for (size_t i=1; i<=n; i++){                                        \
       arr[i] =  (int)dim[i] ;                                           \
     }                                                                   \
     matrix.Init( arr ,MatrixHost);                                      \
